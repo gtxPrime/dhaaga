@@ -1,0 +1,94 @@
+# ====================================================================
+# Dhaaga — Git Ignore Configuration
+# ====================================================================
+
+# --------------------------------------------------------------------
+# 🔒 Firebase & Sensitive Credentials (DO NOT COMMIT)
+# --------------------------------------------------------------------
+google-services.json
+*/google-services.json
+app/google-services.json
+GoogleService-Info.plist
+*/GoogleService-Info.plist
+firebase-debug.log*
+firestore-debug.log*
+
+# Keystores, signing keys & secrets
+*.jks
+*.keystore
+*.pk8
+*.pem
+*.p12
+*.key
+key.properties
+local.properties
+
+# --------------------------------------------------------------------
+# 📦 Built-in Gradle / Android Build Outputs
+# --------------------------------------------------------------------
+.gradle/
+build/
+*/build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+release/
+output-metadata.json
+
+# APKs, Bundles, and Archives
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+
+# --------------------------------------------------------------------
+# 💻 IDE & Editor Configuration
+# --------------------------------------------------------------------
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# Kotlin compiler caches
+.kotlin/
+
+# Agent / AI local directories & skill locks
+.agents/
+.gemini/
+.claude/
+skills-lock.json
+
+# --------------------------------------------------------------------
+# 🛠️ Crashlytics & Analytics build artifacts
+# --------------------------------------------------------------------
+app/crashlytics-build.properties
+crashlytics-build.properties
+*/crashlytics-build.properties
+
+# --------------------------------------------------------------------
+# 📁 Scratch, Temporary & Local Testing Files
+# --------------------------------------------------------------------
+scratch/
+tmp/
+*.log
+*.tmp
+__pycache__/
+*.py[cod]
+
+# --------------------------------------------------------------------
+# 🖥️ OS-Specific Metadata
+# --------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
