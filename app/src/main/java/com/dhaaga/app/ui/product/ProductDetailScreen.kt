@@ -89,6 +89,7 @@ fun ProductDetailScreen(
     val products by viewModel.products.collectAsState()
     val wishlist by viewModel.wishlist.collectAsState()
     val cart by viewModel.cart.collectAsState()
+    val currentLang by viewModel.selectedLanguage.collectAsState()
     val user by viewModel.currentUser.collectAsState()
 
     val product = products.find { it.productId == productId }
@@ -367,32 +368,66 @@ fun ProductDetailScreen(
                         verticalAlignment = Alignment.Top
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
+                            val displayTitle = if (currentLang != "en" && product.titleHi.isNotBlank()) product.titleHi else product.titleEn
+                            val subTitle = if (currentLang != "en" && product.titleHi.isNotBlank()) product.titleEn else product.titleHi
                             Text(
-                                text = product.titleEn,
+                                text = displayTitle,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = PaletteDarkGreen,
                                 lineHeight = 26.sp
                             )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = product.titleHi,
-                                fontSize = 13.sp,
-                                color = DhaagaTextMedium
-                            )
+                            if (subTitle.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = subTitle,
+                                    fontSize = 13.sp,
+                                    color = DhaagaTextMedium
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(12.dp))
 
                         Column(horizontalAlignment = Alignment.End) {
+                            if (product.hasSalePrice) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = product.priceDisplay,
+                                        fontSize = 13.sp,
+                                        textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough,
+                                        color = DhaagaTextLight
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = Color(0xFFD32F2F)
+                                    ) {
+                                        Text(
+                                            text = "-${product.discountPercentage}%",
+                                            fontSize = 9.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White,
+                                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                Text(
+                                    text = product.effectivePriceDisplay,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = PaletteForest
+                                )
+                            } else {
+                                Text(
+                                    text = product.priceDisplay,
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PaletteForest
+                                )
+                            }
                             Text(
-                                text = product.priceDisplay,
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = PaletteForest
-                            )
-                            Text(
-                                text = "per piece",
+                                text = viewModel.tr("per_piece", "per piece"),
                                 fontSize = 10.sp,
                                 color = DhaagaTextLight
                             )
@@ -448,6 +483,87 @@ fun ProductDetailScreen(
                                     color = PaletteDarkGreen,
                                     fontWeight = FontWeight.Bold
                                 )
+                            }
+                        }
+                    }
+
+                    // Available Discount Coupon Card with Copy/Apply
+                    if (product.isCouponValid) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = PaletteGreenTint.copy(alpha = 0.55f)),
+                            border = BorderStroke(1.dp, PaletteForest.copy(alpha = 0.35f))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(CircleShape)
+                                            .background(PaletteForest),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(Icons.Default.ConfirmationNumber, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    }
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Column {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                text = product.couponCode ?: "",
+                                                fontSize = 13.5.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = PaletteDarkGreen
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Surface(
+                                                shape = RoundedCornerShape(6.dp),
+                                                color = PaletteForest
+                                            ) {
+                                                Text(
+                                                    text = if (product.discountType == "percentage") "${product.discountValue}% OFF" else "₹${product.discountValue} FLAT OFF",
+                                                    fontSize = 9.5.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White,
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                )
+                                            }
+                                        }
+                                        val remainingMins = product.couponExpiryTimestamp?.let { ((it - System.currentTimeMillis()) / (60 * 1000L)).coerceAtLeast(0) }
+                                        val expiryText = if (remainingMins != null) {
+                                            if (remainingMins < 60) "Expires in ${remainingMins}m" else if (remainingMins < 1440) "Expires in ${remainingMins / 60}h" else "Expires in ${remainingMins / 1440}d"
+                                        } else "Limited time coupon"
+                                        Text(expiryText, fontSize = 10.5.sp, color = PaletteSage)
+                                    }
+                                }
+
+                                Surface(
+                                    onClick = {
+                                        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                                        val clip = android.content.ClipData.newPlainText("Coupon Code", product.couponCode)
+                                        clipboard.setPrimaryClip(clip)
+                                        Toast.makeText(context, "Copied \"${product.couponCode}\"! Apply in shopping bag.", Toast.LENGTH_SHORT).show()
+                                    },
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = Color.White,
+                                    border = BorderStroke(1.dp, PaletteForest.copy(alpha = 0.5f))
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Default.ContentCopy, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(13.dp))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text("Copy Code", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = PaletteForest)
+                                    }
+                                }
                             }
                         }
                     }
@@ -535,7 +651,7 @@ fun ProductDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "THE STORY (KAHAANI)",
+                                    text = viewModel.tr("the_story", "THE STORY (KAHAANI)"),
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = PaletteDarkGreen,
@@ -552,8 +668,13 @@ fun ProductDetailScreen(
                             AnimatedVisibility(visible = showStory) {
                                 Column {
                                     Spacer(modifier = Modifier.height(10.dp))
+                                    val localizedStory = if (currentLang != "en" && product.descriptionHi.isNotBlank()) {
+                                        product.descriptionHi
+                                    } else {
+                                        product.storyEn.ifBlank { product.descriptionEn.ifBlank { "Warli painting is a 2,500-year-old ritual tribal art originating from Maharashtra. Depicting harmony between human life and nature." } }
+                                    }
                                     Text(
-                                        text = product.storyEn.ifBlank { "Warli painting is a 2,500-year-old ritual tribal art originating from the North Sahyadri Range in Maharashtra. Depicting harmony between human life, spirits, and harvest deities, every circle represents the sun and moon, triangles denote mountains and pointed trees, while squares represent sacred enclosures." },
+                                        text = localizedStory,
                                         fontSize = 13.sp,
                                         color = PaletteDarkGreen,
                                         lineHeight = 20.sp
@@ -837,7 +958,7 @@ fun ProductDetailScreen(
                                     modifier = Modifier.size(15.dp)
                                 )
                                 Text(
-                                    text = if (isInCart) "In Bag" else "Add to Bag",
+                                    text = if (isInCart) viewModel.tr("in_stock_label", "In Bag") else viewModel.tr("add_to_bag", "Add to Bag"),
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = if (isInCart) PaletteForest else PaletteDarkGreen
@@ -863,7 +984,7 @@ fun ProductDetailScreen(
                                 horizontalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
                                 Text(
-                                    text = "Buy Craft",
+                                    text = viewModel.tr("buy_craft", "Buy Craft"),
                                     fontSize = 12.5.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White
