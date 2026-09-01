@@ -104,6 +104,7 @@ dependencies {
     // Images
     implementation(libs.coil.compose)
     implementation(libs.glide.compose)
+    implementation("com.google.android.gms:play-services-mlkit-subject-segmentation:16.0.0-beta1")
 
     // Data
     implementation(libs.google.gson)
