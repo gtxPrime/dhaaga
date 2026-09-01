@@ -1,7 +1,11 @@
 package com.dhaaga.app.ui.home
 
+import android.content.Intent
+import android.speech.RecognizerIntent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -78,6 +82,7 @@ fun HomeScreen(
     val cart by viewModel.cart.collectAsState()
     val cartAnimationEvent by viewModel.cartAnimationEvent.collectAsState()
     val lastAddedProduct by viewModel.lastAddedProduct.collectAsState()
+    val currentLang by viewModel.selectedLanguage.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = initialTab.coerceIn(0, 4), pageCount = { 5 })
 
@@ -110,28 +115,28 @@ fun HomeScreen(
         }
     }
 
-    // Demo Banners for Auto-Loop Slider (Uploaded to Live PHP Server)
-    val bannerItems = remember {
+    // Demo Banners for Auto-Loop Slider (Uploaded to Live Server)
+    val bannerItems = remember(currentLang) {
         listOf(
             HomeBannerItem(
                 id = 1,
-                title = "Artisan Handloom Week",
-                subtitle = "Preserving Centuries of Heritage Crafts",
-                badge = "HANDLOOM SPECIAL",
+                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner1_title", currentLang, "Artisan Handloom Week"),
+                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner1_sub", currentLang, "Preserving Centuries of Heritage Crafts"),
+                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner1_badge", currentLang, "HANDLOOM SPECIAL"),
                 imageUrl = "https://dhaaga.thecoolestportfolio.site/uploads/dhaaga_20260826_190707_bf398ccf1376.jpg"
             ),
             HomeBannerItem(
                 id = 2,
-                title = "Authentic Madhubani Art",
-                subtitle = "Handcrafted by Master Folk Artists",
-                badge = "GI CERTIFIED CRAFTS",
+                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner2_title", currentLang, "Authentic Madhubani Art"),
+                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner2_sub", currentLang, "Handcrafted by Master Folk Artists"),
+                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner2_badge", currentLang, "GI CERTIFIED CRAFTS"),
                 imageUrl = "https://dhaaga.thecoolestportfolio.site/uploads/dhaaga_20260826_194856_3422de9243b3.jpg"
             ),
             HomeBannerItem(
                 id = 3,
-                title = "Terracotta & Metalwork",
-                subtitle = "Direct Workshop Pricing from Rural Artisans",
-                badge = "DIRECT ARTISAN SALE",
+                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner3_title", currentLang, "Terracotta & Metalwork"),
+                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner3_sub", currentLang, "Direct Workshop Pricing from Rural Artisans"),
+                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner3_badge", currentLang, "DIRECT ARTISAN SALE"),
                 imageUrl = "https://dhaaga.thecoolestportfolio.site/uploads/dhaaga_20260826_190717_1baa44af0567.jpg"
             )
         )
@@ -160,12 +165,17 @@ fun HomeScreen(
                     onProductClick = onProductClick,
                     onChatList = onChatList,
                     onNavigateToCart = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(2, animationSpec = tween(350, easing = FastOutSlowInEasing))
+                        if (isSeller) {
+                            onCart()
+                        } else {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(2, animationSpec = tween(350, easing = FastOutSlowInEasing))
+                            }
                         }
                     },
                     sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    currentLang = currentLang
                 )
                 1 -> if (isSeller) {
                     MyListingsTabContent(
@@ -190,6 +200,7 @@ fun HomeScreen(
                 }
                 2 -> if (isSeller) {
                     AddProductTabContent(
+                        viewModel = viewModel,
                         onProductAdded = {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(1, animationSpec = tween(350, easing = FastOutSlowInEasing))
@@ -213,10 +224,12 @@ fun HomeScreen(
                 }
                 3 -> if (isSeller) {
                     SellerDashboardTabContent(
+                        viewModel = viewModel,
                         onViewOrders = { }
                     )
                 } else {
                     MyOrdersTabContent(
+                        viewModel = viewModel,
                         onExplore = {
                             coroutineScope.launch {
                                 pagerState.animateScrollToPage(0, animationSpec = tween(350, easing = FastOutSlowInEasing))
@@ -294,13 +307,14 @@ fun HomeScreen(
                     }
                     Column(modifier = Modifier.weight(1f, fill = false)) {
                         Text(
-                            text = "Added to Bag",
+                            text = com.dhaaga.app.utils.AppLanguageManager.translate("added_to_bag", currentLang, "Added to Bag"),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
+                        val bannerTitle = if (currentLang != "en" && !bannerProduct?.titleHi.isNullOrBlank()) bannerProduct?.titleHi else bannerProduct?.titleEn
                         Text(
-                            text = bannerProduct?.titleEn ?: "",
+                            text = bannerTitle ?: "",
                             fontSize = 11.sp,
                             color = PaletteGreenTint,
                             maxLines = 1,
@@ -310,8 +324,12 @@ fun HomeScreen(
                     Button(
                         onClick = {
                             showAddedBanner = false
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(2, animationSpec = tween(350, easing = FastOutSlowInEasing))
+                            if (isSeller) {
+                                onCart()
+                            } else {
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(2, animationSpec = tween(350, easing = FastOutSlowInEasing))
+                                }
                             }
                         },
                         shape = RoundedCornerShape(12.dp),
@@ -319,7 +337,12 @@ fun HomeScreen(
                         contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
                         modifier = Modifier.height(28.dp)
                     ) {
-                        Text("View Bag", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(
+                            text = com.dhaaga.app.utils.AppLanguageManager.translate("view_bag", currentLang, "View Bag"),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     }
                 }
             }
@@ -332,6 +355,7 @@ fun HomeScreen(
             cartCount = cart.size,
             wishlistCount = wishlist.size,
             cartAnimationTrigger = cartAnimationEvent,
+            currentLang = currentLang,
             onTabSelected = { targetTab ->
                 coroutineScope.launch {
                     pagerState.animateScrollToPage(
@@ -363,7 +387,8 @@ private fun HomeFeedTab(
     onChatList: () -> Unit,
     onNavigateToCart: () -> Unit = {},
     sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    currentLang: String = "en"
 ) {
     val isSearching = searchQuery.isNotBlank() || selectedCategory != "All"
 
@@ -419,7 +444,10 @@ private fun HomeFeedTab(
                     selectedCategory = selectedCategory,
                     onCategorySelected = onCategorySelected,
                     onChatClick = onChatList,
-                    onNotificationClick = {}
+                    onNotificationClick = {},
+                    cartCount = cart.size,
+                    onCartClick = onNavigateToCart,
+                    currentLang = currentLang
                 )
             }
 
@@ -435,21 +463,24 @@ private fun HomeFeedTab(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Column {
+                            val resultsPrefix = com.dhaaga.app.utils.AppLanguageManager.translate("results_for", currentLang, "RESULTS FOR")
+                            val catLabel = com.dhaaga.app.utils.AppLanguageManager.translate("category_label", currentLang, "CATEGORY")
                             Text(
-                                text = if (searchQuery.isNotBlank()) "RESULTS FOR \"$searchQuery\"" else "CATEGORY: ${selectedCategory.uppercase()}",
+                                text = if (searchQuery.isNotBlank()) "$resultsPrefix \"$searchQuery\"" else "$catLabel: ${selectedCategory.uppercase()}",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = PaletteDarkGreen,
                                 letterSpacing = 0.5.sp
                             )
+                            val itemsSuffix = com.dhaaga.app.utils.AppLanguageManager.translate("items_suffix", currentLang, "crafts found")
                             Text(
-                                text = "${filteredProducts.size} authentic craft${if (filteredProducts.size == 1) "" else "s"} found",
+                                text = "${filteredProducts.size} $itemsSuffix",
                                 fontSize = 11.5.sp,
                                 color = DhaagaTextLight
                             )
                         }
                         Text(
-                            text = "Clear Filter",
+                            text = com.dhaaga.app.utils.AppLanguageManager.translate("clear_filter", currentLang, "Clear Filter"),
                             fontSize = 12.sp,
                             color = PaletteForest,
                             fontWeight = FontWeight.Bold,
@@ -537,7 +568,8 @@ private fun HomeFeedTab(
                                     onClick = { onProductClick(product.productId, searchKey) },
                                     modifier = Modifier.weight(1f),
                                     sharedTransitionScope = sharedTransitionScope,
-                                    animatedVisibilityScope = animatedVisibilityScope
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    currentLang = currentLang
                                 )
                             }
                             if (rowProducts.size == 1) {
@@ -560,7 +592,7 @@ private fun HomeFeedTab(
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
                     SectionHeaderRow(
-                        title = "TRENDING THIS WEEK",
+                        title = com.dhaaga.app.utils.AppLanguageManager.translate("trending_this_week", currentLang, "TRENDING THIS WEEK"),
                         icon = Icons.Default.Whatshot,
                         iconColor = DhaagaPrimary,
                         onSeeAll = { onCategorySelected("Handloom") }
@@ -586,7 +618,8 @@ private fun HomeFeedTab(
                                 onClick = { onProductClick(product.productId, trendingKey) },
                                 modifier = Modifier.width(180.dp),
                                 sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                currentLang = currentLang
                             )
                         }
                     }
@@ -596,8 +629,8 @@ private fun HomeFeedTab(
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     SectionHeaderRow(
-                        title = "ALL PRODUCTS",
-                        subtitle = "${products.size} Items",
+                        title = com.dhaaga.app.utils.AppLanguageManager.translate("all_products", currentLang, "ALL PRODUCTS"),
+                        subtitle = "${products.size} ${com.dhaaga.app.utils.AppLanguageManager.translate("items_suffix", currentLang, "Items")}",
                         icon = Icons.Default.GridView,
                         iconColor = DhaagaPrimary,
                         onSeeAll = {}
@@ -626,7 +659,8 @@ private fun HomeFeedTab(
                                 onClick = { onProductClick(product.productId, gridKey) },
                                 modifier = Modifier.weight(1f),
                                 sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                currentLang = currentLang
                             )
                         }
                         if (rowProducts.size == 1) {
@@ -651,9 +685,27 @@ private fun HeaderBlock(
     selectedCategory: String,
     onCategorySelected: (String) -> Unit,
     onChatClick: () -> Unit,
-    onNotificationClick: () -> Unit
+    onNotificationClick: () -> Unit,
+    cartCount: Int = 0,
+    onCartClick: () -> Unit = {},
+    currentLang: String = "en"
 ) {
     val context = LocalContext.current
+
+    // Android Voice Search Recognition Launcher
+    val voiceSearchLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val spokenText = result.data
+                ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                ?.firstOrNull()
+            if (!spokenText.isNullOrBlank()) {
+                onSearchQueryChange(spokenText)
+                Toast.makeText(context, "Voice Search: \"$spokenText\"", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -693,8 +745,10 @@ private fun HeaderBlock(
                             modifier = Modifier.size(11.dp)
                         )
                         Spacer(modifier = Modifier.width(2.dp))
+                        val userLabel = if (isSeller) com.dhaaga.app.utils.AppLanguageManager.translate("artisan_label", currentLang, "Artisan") else com.dhaaga.app.utils.AppLanguageManager.translate("craft_lover", currentLang, "Craft Lover")
+                        val userPlace = if (isSeller) (user?.village ?: "India") else (user?.name?.split(" ")?.firstOrNull() ?: "India")
                         Text(
-                            text = if (isSeller) "Artisan • ${user?.village ?: "India"}" else "Craft Lover • ${user?.name?.split(" ")?.firstOrNull() ?: "India"}",
+                            text = "$userLabel • $userPlace",
                             fontSize = 11.sp,
                             color = Color.White.copy(alpha = 0.9f),
                             fontWeight = FontWeight.Medium
@@ -717,6 +771,44 @@ private fun HeaderBlock(
                         tint = Color.White,
                         modifier = Modifier.size(17.dp)
                     )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Shopping Bag button (Instant access for Artisan and Buyer)
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f))
+                        .clickable { onCartClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ShoppingBag,
+                        contentDescription = "Shopping Bag",
+                        tint = Color.White,
+                        modifier = Modifier.size(17.dp)
+                    )
+                    if (cartCount > 0) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = 4.dp, y = (-2).dp)
+                                .defaultMinSize(minWidth = 14.dp, minHeight = 14.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFE53935))
+                                .padding(horizontal = 3.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (cartCount > 99) "99+" else "$cartCount",
+                                fontSize = 8.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -775,7 +867,7 @@ private fun HeaderBlock(
                 ) {
                     if (searchQuery.isEmpty()) {
                         Text(
-                            text = "Search products, artisans, crafts...",
+                            text = com.dhaaga.app.utils.AppLanguageManager.translate("search_placeholder", currentLang, "Search products, artisans, crafts..."),
                             color = Color(0xFF888888),
                             fontSize = 13.sp
                         )
@@ -808,13 +900,28 @@ private fun HeaderBlock(
                 } else {
                     IconButton(
                         onClick = {
-                            Toast.makeText(context, "Voice search: Listening for craft name...", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                putExtra(
+                                    RecognizerIntent.EXTRA_PROMPT,
+                                    if (currentLang != "en") "शिल्प या कला का नाम बोलें..." else "Speak craft name (e.g. Warli, Handloom, Terracotta)..."
+                                )
+                                putExtra(
+                                    RecognizerIntent.EXTRA_LANGUAGE,
+                                    if (currentLang != "en") "hi-IN" else java.util.Locale.getDefault().toLanguageTag()
+                                )
+                            }
+                            try {
+                                voiceSearchLauncher.launch(intent)
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Voice search not available on this device", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         modifier = Modifier.size(28.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Mic,
-                            contentDescription = "Voice",
+                            contentDescription = "Voice Search",
                             tint = PaletteForest,
                             modifier = Modifier.size(18.dp)
                         )
@@ -832,6 +939,16 @@ private fun HeaderBlock(
             ) {
                 items(categories) { cat ->
                     val isSelected = selectedCategory == cat
+                    val localizedLabel = when (cat) {
+                        "All" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_all", currentLang, "All")
+                        "Warli Art" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_warli", currentLang, "Warli Art")
+                        "Madhubani" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_madhubani", currentLang, "Madhubani")
+                        "Handloom" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_handloom", currentLang, "Handloom")
+                        "Terracotta" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_terracotta", currentLang, "Terracotta")
+                        "Jewellery" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_jewellery", currentLang, "Jewellery")
+                        "GI Certified" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_gi", currentLang, "GI Certified")
+                        else -> cat
+                    }
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(14.dp))
@@ -844,7 +961,7 @@ private fun HeaderBlock(
                             .padding(horizontal = 12.dp, vertical = 5.dp)
                     ) {
                         Text(
-                            text = cat,
+                            text = localizedLabel,
                             fontSize = 11.5.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                             color = if (isSelected) PaletteForest else Color.White
@@ -998,7 +1115,8 @@ private fun ProductCardCreative(
     modifier: Modifier = Modifier,
     sharedKey: String = "product-image-${product.productId}",
     sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    currentLang: String = "en"
 ) {
     Card(
         modifier = modifier,
@@ -1043,31 +1161,53 @@ private fun ProductCardCreative(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // GI Tag Badge (Top Left)
-                if (product.hasGITag) {
+                // Badges Row (Top Left): GI Tag + Small DEMO Tag
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (product.hasGITag) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(PaletteForest)
+                                .padding(horizontal = 6.dp, vertical = 2.5.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Verified,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(10.dp)
+                                )
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Text(
+                                    text = "GI",
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                        }
+                    }
+
+                    // Small Tag for Demo Listed items
                     Box(
                         modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(8.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(PaletteForest)
-                            .padding(horizontal = 6.dp, vertical = 3.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0xFF2C5E7A))
+                            .padding(horizontal = 5.dp, vertical = 2.5.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Verified,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(11.dp)
-                            )
-                            Spacer(modifier = Modifier.width(3.dp))
-                            Text(
-                                text = "GI",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
+                        Text(
+                            text = "DEMO",
+                            fontSize = 8.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            letterSpacing = 0.5.sp
+                        )
                     }
                 }
 
@@ -1137,8 +1277,9 @@ private fun ProductCardCreative(
                         .fillMaxWidth()
                         .clickable { onClick() }
                 ) {
+                    val displayTitle = if (currentLang != "en" && product.titleHi.isNotBlank()) product.titleHi else product.titleEn
                     Text(
-                        text = product.titleEn,
+                        text = displayTitle,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = PaletteDarkGreen,
@@ -1223,8 +1364,13 @@ private fun ProductCardCreative(
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
+                        val btnLabel = if (isInCart) {
+                            "${com.dhaaga.app.utils.AppLanguageManager.translate("in_stock_label", currentLang, "In Bag")} • ${com.dhaaga.app.utils.AppLanguageManager.translate("view_bag", currentLang, "View")}"
+                        } else {
+                            com.dhaaga.app.utils.AppLanguageManager.translate("add_to_bag", currentLang, "Add to Bag")
+                        }
                         Text(
-                            text = if (isInCart) "In Bag • View" else "Add to Bag",
+                            text = btnLabel,
                             fontSize = 11.5.sp,
                             fontWeight = FontWeight.Bold,
                             color = if (isInCart) Color.White else PaletteForest
@@ -1297,6 +1443,7 @@ fun LoreExactFloatingBottomNav(
     cartCount: Int,
     wishlistCount: Int,
     cartAnimationTrigger: Long = 0L,
+    currentLang: String = "en",
     onTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -1370,7 +1517,7 @@ fun LoreExactFloatingBottomNav(
                 IconButton(onClick = { onTabSelected(0) }, modifier = Modifier.size(40.dp)) {
                     Icon(
                         imageVector = if (isHomeSelected) Icons.Filled.Home else Icons.Outlined.Home,
-                        contentDescription = "Home",
+                        contentDescription = com.dhaaga.app.utils.AppLanguageManager.translate("home", currentLang, "Home"),
                         tint = if (isHomeSelected) PaletteForest else Color(0xFF6E8260),
                         modifier = Modifier.size(24.dp)
                     )
@@ -1389,7 +1536,7 @@ fun LoreExactFloatingBottomNav(
                             } else {
                                 if (isTab1Selected) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
                             },
-                            contentDescription = if (isSeller) "Listings" else "Wishlist",
+                            contentDescription = if (isSeller) com.dhaaga.app.utils.AppLanguageManager.translate("listings", currentLang, "My Crafts") else com.dhaaga.app.utils.AppLanguageManager.translate("wishlist", currentLang, "Wishlist"),
                             tint = if (isTab1Selected) PaletteForest else Color(0xFF6E8260),
                             modifier = Modifier.size(24.dp)
                         )
@@ -1432,7 +1579,7 @@ fun LoreExactFloatingBottomNav(
                         } else {
                             if (isTab3Selected) Icons.Filled.LocalShipping else Icons.Outlined.LocalShipping
                         },
-                        contentDescription = if (isSeller) "Dashboard" else "Orders",
+                        contentDescription = if (isSeller) com.dhaaga.app.utils.AppLanguageManager.translate("dashboard", currentLang, "Dashboard") else com.dhaaga.app.utils.AppLanguageManager.translate("orders", currentLang, "Orders"),
                         tint = if (isTab3Selected) PaletteForest else Color(0xFF6E8260),
                         modifier = Modifier.size(24.dp)
                     )
@@ -1443,7 +1590,7 @@ fun LoreExactFloatingBottomNav(
                 IconButton(onClick = { onTabSelected(4) }, modifier = Modifier.size(40.dp)) {
                     Icon(
                         imageVector = if (isTab4Selected) Icons.Filled.Person else Icons.Outlined.Person,
-                        contentDescription = "Profile",
+                        contentDescription = com.dhaaga.app.utils.AppLanguageManager.translate("profile", currentLang, "Profile"),
                         tint = if (isTab4Selected) PaletteForest else Color(0xFF6E8260),
                         modifier = Modifier.size(24.dp)
                     )
