@@ -31,13 +31,23 @@ fun MyListingsScreen(
     onProductClick: (String) -> Unit,
     onAddProduct: () -> Unit
 ) {
-    val products by viewModel.products.collectAsState()
+    val sellerProducts by viewModel.sellerProducts.collectAsState()
     val user by viewModel.currentUser.collectAsState()
 
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Active", "Draft", "Sold")
 
-    val sellerProducts = products  // In production: filter by sellerId
+    val activeProducts = remember(sellerProducts) { sellerProducts.filter { it.status == "active" && it.stockQuantity > 0 } }
+    val draftProducts = remember(sellerProducts) { sellerProducts.filter { it.status == "draft" } }
+    val soldProducts = remember(sellerProducts) { sellerProducts.filter { it.status == "sold" || it.stockQuantity <= 0 } }
+
+    val displayedProducts = when (selectedTab) {
+        0 -> activeProducts
+        1 -> draftProducts
+        2 -> soldProducts
+        else -> activeProducts
+    }
+
+    val tabs = listOf("Active (${activeProducts.size})", "Draft (${draftProducts.size})", "Sold (${soldProducts.size})")
 
     Scaffold(
         containerColor = DhaagaBackground,
@@ -110,7 +120,7 @@ fun MyListingsScreen(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                if (sellerProducts.isEmpty()) {
+                if (displayedProducts.isEmpty()) {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(top = 60.dp),
                         contentAlignment = Alignment.Center
@@ -131,7 +141,17 @@ fun MyListingsScreen(
                                 )
                             }
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("No listings yet", fontSize = 16.sp, color = DhaagaTextMedium)
+                            Text(
+                                when (selectedTab) {
+                                    0 -> "No Active Crafts"
+                                    1 -> "No Draft Crafts"
+                                    2 -> "No Sold Crafts"
+                                    else -> "No Listings Yet"
+                                },
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = DhaagaTextDark
+                            )
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
                                 onClick = onAddProduct,
@@ -142,7 +162,7 @@ fun MyListingsScreen(
                         }
                     }
                 } else {
-                    sellerProducts.forEach { product ->
+                    displayedProducts.forEach { product ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
