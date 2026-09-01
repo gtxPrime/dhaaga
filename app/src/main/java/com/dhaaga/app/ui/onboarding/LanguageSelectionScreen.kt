@@ -23,8 +23,11 @@ import com.dhaaga.app.data.mock.MockData
 import com.dhaaga.app.ui.theme.*
 
 @Composable
-fun LanguageSelectionScreen(onLanguageSelected: (String) -> Unit) {
-    var selectedLang by remember { mutableStateOf("en") }
+fun LanguageSelectionScreen(
+    viewModel: com.dhaaga.app.AppViewModel? = null,
+    onLanguageSelected: (String) -> Unit
+) {
+    var selectedLang by remember { mutableStateOf(viewModel?.selectedLanguage?.value ?: "en") }
 
     Box(
         modifier = Modifier
@@ -70,12 +73,23 @@ fun LanguageSelectionScreen(onLanguageSelected: (String) -> Unit) {
                 }
             }
 
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Audio Onboarding Guide
+            com.dhaaga.app.ui.components.AudioGuideCard(
+                englishText = "Welcome to Dhaaga. Please choose your preferred language to continue.",
+                hindiText = "धागा में आपका स्वागत है। आगे बढ़ने के लिए कृपया अपनी पसंदीदा भाषा चुनें।",
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
             // Language grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -101,7 +115,10 @@ fun LanguageSelectionScreen(onLanguageSelected: (String) -> Unit) {
                                 color = borderColor,
                                 shape = RoundedCornerShape(12.dp)
                             )
-                            .clickable { selectedLang = code },
+                            .clickable {
+                                selectedLang = code
+                                viewModel?.setLanguage(code)
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -123,7 +140,10 @@ fun LanguageSelectionScreen(onLanguageSelected: (String) -> Unit) {
                     .padding(horizontal = 24.dp, vertical = 20.dp)
             ) {
                 Button(
-                    onClick = { onLanguageSelected(selectedLang) },
+                    onClick = {
+                        viewModel?.setLanguage(selectedLang)
+                        onLanguageSelected(selectedLang)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
@@ -132,8 +152,9 @@ fun LanguageSelectionScreen(onLanguageSelected: (String) -> Unit) {
                         containerColor = DhaagaPrimary
                     )
                 ) {
+                    val continueText = com.dhaaga.app.utils.AppLanguageManager.translate("continue_btn", selectedLang, "Continue")
                     Text(
-                        text = "Continue",
+                        text = "$continueText • ${com.dhaaga.app.utils.AppLanguageManager.getLanguageName(selectedLang).substringBefore(" ")}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White
