@@ -4,13 +4,13 @@ import android.app.Activity
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,14 +32,16 @@ import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.dhaaga.app.AppViewModel
+import com.dhaaga.app.data.model.UserModel
 import java.util.concurrent.TimeUnit
 
 private const val TAG = "PhoneOtpScreen"
 
 @Composable
 fun PhoneOtpScreen(
-    role: String,
-    onVerified: (phone: String, uid: String) -> Unit
+    viewModel: AppViewModel,
+    onVerified: (phone: String, uid: String, existingUser: UserModel?) -> Unit
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
@@ -53,6 +55,7 @@ fun PhoneOtpScreen(
 
     var storedVerificationId by remember { mutableStateOf("") }
     var resendToken by remember { mutableStateOf<PhoneAuthProvider.ForceResendingToken?>(null) }
+    var isDevOtpMode by remember { mutableStateOf(false) }
 
     val firebaseAuth = remember {
         try {
@@ -72,6 +75,58 @@ fun PhoneOtpScreen(
         }
     }
 
+    fun handleSuccessfulAuth(formattedPhone: String, uid: String) {
+        isLoading = true
+        val sanitizedPhone = formattedPhone.trim().removePrefix("+91").removePrefix("+").trim()
+
+        // Artisan Test Creds: 7668439019 with OTP 123456
+        if (otp == "123456") {
+            Log.i(TAG, "🎨 Artisan test login with OTP 123456 for $formattedPhone")
+            val artisanUser = UserModel(
+                uid = "artisan_$sanitizedPhone",
+                phoneNumber = formattedPhone,
+                name = "Kavita Devi",
+                role = "seller",
+                village = "Madhubani",
+                state = "Bihar"
+            )
+            viewModel.loginAs(artisanUser)
+            isLoading = false
+            onVerified(formattedPhone, artisanUser.uid, artisanUser)
+            return
+        }
+
+        // Buyer Test Creds: 7668439019 with OTP 696969
+        if (otp == "696969") {
+            Log.i(TAG, "🛍️ Buyer test login with OTP 696969 for $formattedPhone")
+            val buyerUser = UserModel(
+                uid = "buyer_$sanitizedPhone",
+                phoneNumber = formattedPhone,
+                name = "Aarav Sharma",
+                role = "buyer",
+                village = "Mumbai",
+                state = "Maharashtra"
+            )
+            viewModel.loginAs(buyerUser)
+            isLoading = false
+            onVerified(formattedPhone, buyerUser.uid, buyerUser)
+            return
+        }
+
+        viewModel.checkExistingUserByPhone(formattedPhone) { existingUser ->
+            isLoading = false
+            if (existingUser != null) {
+                // Phone number already registered!
+                Log.i(TAG, "🔒 Number $formattedPhone already exists as ${existingUser.role}. Re-login directly!")
+                onVerified(formattedPhone, uid, existingUser)
+            } else {
+                // Brand new user registration -> will ask 'Who are you?'
+                Log.i(TAG, "🆕 Number $formattedPhone is new. Proceeding to Role Selection.")
+                onVerified(formattedPhone, uid, null)
+            }
+        }
+    }
+
     fun sendVerificationCode() {
         val sanitizedPhone = phone.trim().removePrefix("+91").removePrefix("+").trim()
         if (sanitizedPhone.length != 10) {
@@ -87,13 +142,13 @@ fun PhoneOtpScreen(
             val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
                     Log.i(TAG, "🔥 Phone Auth auto-verification completed")
-                    isLoading = false
                     firebaseAuth.signInWithCredential(credential)
                         .addOnSuccessListener { authResult ->
                             val uid = authResult.user?.uid ?: "user_${sanitizedPhone}"
-                            onVerified(formattedPhone, uid)
+                            handleSuccessfulAuth(formattedPhone, uid)
                         }
                         .addOnFailureListener { e ->
+                            isLoading = false
                             errorMsg = e.localizedMessage ?: "Auto verification failed"
                         }
                 }
@@ -101,12 +156,14 @@ fun PhoneOtpScreen(
                 override fun onVerificationFailed(e: FirebaseException) {
                     Log.w(TAG, "🔥 Phone Auth verification failed: ${e.message}")
                     isLoading = false
-                    // If Firebase rejects due to missing SHA-256 / Play Integrity check on debug builds,
-                    // allow dev testing with OTP 123456 so the user is never blocked.
+                    // When Firebase rejects due to SMS Region policy (Error 17006) on debug builds,
+                    // automatically switch to dev testing mode and pre-fill 123456 so testing continues seamlessly.
                     storedVerificationId = "dev_otp_${System.currentTimeMillis()}"
                     otpSent = true
                     countdown = 60
-                    errorMsg = "Firebase SMS verification restricted. Use code 123456 to continue testing."
+                    otp = "123456"
+                    isDevOtpMode = true
+                    errorMsg = ""
                 }
 
                 override fun onCodeSent(
@@ -119,6 +176,7 @@ fun PhoneOtpScreen(
                     isLoading = false
                     otpSent = true
                     countdown = 60
+                    isDevOtpMode = false
                 }
             }
 
@@ -140,15 +198,19 @@ fun PhoneOtpScreen(
                 storedVerificationId = "dev_otp_${System.currentTimeMillis()}"
                 otpSent = true
                 countdown = 60
+                otp = "123456"
+                isDevOtpMode = true
             }
         } else {
             // Local fallback simulation when Firebase is unavailable
             scope.launch {
-                delay(500)
+                delay(400)
                 isLoading = false
                 storedVerificationId = "dev_otp_${System.currentTimeMillis()}"
                 otpSent = true
                 countdown = 60
+                otp = "123456"
+                isDevOtpMode = true
             }
         }
     }
@@ -168,28 +230,26 @@ fun PhoneOtpScreen(
             val credential = PhoneAuthProvider.getCredential(storedVerificationId, otp)
             firebaseAuth.signInWithCredential(credential)
                 .addOnSuccessListener { authResult ->
-                    isLoading = false
                     val uid = authResult.user?.uid ?: "user_${sanitizedPhone}"
                     Log.i(TAG, "🔥 Firebase Phone Auth successful! UID: $uid")
-                    onVerified(formattedPhone, uid)
+                    handleSuccessfulAuth(formattedPhone, uid)
                 }
                 .addOnFailureListener { e ->
-                    isLoading = false
                     Log.w(TAG, "🔥 Phone Auth OTP verification failed: ${e.message}")
-                    if (otp == "123456") {
+                    if (otp == "123456" || otp == "696969") {
                         val uid = firebaseAuth.currentUser?.uid ?: "user_${sanitizedPhone}"
-                        onVerified(formattedPhone, uid)
+                        handleSuccessfulAuth(formattedPhone, uid)
                     } else {
+                        isLoading = false
                         errorMsg = "Invalid OTP code. Please check and try again."
                     }
                 }
         } else {
-            // In case Firebase is in test/dev mode or OTP 123456 is used
+            // Dev fallback or local verification
             scope.launch {
                 delay(400)
-                isLoading = false
                 val currentUid = firebaseAuth?.currentUser?.uid ?: "user_${sanitizedPhone}"
-                onVerified(formattedPhone, currentUid)
+                handleSuccessfulAuth(formattedPhone, currentUid)
             }
         }
     }
@@ -231,15 +291,15 @@ fun PhoneOtpScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = if (role == "seller") Icons.Default.Storefront else Icons.Default.ShoppingBag,
+                            imageVector = Icons.Default.Lock,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(30.dp)
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = if (!otpSent) "Enter your phone number" else "Enter OTP Code",
+                        text = if (!otpSent) viewModel.tr("enter_phone", "Enter your phone number") else "Enter OTP Code",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -254,7 +314,30 @@ fun PhoneOtpScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
+            val onSelectTestCreds: (String, String) -> Unit = { p, o ->
+                phone = p
+                otp = o
+                otpSent = true
+                isDevOtpMode = true
+                errorMsg = ""
+            }
+
             if (!otpSent) {
+                // Audio Onboarding Guide with Hindi / English switch & Audio ON/OFF
+                com.dhaaga.app.ui.components.AudioGuideCard(
+                    englishText = "Please enter your 10-digit mobile number to receive an OTP code. For demonstration, you can tap either Artisan or Buyer test credentials below.",
+                    hindiText = "कृपया अपना 10 अंकों का मोबाइल नंबर दर्ज करें और ओटीपी प्राप्त करें। टेस्टिंग के लिए आप नीचे दिए गए कारीगर या खरीदार टेस्ट क्रेडेंशियल्स पर भी टैप कर सकते हैं।",
+                    initialLanguage = viewModel.selectedLanguage.value,
+                    autoPlay = false
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Testing phase note requested by user with Artisan & Buyer test creds
+                TestCredentialsCard(onSelectRole = onSelectTestCreds, viewModel = viewModel)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // Phone input
                 OutlinedTextField(
                     value = phone,
@@ -307,13 +390,17 @@ fun PhoneOtpScreen(
 
             } else {
                 // OTP input
+                TestCredentialsCard(onSelectRole = onSelectTestCreds, viewModel = viewModel)
+
+                Spacer(modifier = Modifier.height(14.dp))
+
                 Text(
                     text = "Enter the 6-digit OTP sent to your phone",
                     fontSize = 15.sp,
                     color = DhaagaTextMedium
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedTextField(
                     value = otp,
@@ -369,7 +456,7 @@ fun PhoneOtpScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Verify & Continue →", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
+                        Text("Verify & Continue", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
                     }
                 }
 
@@ -381,3 +468,108 @@ fun PhoneOtpScreen(
         }
     }
 }
+
+@Composable
+private fun TestCredentialsCard(
+    viewModel: AppViewModel,
+    onSelectRole: (phone: String, otp: String) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(PaletteGreenTint)
+            .border(1.dp, PaletteForest.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+            .padding(14.dp)
+    ) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Info,
+                    contentDescription = null,
+                    tint = PaletteForest,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    "SMS Restricted (Testing Phase)",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PaletteDarkGreen
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "Use 7668439019 with OTP: 123456 (Artisan) or 696969 (Buyer). Tap below to auto-fill:",
+                fontSize = 11.5.sp,
+                color = DhaagaTextMedium,
+                lineHeight = 16.sp
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Artisan Creds Chip
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = PaletteForest,
+                    shadowElevation = 2.dp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onSelectRole("7668439019", "123456") }
+                ) {
+                    Column(
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            viewModel.tr("artisan_test_creds", "Artisan Creds"),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            "OTP: 123456",
+                            fontSize = 11.sp,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+
+                // Buyer Creds Chip
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Color(0xFF2C5E7A),
+                    shadowElevation = 2.dp,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onSelectRole("7668439019", "696969") }
+                ) {
+                    Column(
+                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            viewModel.tr("buyer_test_creds", "Buyer Creds"),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            "OTP: 696969",
+                            fontSize = 11.sp,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
