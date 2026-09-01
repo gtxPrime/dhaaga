@@ -50,6 +50,9 @@ class MainActivity : FragmentActivity() {
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
         )
 
+        // Pre-warm TTS engine for instant voice responses
+        com.dhaaga.app.utils.AppTtsManager.init(this)
+
         setContent {
             DhaagaTheme {
                 DhaagaApp(viewModel = viewModel)
@@ -91,24 +94,50 @@ fun DhaagaApp(viewModel: AppViewModel) {
 
             // ── Onboarding ─────────────────────────────────────────────────
             composable(Routes.LANGUAGE_SELECT) {
-                LanguageSelectionScreen(onLanguageSelected = { lang ->
-                    navController.navigate(Routes.ROLE_SELECT)
-                })
-            }
-
-            composable(Routes.ROLE_SELECT) {
-                RoleSelectionScreen(onRoleSelected = { role ->
-                    selectedRole = role
-                    navController.navigate(Routes.PHONE_OTP)
-                })
+                LanguageSelectionScreen(
+                    viewModel = viewModel,
+                    onLanguageSelected = { lang ->
+                        viewModel.setLanguage(lang)
+                        navController.navigate(Routes.PHONE_OTP)
+                    }
+                )
             }
 
             composable(Routes.PHONE_OTP) {
                 PhoneOtpScreen(
-                    role = selectedRole,
-                    onVerified = { phone, uid ->
+                    viewModel = viewModel,
+                    onVerified = { phone, uid, existingUser ->
                         userPhone = phone
                         userUid = uid
+
+                        if (existingUser != null) {
+                            // User account already exists!
+                            // No need to ask "Who are you?" - account type is already saved and locked!
+                            selectedRole = existingUser.role
+
+                            if (existingUser.name.isNotBlank()) {
+                                // Direct re-login for returning registered user
+                                viewModel.loginAs(existingUser)
+                                navController.navigate(Routes.home(0)) {
+                                    popUpTo(Routes.SPLASH) { inclusive = true }
+                                }
+                            } else {
+                                // Incomplete profile: go directly to profile setup with existing locked role
+                                navController.navigate(Routes.PROFILE_SETUP)
+                            }
+                        } else {
+                            // Brand new user: NOW ask "Who are you?" (Role Selection: Artisan vs Buyer)
+                            navController.navigate(Routes.ROLE_SELECT)
+                        }
+                    }
+                )
+            }
+
+            composable(Routes.ROLE_SELECT) {
+                RoleSelectionScreen(
+                    viewModel = viewModel,
+                    onRoleSelected = { role ->
+                        selectedRole = role
                         navController.navigate(Routes.PROFILE_SETUP)
                     }
                 )
@@ -119,6 +148,7 @@ fun DhaagaApp(viewModel: AppViewModel) {
                     role = selectedRole,
                     phone = userPhone,
                     uid = userUid,
+                    viewModel = viewModel,
                     onComplete = { user ->
                         viewModel.loginAs(user)
                         navController.navigate(Routes.home(0)) {
@@ -157,6 +187,9 @@ fun DhaagaApp(viewModel: AppViewModel) {
                             popUpTo(Routes.HOME) { inclusive = true }
                         }
                     },
+                    onCart = {
+                        navController.navigate(Routes.CART)
+                    },
                     onChatList = {}
                 )
             }
@@ -176,9 +209,8 @@ fun DhaagaApp(viewModel: AppViewModel) {
                 popEnterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
                 popExitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) }
             ) { backStack ->
-                val productId = backStack.arguments?.getString("productId") ?: return@composable
-                val argKey = backStack.arguments?.getString("sharedKey")?.takeIf { it.isNotEmpty() }
-                val sharedKey = argKey ?: "product-image-$productId"
+                val productId = backStack.arguments?.getString("productId") ?: ""
+                val sharedKey = backStack.arguments?.getString("sharedKey") ?: ""
                 ProductDetailScreen(
                     productId = productId,
                     sharedKey = sharedKey,
@@ -188,7 +220,12 @@ fun DhaagaApp(viewModel: AppViewModel) {
                     onBack = { navController.popBackStack() },
                     onAddToCart = { product ->
                         viewModel.addToCart(product)
-                        navController.navigate(Routes.home(2))
+                        val isSeller = viewModel.currentUser.value?.isSeller == true
+                        if (isSeller) {
+                            navController.navigate(Routes.CART)
+                        } else {
+                            navController.navigate(Routes.home(2))
+                        }
                     },
                     onBulkEnquiry = { }
                 )
@@ -226,6 +263,7 @@ fun DhaagaApp(viewModel: AppViewModel) {
 
         composable(Routes.ADD_PRODUCT) {
             AddProductScreen(
+                viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onPublish = { navController.popBackStack() }
             )
@@ -243,12 +281,15 @@ fun DhaagaApp(viewModel: AppViewModel) {
         }
 
         composable(Routes.CART) {
+            val cart by viewModel.cart.collectAsState()
+            val user by viewModel.currentUser.collectAsState()
             CartScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onCheckout = {
-                    // Mock checkout: navigate to order success
-                    navController.navigate(Routes.MY_ORDERS)
+                    viewModel.placeDemoOrder(cart, user) {
+                        navController.navigate(Routes.MY_ORDERS)
+                    }
                 }
             )
         }
