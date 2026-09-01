@@ -1,5 +1,9 @@
 package com.dhaaga.app.data.model
 
+import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.IgnoreExtraProperties
+
+@IgnoreExtraProperties
 data class UserModel(
     val uid: String = "",
     val phoneNumber: String = "",
@@ -23,6 +27,8 @@ data class UserModel(
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 ) {
+    @get:Exclude
     val isSeller: Boolean get() = role == "seller"
+    @get:Exclude
     val isBuyer: Boolean get() = role == "buyer"
 }
