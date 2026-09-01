@@ -88,11 +88,24 @@ fun ProfileScreen(
                         color = DhaagaTextDark
                     )
 
-                    Text(
-                        text = user?.phoneNumber ?: "",
-                        fontSize = 14.sp,
-                        color = DhaagaTextMedium
-                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(PaletteForest.copy(alpha = 0.08f))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Icon(Icons.Default.Phone, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(14.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = viewModel.loggedInPhone,
+                            fontSize = 13.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PaletteDarkGreen
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
