@@ -6,8 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
@@ -27,7 +29,10 @@ import androidx.compose.ui.unit.sp
 import com.dhaaga.app.ui.theme.*
 
 @Composable
-fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
+fun RoleSelectionScreen(
+    onRoleSelected: (String) -> Unit,
+    viewModel: com.dhaaga.app.AppViewModel? = null
+) {
     var selectedRole by remember { mutableStateOf<String?>(null) }
 
     Box(
@@ -41,15 +46,16 @@ fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .imePadding()
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // App icon mark
             Box(
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(56.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(DhaagaPrimary),
                 contentAlignment = Alignment.Center
@@ -58,25 +64,34 @@ fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
                     imageVector = Icons.Default.Palette,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(32.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Who are you?",
-                fontSize = 28.sp,
+                text = viewModel?.tr("who_are_you", "Who are you?") ?: "Who are you?",
+                fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 color = DhaagaTextDark
             )
             Text(
                 text = "आप कौन हैं?",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 color = DhaagaTextMedium
             )
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Audio Guide with Hindi / English toggle and Audio ON/OFF switch
+            com.dhaaga.app.ui.components.AudioGuideCard(
+                englishText = "Welcome to Dhaaga! Please choose your role to continue. If you make and sell handmade crafts, select 'I am an Artisan'. If you want to explore and purchase authentic crafts, select 'I am a Buyer'. Then tap Continue.",
+                hindiText = "नमस्ते! धागा में आपका स्वागत है। कृपया अपनी भूमिका चुनें। यदि आप हस्तशिल्प बनाते और बेचते हैं, तो 'कारीगर' चुनें। यदि आप प्रामाणिक कला खरीदना चाहते हैं, तो 'खरीदार' चुनें। इसके बाद नीचे 'आगे बढ़ें' पर टैप करें।",
+                initialLanguage = viewModel?.selectedLanguage?.value ?: "hi"
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Uniform Role Cards
             Row(
@@ -135,7 +150,7 @@ fun RoleSelectionScreen(onRoleSelected: (String) -> Unit) {
                 )
             ) {
                 Text(
-                    text = "Continue",
+                    text = viewModel?.tr("continue_btn", "Continue") ?: "Continue",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White
