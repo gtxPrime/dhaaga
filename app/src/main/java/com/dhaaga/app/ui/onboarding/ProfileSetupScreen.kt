@@ -38,6 +38,7 @@ fun ProfileSetupScreen(
     role: String,
     phone: String = "",
     uid: String = "",
+    viewModel: com.dhaaga.app.AppViewModel? = null,
     onComplete: (UserModel) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
@@ -87,7 +88,7 @@ fun ProfileSetupScreen(
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = if (isSeller) "Set up your Artisan Profile" else "Tell Us About Yourself",
+                        text = if (isSeller) (viewModel?.tr("artisan_profile", "Set up your Artisan Profile") ?: "Set up your Artisan Profile") else "Tell Us About Yourself",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -100,7 +101,16 @@ fun ProfileSetupScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Audio Onboarding Guide
+            com.dhaaga.app.ui.components.AudioGuideCard(
+                englishText = if (isSeller) "Please enter your name, village, and state to create your artisan profile." else "Please enter your name and city to complete your buyer profile.",
+                hindiText = if (isSeller) "कृपया अपनी कारीगर प्रोफ़ाइल बनाने के लिए अपना नाम, गाँव और राज्य दर्ज करें।" else "कृपया अपनी प्रोफ़ाइल पूरी करने के लिए अपना नाम और शहर दर्ज करें।",
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Fields with Title Case capitalization
             DhaagaTextField(
@@ -222,22 +232,27 @@ fun ProfileSetupScreen(
                     val effectivePhone = phone.ifEmpty { "+919876543210" }
 
                     val user = if (isSeller) {
-                        MockData.mockSeller.copy(
+                        UserModel(
                             uid = effectiveUid,
                             phoneNumber = effectivePhone,
                             name = trimmedName,
                             village = trimmedVillage,
                             state = trimmedState,
                             role = "seller",
-                            craftTypes = if (trimmedCraft.isNotBlank()) listOf(trimmedCraft) else listOf("Handicrafts")
+                            craftTypes = if (trimmedCraft.isNotBlank()) listOf(trimmedCraft) else listOf("Handicrafts"),
+                            createdAt = System.currentTimeMillis(),
+                            updatedAt = System.currentTimeMillis()
                         )
                     } else {
-                        MockData.mockBuyer.copy(
+                        UserModel(
                             uid = effectiveUid,
                             phoneNumber = effectivePhone,
                             name = trimmedName,
                             village = trimmedVillage,
-                            role = "buyer"
+                            state = trimmedState,
+                            role = "buyer",
+                            createdAt = System.currentTimeMillis(),
+                            updatedAt = System.currentTimeMillis()
                         )
                     }
                     onComplete(user)
@@ -249,7 +264,7 @@ fun ProfileSetupScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = DhaagaPrimary)
             ) {
                 Text(
-                    text = "Complete Setup",
+                    text = viewModel?.tr("continue_btn", "Complete Setup") ?: "Complete Setup",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White
