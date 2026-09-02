@@ -20,7 +20,10 @@ import com.dhaaga.app.data.mock.MockData
 import com.dhaaga.app.ui.theme.*
 
 @Composable
-fun SellerDashboardScreen(onBack: () -> Unit) {
+fun SellerDashboardScreen(
+    onBack: () -> Unit,
+    viewModel: com.dhaaga.app.AppViewModel? = null
+) {
     val user = MockData.mockSeller
 
     Scaffold(
@@ -37,7 +40,7 @@ fun SellerDashboardScreen(onBack: () -> Unit) {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
-                    Text("Dashboard", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(viewModel?.tr("artisan_dashboard", "Artisan Dashboard") ?: "Artisan Dashboard", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
         }
