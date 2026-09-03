@@ -49,26 +49,41 @@ However, despite massive global demand, artisans face systemic barriers:
 - ❌ **The Intermediary & Exploitation Trap:** Middlemen siphon up to **70–80%** of the product's final retail value.
 - ❌ **The Feasibility & ONDC Gap:** Artisans struggle to navigate strict Open Network for Digital Commerce (ONDC) and Government e-Marketplace (GeM) catalog taxonomies.
 
-**Dhaaga (धागा • ShilpSetu)** dissolves these barriers. With **voice-first multilingual onboarding in 22 scheduled Indian languages**, **Gemini Multimodal AI image staging & attribute extraction**, **automated Geographical Indication (GI) tag verification**, and a **unified dynamic dual-role Android engine**, an artisan can capture a single photo, speak a 15-second voice memo in their mother tongue, and have a studio-grade, fair-priced listing published to global buyers and ONDC within **under 5 minutes**.
+**Dhaaga (धागा • ShilpSetu)** dissolves these barriers:
+- 🗣️ **Instant Voice Onboarding & Guidance:** Pre-warmed native TTS engine (`AppTtsManager`) providing conversational audio guidance in Hindi and English with zero cold-start delay.
+- 🌐 **All 22 Scheduled Indian Languages:** Real-time localized interface with craft-specific vocabularies (`AppLanguageManager`).
+- 📸 **AI Studio & Background Removal:** Turns raw workshop captures into clean studio photos using ML Kit segmentation and Google Gemini models.
+- 🏷️ **Direct Sale Pricing & Time-Limited Coupons:** Flexible artisan promotions with automated coupon codes, validity windows (10 minutes to 3 months), and usage caps (`ProductDiscountCouponCard`).
+- 🔍 **Integrated Voice Search:** Fast speech-recognition product discovery on the home marketplace.
+- ☁️ **Bidirectional Cloud Sync:** Persistent on-device storage + Firestore cloud sync ensuring inventory and orders are never lost across logins or devices.
+- 📦 **Automated Inventory & Restocking:** Live stock deductions upon order placement with automatic restocking on cancellation.
 
 ---
 
 ## 🌟 Key Features
 
 ### 🧵 1. Artisan (Seller) Experience
-* **Voice-to-Listing in 22 Languages:** Artisans speak about materials, dimensions, and craft history; AI extracts structured metadata (`craftType`, `dimensions`, `technique`, `region`, `material`).
-* **AI Image Studio:** Turns cluttered workshop snapshots into studio-grade white backgrounds or contextual lifestyle mockups with 4x neural upscaling.
-* **Smart Fair-Pricing Intelligence:** Compares real-time market data across e-commerce channels to alert artisans if they are underpricing their labor and heritage value.
-* **Shilpi Trust Score & GI Tag Registry:** Automatic cross-referencing with 400+ Indian Geographical Indication registries to bestow authenticity badges and boost search rank.
-* **Single-Tap ONDC & GeM Export:** Formats listings into JSON schemas compliant with Open Network for Digital Commerce protocols and GeM artisan seller portals.
-* **Unified Financial Dashboard:** Real-time earnings tracker (stored in paise for zero rounding loss), order lifecycle manager, and payout histories.
+* **Voice Onboarding Guide (`AppTtsManager`):** Real-time voice assistance that automatically welcomes artisans and guides them through language choice, login, and store creation.
+* **5-Step AI Listing Wizard:**
+  1. **AI Image Enhancer & Studio:** Camera framing guide, ML Kit segmentation cutout, and studio backdrop filters.
+  2. **Smart Cataloging:** Multilingual craft titles, descriptions, and regional classification.
+  3. **Material & Authentic Specs:** Size, technique, region, and GI registry validation.
+  4. **Fair-Trade Pricing & Promotions:** Direct sale prices with buyer savings indicators + customized discount coupons.
+  5. **One-Tap Publish:** Immediate sync to Home Screen marketplace, Seller Dashboard, and Cloud Firestore.
+* **Promotional Discount & Coupon Engine (`ProductDiscountCouponCard`):**
+  - Direct sale pricing (strike-through original price).
+  - % off or ₹ flat discounts.
+  - Auto-generate code button vs custom entry.
+  - Validity limits: 10 minutes to 3 months.
+  - Usage limits (unlimited, 10, 25, 50, 100 uses).
+* **My Listings & Dashboard:** Active inventory cards with status badges, price editing, and stock tracking.
 
 ### 🛍️ 2. Connoisseur (Buyer) Experience
-* **The "Kahaani" Storytelling Engine:** Every product detail view renders rich cultural narratives, tribal history, and the artisan's lineage alongside technical specifications.
-* **Privacy-First Direct Negotiation:** In-app real-time messaging allows bulk inquiries and custom orders with phone/contact redaction until deals are locked.
-* **Verified Handcrafted Guarantees:** Authenticity scores, GI verification seals, artisan village coordinates, and artisan workshop badges.
-* **Seamless Mock UPI & Escrow:** Smooth bottom-sheet cart checkout supporting multi-item orders, simulated Instant UPI/VPA payments, and milestone-based escrow.
-* **Interactive Order Tracking:** Granular delivery timelines (`Pending` ➔ `Confirmed` ➔ `Packed` ➔ `Shipped` ➔ `Delivered`).
+* **Voice Search:** Tap the microphone on the Home search bar to search authentic crafts by voice.
+* **The "Kahaani" Storytelling Engine:** Product detail views rendering cultural narratives, tribal history, and artisan workshop credentials.
+* **Available Offers & Coupons Card:** Interactive promotional coupon showcase with one-tap copy and live checkout redemption.
+* **Smart Cart & Checkout:** Live discount calculations, address selection, instant order summary, and automatic stock deduction.
+* **Order History & Restocking:** Interactive order tracking (`Pending` ➔ `Confirmed` ➔ `Packed` ➔ `Shipped` ➔ `Delivered`) with one-tap cancellation that automatically restocks seller inventory.
 
 ### ⚡ 3. Unified Dynamic Single-APK Engine
 A single lightweight Android application (`com.dhaaga.app`) dynamically reconfigures its navigation hierarchy, bottom bars, and capabilities according to the authenticated user's profile (`role = "seller"` vs `role = "buyer"`).
@@ -294,6 +309,34 @@ data class ProductModel(
 
 ---
 
+## 📦 Signed Release APK
+
+The production release APK is built and signed with the official `alphaKey.jks` release keystore.
+
+### 🔑 Signing Configuration (`key.properties`):
+```properties
+storeFile=F:/MyAppKey/alphaKey.jks
+storePassword=Topicno+0987
+keyAlias=key0
+keyPassword=Topicno+0987
+```
+
+### 📍 Artifact Location:
+```text
+app/build/outputs/apk/release/app-release.apk (Size: ~20.7 MB)
+```
+
+### 🔨 Build Commands:
+```bash
+# Build Signed Release APK
+gradlew.bat assembleRelease
+
+# Install Release APK on connected device
+adb install -r app/build/outputs/apk/release/app-release.apk
+```
+
+---
+
 ## 🚀 Getting Started
 
 ### 📋 Prerequisites
@@ -343,12 +386,12 @@ data class ProductModel(
 ## 🗺️ SIH 2026 Roadmap
 
 ```
-  [Phase 0: Design & Foundation] ────► ✅ Complete (Colors, Typography, Version Catalog, Manifest)
-  [Phase 1: Interactive Prototype] ──► ✅ Complete (Dual Mode NavHost, All 14 Screens, Mock Engine)
-  [Phase 2: Live Backend Sync] ──────► 🔄 In Progress (Firebase Auth OTP, Firestore Live Queries)
-  [Phase 3: Gemini & Bhashini AI] ───► ⏳ Next (Multimodal Vision Studio, Real-time Speech-to-Listing)
-  [Phase 4: ONDC & Escrow Payment] ──► ⏳ Next (ONDC Catalog Protocol Adapter, Razorpay / UPI Escrow)
-  [Phase 5: Field Testing & Pilot] ──► ⏳ Next (Artisan Cluster Pilot in Palghar & Madhubani)
+  [Phase 0: Design & Foundation] ─────────► ✅ Complete (Colors, Typography, Version Catalog, Edge-to-Edge)
+  [Phase 1: Interactive Prototype] ───────► ✅ Complete (Dual Mode NavHost, 14 Screens, Mock Dataset)
+  [Phase 2: Multilingual & TTS Engine] ───► ✅ Complete (22 Languages, Pre-warmed Zero-Delay Audio Guide)
+  [Phase 3: AI Studio & Smart Catalog] ───► ✅ Complete (ML Kit Cutout, Gemini Multimodal Extraction)
+  [Phase 4: Promotions, Stock & Cloud] ───► ✅ Complete (Discounts, Coupons, Voice Search, Firestore Sync)
+  [Phase 5: Production Release] ──────────► ✅ Complete (Signed Release APK with alphaKey.jks)
 ```
 
 ---
