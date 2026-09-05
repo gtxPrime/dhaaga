@@ -1,291 +1,356 @@
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  DHAAGA • धागा — README                                           -->
+<!--  Theme-aware · Lucide icons · Responsive layout                   -->
+<!-- ═══════════════════════════════════════════════════════════════════ -->
+
 <div align="center">
 
-# 🧵 धागा • DHAAGA
-### *Connecting Hands to Markets — From Village Craft to Global Cart in Under 5 Minutes*
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=52&pause=1200&color=F5A623&center=true&vCenter=true&width=700&height=90&lines=🧵+धागा+•+DHAAGA;ShilpSetu+Platform;Artisan+Commerce+AI">
+  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=52&pause=1200&color=D4521A&center=true&vCenter=true&width=700&height=90&lines=🧵+धागा+•+DHAAGA;ShilpSetu+Platform;Artisan+Commerce+AI" alt="Dhaaga Animated Title"/>
+</picture>
 
-[![Smart India Hackathon 2026](https://img.shields.io/badge/SIH-2026_Finalist-FF9933?style=for-the-badge&logo=target&logoColor=white)](https://sih.gov.in)
-[![Android](https://img.shields.io/badge/Platform-Android_Native-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack_Compose_BOM_2026-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-[![Firebase](https://img.shields.io/badge/Cloud-Firebase_Suite-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
-[![Gemini AI](https://img.shields.io/badge/AI-Gemini_Multimodal_Vision-8E75FF?style=for-the-badge&logo=googlebard&logoColor=white)](https://ai.google.dev)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
-
-<br />
-
-```
-  ██████╗ ██╗  ██╗ █████╗  █████╗  ██████╗  █████╗ 
-  ██╔══██╗██║  ██║██╔══██╗██╔══██╗██╔════╝ ██╔══██╗
-  ██║  ██║███████║███████║███████║██║  ███╗███████║
-  ██║  ██║██╔══██║██╔══██║██╔══██║██║   ██║██╔══██║
-  ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╔╝██║  ██║
-  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝
-     Connecting Hands to Markets • शिल्पसेतु
-```
+<br/>
 
 <p align="center">
-  <b>An AI-Powered, Multilingual, Zero-Barrier Mobile Commerce Platform for Indian Artisans & Connoisseur Buyers</b>
-  <br />
-  <i>Empowering 7M+ traditional weavers, sculptors, and folk artists across 28 states & 8 UTs.</i>
+  <b>Connecting Hands to Markets — From Village Craft to Global Cart in Under 5 Minutes</b><br/>
+  <i>Empowering 7M+ traditional weavers, sculptors and folk artists across 28 states and 8 UTs of India</i>
 </p>
 
----
+<br/>
 
-[Explore Features](#-key-features) • [System Architecture](#-system-architecture) • [Technical Workflows](#-technical-workflows) • [Design System](#-design-system--ui-philosophy) • [Project Structure](#-project-structure) • [Getting Started](#-getting-started) • [Roadmap](#-sih-2026-roadmap)
+[![SIH 2026](https://img.shields.io/badge/🏆%20SIH-2026%20Finalist-FF9933?style=for-the-badge&labelColor=1a1a2e)](https://sih.gov.in)
+[![Android](https://img.shields.io/badge/Android-Native%20SDK%2037-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 
----
+[![Compose](https://img.shields.io/badge/Jetpack%20Compose-BOM%202026-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Firebase](https://img.shields.io/badge/Firebase-Suite-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
+[![Gemini AI](https://img.shields.io/badge/Gemini%20AI-Multimodal-8E75FF?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
+[![License](https://img.shields.io/badge/License-Apache%202.0-06B6D4?style=for-the-badge)](LICENSE)
+
+<br/>
+
+<p>
+  <a href="#-overview">Overview</a> &nbsp;•&nbsp;
+  <a href="#-key-features">Features</a> &nbsp;•&nbsp;
+  <a href="#-architecture">Architecture</a> &nbsp;•&nbsp;
+  <a href="#-design-system">Design</a> &nbsp;•&nbsp;
+  <a href="#-project-structure">Structure</a> &nbsp;•&nbsp;
+  <a href="#-getting-started">Get Started</a> &nbsp;•&nbsp;
+  <a href="#-roadmap">Roadmap</a>
+</p>
 
 </div>
 
-<br />
+---
 
-## 📖 Executive Summary
+## 🌟 Overview
 
-India is home to over **7 million registered artisans and master craftspeople** generating unmatched cultural heritage through crafts like *Warli Art, Madhubani Painting, Banarasi Brocade, Dhokra Brass Casting, Blue Pottery, and Pashmina Weaving*. 
+> **Dhaaga (धागा · ShilpSetu)** is an AI-powered, multilingual, zero-barrier mobile commerce platform built for India's 7 million+ artisans — eliminating every traditional obstacle between a rural craftsperson and a global buyer.
 
-However, despite massive global demand, artisans face systemic barriers:
-- ❌ **The Digital Illiteracy Barrier:** Traditional e-commerce apps require complex forms, professional copywriting, and English literacy.
-- ❌ **The Studio Photography Barrier:** Raw smartphone photos taken in rural workshops fail against professionally staged studio catalog listings.
-- ❌ **The Intermediary & Exploitation Trap:** Middlemen siphon up to **70–80%** of the product's final retail value.
-- ❌ **The Feasibility & ONDC Gap:** Artisans struggle to navigate strict Open Network for Digital Commerce (ONDC) and Government e-Marketplace (GeM) catalog taxonomies.
+<table>
+<tr>
+<td width="50%">
 
-**Dhaaga (धागा • ShilpSetu)** dissolves these barriers:
-- 🗣️ **Instant Voice Onboarding & Guidance:** Pre-warmed native TTS engine (`AppTtsManager`) providing conversational audio guidance in Hindi and English with zero cold-start delay.
-- 🌐 **All 22 Scheduled Indian Languages:** Real-time localized interface with craft-specific vocabularies (`AppLanguageManager`).
-- 📸 **AI Studio & Background Removal:** Turns raw workshop captures into clean studio photos using ML Kit segmentation and Google Gemini models.
-- 🏷️ **Direct Sale Pricing & Time-Limited Coupons:** Flexible artisan promotions with automated coupon codes, validity windows (10 minutes to 3 months), and usage caps (`ProductDiscountCouponCard`).
-- 🔍 **Integrated Voice Search:** Fast speech-recognition product discovery on the home marketplace.
-- ☁️ **Bidirectional Cloud Sync:** Persistent on-device storage + Firestore cloud sync ensuring inventory and orders are never lost across logins or devices.
-- 📦 **Automated Inventory & Restocking:** Live stock deductions upon order placement with automatic restocking on cancellation.
+### 🚧 The Problem
+
+| Barrier | Impact |
+|:---|:---|
+| 📵 Digital illiteracy | Cannot list on e-commerce |
+| 📷 No studio photography | Listings look uncompetitive |
+| 💸 Middlemen take 70–80% | Artisans earn a fraction |
+| 🌐 English-only portals | Excluded from GeM & ONDC |
+| 📝 No copywriting skills | Poor discoverability & SEO |
+
+</td>
+<td width="50%">
+
+### ✅ The Solution
+
+| Feature | Value |
+|:---|:---|
+| 🗣️ Voice onboarding | Zero typing required |
+| 🤖 AI Image Studio | Raw photo → studio listing |
+| 🏷️ Direct sale pricing | No middlemen, fair trade |
+| 🌍 22 Indian languages | Full regional inclusivity |
+| ☁️ Real-time cloud sync | Always-available inventory |
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🌟 Key Features
+## ✨ Key Features
 
-### 🧵 1. Artisan (Seller) Experience
-* **Voice Onboarding Guide (`AppTtsManager`):** Real-time voice assistance that automatically welcomes artisans and guides them through language choice, login, and store creation.
-* **5-Step AI Listing Wizard:**
-  1. **AI Image Enhancer & Studio:** Camera framing guide, ML Kit segmentation cutout, and studio backdrop filters.
-  2. **Smart Cataloging:** Multilingual craft titles, descriptions, and regional classification.
-  3. **Material & Authentic Specs:** Size, technique, region, and GI registry validation.
-  4. **Fair-Trade Pricing & Promotions:** Direct sale prices with buyer savings indicators + customized discount coupons.
-  5. **One-Tap Publish:** Immediate sync to Home Screen marketplace, Seller Dashboard, and Cloud Firestore.
-* **Promotional Discount & Coupon Engine (`ProductDiscountCouponCard`):**
-  - Direct sale pricing (strike-through original price).
-  - % off or ₹ flat discounts.
-  - Auto-generate code button vs custom entry.
-  - Validity limits: 10 minutes to 3 months.
-  - Usage limits (unlimited, 10, 25, 50, 100 uses).
-* **My Listings & Dashboard:** Active inventory cards with status badges, price editing, and stock tracking.
+### 🧵 Artisan (Seller) Experience
 
-### 🛍️ 2. Connoisseur (Buyer) Experience
-* **Voice Search:** Tap the microphone on the Home search bar to search authentic crafts by voice.
-* **The "Kahaani" Storytelling Engine:** Product detail views rendering cultural narratives, tribal history, and artisan workshop credentials.
-* **Available Offers & Coupons Card:** Interactive promotional coupon showcase with one-tap copy and live checkout redemption.
-* **Smart Cart & Checkout:** Live discount calculations, address selection, instant order summary, and automatic stock deduction.
-* **Order History & Restocking:** Interactive order tracking (`Pending` ➔ `Confirmed` ➔ `Packed` ➔ `Shipped` ➔ `Delivered`) with one-tap cancellation that automatically restocks seller inventory.
+<table>
+<tr>
+<td align="center" width="20%">
+  <img src="https://api.iconify.design/lucide/mic.svg?color=%23D4521A&width=40&height=40" alt="voice"/>
+  <br/><b>Voice Onboarding</b>
+  <br/><sub>Real-time TTS guide in Hindi & English with zero cold-start via <code>AppTtsManager</code></sub>
+</td>
+<td align="center" width="20%">
+  <img src="https://api.iconify.design/lucide/wand-2.svg?color=%23F5A623&width=40&height=40" alt="ai"/>
+  <br/><b>AI Listing Wizard</b>
+  <br/><sub>5-step flow: photo → AI enhance → smart catalog → pricing → one-tap publish</sub>
+</td>
+<td align="center" width="20%">
+  <img src="https://api.iconify.design/lucide/camera.svg?color=%232BB5A0&width=40&height=40" alt="camera"/>
+  <br/><b>AI Image Studio</b>
+  <br/><sub>ML Kit background removal + studio backdrop filters + Gemini vision enhancement</sub>
+</td>
+<td align="center" width="20%">
+  <img src="https://api.iconify.design/lucide/tag.svg?color=%237F52FF&width=40&height=40" alt="tag"/>
+  <br/><b>Coupon Engine</b>
+  <br/><sub>% or ₹ flat discounts, auto-generate codes, validity 10min–3 months</sub>
+</td>
+<td align="center" width="20%">
+  <img src="https://api.iconify.design/lucide/layout-dashboard.svg?color=%234CAF50&width=40&height=40" alt="dashboard"/>
+  <br/><b>Live Dashboard</b>
+  <br/><sub>Inventory cards, status badges, stock tracking & price editing in real-time</sub>
+</td>
+</tr>
+</table>
 
-### ⚡ 3. Unified Dynamic Single-APK Engine
-A single lightweight Android application (`com.dhaaga.app`) dynamically reconfigures its navigation hierarchy, bottom bars, and capabilities according to the authenticated user's profile (`role = "seller"` vs `role = "buyer"`).
+### 🛍️ Connoisseur (Buyer) Experience
 
-```
-                      ┌────────────────────────────────────────┐
-                      │        DHAAGA UNIFIED APP (APK)        │
-                      └───────────────────┬────────────────────┘
-                                          │
-                        Role-Based Dynamic View Switching
-                                          │
-                ┌─────────────────────────┴─────────────────────────┐
-                ▼                                                   ▼
-      ┌───────────────────┐                               ┌───────────────────┐
-      │   SELLER MODE     │                               │    BUYER MODE     │
-      ├───────────────────┤                               ├───────────────────┤
-      │ • Home Grid       │                               │ • Home Grid       │
-      │ • My Listings     │                               │ • Wishlist        │
-      │ • AI Add Product  │                               │ • Cart & Checkout │
-      │ • Dashboard       │                               │ • My Orders       │
-      │ • Artisan Profile │                               │ • Buyer Profile   │
-      └───────────────────┘                               └───────────────────┘
-```
+<table>
+<tr>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/search.svg?color=%23D4521A&width=36&height=36" alt="search"/>
+  <br/><b>Voice Search</b>
+  <br/><sub>Tap the mic on the Home search bar — find authentic crafts by voice</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/book-open.svg?color=%23F5A623&width=36&height=36" alt="story"/>
+  <br/><b>Kahaani Stories</b>
+  <br/><sub>Cultural narratives, tribal history & artisan workshop credentials per product</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/shopping-cart.svg?color=%232BB5A0&width=36&height=36" alt="cart"/>
+  <br/><b>Smart Checkout</b>
+  <br/><sub>Live discount calculations, coupon redemption & instant stock deduction</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/package.svg?color=%237F52FF&width=36&height=36" alt="orders"/>
+  <br/><b>Order Tracking</b>
+  <br/><sub>Pending → Confirmed → Packed → Shipped → Delivered with one-tap cancellation</sub>
+</td>
+</tr>
+</table>
+
+### ⚡ Unified Single-APK Engine
+
+One lightweight APK (`com.dhaaga.app`) dynamically reconfigures its entire navigation hierarchy, bottom bars, and feature set based on the authenticated user's role:
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+**🧵 Seller Mode**
+
+| Screen | Description |
+|:---|:---|
+| 🏠 Home Grid | Marketplace browsing |
+| 📋 My Listings | Active inventory management |
+| ➕ AI Add Product | 5-step listing wizard |
+| 📊 Dashboard | Sales analytics & earnings |
+| 👤 Artisan Profile | Storefront & wallet |
+
+</td>
+<td width="50%" align="center">
+
+**🛍️ Buyer Mode**
+
+| Screen | Description |
+|:---|:---|
+| 🏠 Home Grid | Product discovery |
+| ❤️ Wishlist | Saved craft collection |
+| 🛒 Cart & Checkout | Escrow-based purchase |
+| 📦 My Orders | Live order tracking |
+| 👤 Buyer Profile | Address & preferences |
+
+</td>
+</tr>
+</table>
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Architecture
 
 Dhaaga is engineered on **Modern Android Architecture (MVI / Clean MVVM)** with 100% Kotlin Jetpack Compose and reactive coroutine streams.
 
 ```mermaid
 graph TD
-    subgraph UI_Layer ["📱 Android Client Layer (Jetpack Compose)"]
+    subgraph UI ["📱 Android Client — Jetpack Compose"]
         A[MainActivity / NavHost] --> B[AppViewModel StateFlow]
-        B --> C1[Onboarding & Language Flow]
-        B --> C2[HomeScreen & Shared Elements]
+        B --> C1[Onboarding and Language Flow]
+        B --> C2[HomeScreen and Shared Elements]
         B --> C3[AI AddProduct Studio]
-        B --> C4[ProductDetail & Kahaani View]
-        B --> C5[Seller Dashboard & Analytics]
-        B --> C6[Cart & Escrow Checkout]
+        B --> C4[ProductDetail and Kahaani]
+        B --> C5[Seller Dashboard and Analytics]
+        B --> C6[Cart and Escrow Checkout]
     end
 
-    subgraph Data_Layer ["💾 Data & Domain Layer"]
-        B --> D1[UserModel & ProductModel]
-        B --> D2[OrderModel & CartItemModel]
+    subgraph Data ["💾 Data and Domain Layer"]
+        B --> D1[UserModel and ProductModel]
+        B --> D2[OrderModel and CartItemModel]
         B --> D3[ImageUploadRepository]
         B --> D4[MockData Prototype Engine]
     end
 
-    subgraph Backend_Cloud ["☁️ Cloud & AI Infrastructure"]
-        D3 --> E1["Custom PHP Multipart Storage API\n(Direct Public Asset CDN)"]
-        B --> E2["Firebase Authentication\n(Phone OTP / WhatsApp Login)"]
-        B --> E3["Cloud Firestore NoSQL\n(Users, Listings, Orders, Chats)"]
-        B --> E4["Gemini 1.5 / 2.0 Flash Multimodal API\n(Vision Enhancement + Attribute Extraction)"]
-        B --> E5["Bhashini ASR / TTS Voice Engine\n(22 Scheduled Indian Languages)"]
-        B --> E6["Firebase Crashlytics & Analytics\n(Real-Time Diagnostics)"]
+    subgraph Cloud ["☁️ Cloud and AI Infrastructure"]
+        D3 --> E1["Custom PHP CDN — upload.php"]
+        B --> E2["Firebase Auth — Phone OTP / WhatsApp"]
+        B --> E3["Cloud Firestore — Users, Listings, Orders"]
+        B --> E4["Gemini 1.5 / 2.0 Flash — Vision + Extraction"]
+        B --> E5["Bhashini ASR / TTS — 22 Languages"]
+        B --> E6["Firebase Crashlytics — Real-Time Diagnostics"]
     end
 ```
 
----
+### 🔄 The 5-Minute AI Listing Pipeline
 
-## 🔄 Technical Workflows
-
-### 1. ⚡ The 5-Minute AI Listing Pipeline
-```
-[Artisan Takes Photo]
-         │
-         ▼
-[Image Captured via Camera/Gallery] ──► [Uploaded to CDN via ImageUploadRepository]
-         │
-         ▼
-[Artisan Speaks in Regional Tongue] ──► [Bhashini STT Engine converts to Text]
-         │
-         ▼
-[Gemini Multimodal Ingestion] ────────► Extracts: { Title, Craft, Dimensions, Material, Colors }
-         │
-         ▼
-[GI Registry Cross-Reference] ────────► Matches Village/Craft with GI Database (e.g. Warli/Palghar)
-         │
-         ▼
-[Fair-Price Recommendation] ──────────► Generates Baseline Fair Price & Compares Market Averages
-         │
-         ▼
-[One-Tap Publish] ────────────────────► Synchronized with Firestore & ONDC Schema Catalog
+```mermaid
+flowchart LR
+    A([📸 Photo Captured]) --> B[Upload to CDN]
+    B --> C[🗣️ Artisan Speaks in Regional Language]
+    C --> D[Bhashini STT converts to Text]
+    D --> E[🤖 Gemini Multimodal Ingestion]
+    E --> F["Extracts: Title, Craft, Dimensions, Material, Colors"]
+    F --> G[GI Registry Cross-Reference]
+    G --> H[Fair-Price Recommendation]
+    H --> I([✅ One-Tap Publish to Firestore])
 ```
 
-### 2. 🛡️ Privacy-First Escrow & Direct Commerce Flow
-```
-Buyer taps "Bulk Inquiry" ──► Anonymous P2P Chat initiated
-                                       │
-Artisan & Buyer agree on Quote ────────┤ (Contact details redacted to prevent leakage)
-                                       │
-Buyer proceeds to Checkout ────────────► Funds locked in Escrow Mock Vault
-                                       │
-Artisan packs & ships item ────────────► Tracking ID recorded in Firestore
-                                       │
-Buyer receives & verifies GI ──────────► Escrow released to Artisan Wallet
-```
+### 🛡️ Privacy-First Escrow Flow
 
-### 3. 🌐 Dual-Storage Fallback Architecture
-To ensure **zero server cost barriers** during high-volume hackathon demonstrations and prototype testing, Dhaaga includes a resilient dual-engine media architecture:
-1. **Primary Custom CDN (`upload.php`):** Lightweight multipart PHP API on shared hosting returning high-speed public image links with zero cold starts.
-2. **Enterprise Cloud Storage:** Firebase Storage with direct tokenized access URLs and security rules.
+```mermaid
+sequenceDiagram
+    participant B as 🛍️ Buyer
+    participant P as 🔒 Platform Escrow
+    participant A as 🧵 Artisan
+
+    B->>P: Bulk Inquiry via Anonymous P2P Chat
+    P->>A: Forward anonymized request
+    A->>P: Agree on quote
+    B->>P: Checkout — Funds locked in Escrow Vault
+    A->>P: Packs and ships item with Tracking ID
+    B->>P: Receives and verifies GI tag
+    P->>A: Escrow released to Artisan Wallet ✅
+```
 
 ---
 
-## 🎨 Design System & UI Philosophy
+## 🎨 Design System
 
-Dhaaga's visual design embraces **Indian Heritage & Earthy Textures** combined with modern, clean **Glassmorphism & Material 3** principles.
+Dhaaga's visual identity blends **Indian Heritage & Earthy Textures** with modern **Glassmorphism & Material 3** principles.
 
-### 🎨 Color Palette
+### 🖌️ Color Palette
 
-| Token | Hex Code | Visual Sample | Semantic Role |
+| Token | Hex | Preview | Semantic Role |
 |:---|:---:|:---:|:---|
-| **Saffron Primary** | `#D4521A` | ![#D4521A](https://via.placeholder.com/15/D4521A/D4521A.png) | High-emphasis CTAs, active indicators, brand accent |
-| **Warm Gold** | `#F5A623` | ![#F5A623](https://via.placeholder.com/15/F5A623/F5A623.png) | Featured craft tags, ratings, star highlights |
-| **Teal Accent** | `#2BB5A0` | ![#2BB5A0](https://via.placeholder.com/15/2BB5A0/2BB5A0.png) | Verified badges, chat bubbles, GI verification tags |
-| **Cream Background** | `#FFF8EE` | ![#FFF8EE](https://via.placeholder.com/15/FFF8EE/FFF8EE.png) | App canvas background, clean reading comfort |
-| **Peach Card** | `#FDEBD0` | ![#FDEBD0](https://via.placeholder.com/15/FDEBD0/FDEBD0.png) | Product listing cards, tonal containers |
-| **Deep Brown Text** | `#3E1F00` | ![#3E1F00](https://via.placeholder.com/15/3E1F00/3E1F00.png) | High-contrast readable typography (headings & body) |
-| **GI Tag Green** | `#4CAF50` | ![#4CAF50](https://via.placeholder.com/15/4CAF50/4CAF50.png) | Official authenticity seal, success confirmations |
+| **Saffron Primary** | `#D4521A` | ![#D4521A](https://via.placeholder.com/60x20/D4521A/D4521A.png) | High-emphasis CTAs, active indicators, brand accent |
+| **Warm Gold** | `#F5A623` | ![#F5A623](https://via.placeholder.com/60x20/F5A623/F5A623.png) | Featured craft tags, ratings, star highlights |
+| **Teal Accent** | `#2BB5A0` | ![#2BB5A0](https://via.placeholder.com/60x20/2BB5A0/2BB5A0.png) | Verified badges, chat bubbles, GI verification tags |
+| **Cream Background** | `#FFF8EE` | ![#FFF8EE](https://via.placeholder.com/60x20/FFF8EE/FFF8EE.png) | App canvas background, clean reading comfort |
+| **Peach Card** | `#FDEBD0` | ![#FDEBD0](https://via.placeholder.com/60x20/FDEBD0/FDEBD0.png) | Product listing cards, tonal containers |
+| **Deep Brown Text** | `#3E1F00` | ![#3E1F00](https://via.placeholder.com/60x20/3E1F00/3E1F00.png) | High-contrast readable typography (headings & body) |
+| **GI Tag Green** | `#4CAF50` | ![#4CAF50](https://via.placeholder.com/60x20/4CAF50/4CAF50.png) | Official authenticity seal, success confirmations |
 
-### 🖋️ Typography & Interaction
-* **Dual-Script Typography:** Poppins (Latin) paired with Noto Sans Devanagari for seamless bilingual typography across English, Hindi, and regional scripts.
-* **Fintech Accuracy:** All monetary amounts are stored and computed in **paise (`Long`)** (e.g. ₹850.00 = `85000L`) to eliminate floating-point precision errors.
-* **Notion-Style Procedural Avatars:** Custom canvas-rendered avatars for artisans and buyers without requiring photo uploads on day one.
-* **Edge-to-Edge Experience:** Fully transparent navigation and status bars utilizing Android 15/16 window insets.
+### 🖋️ Typography & Interactions
+
+<table>
+<tr>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/type.svg?color=%23D4521A&width=32&height=32" alt="type"/>
+  <br/><b>Dual-Script Typography</b><br/>
+  <sub>Poppins (Latin) + Noto Sans Devanagari for seamless bilingual display across English, Hindi & regional scripts</sub>
+</td>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/indian-rupee.svg?color=%23F5A623&width=32&height=32" alt="rupee"/>
+  <br/><b>Fintech Precision</b><br/>
+  <sub>All monetary values stored in <b>paise (Long)</b> — e.g. ₹850.00 = <code>85000L</code> — eliminating floating-point errors</sub>
+</td>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/smartphone.svg?color=%232BB5A0&width=32&height=32" alt="mobile"/>
+  <br/><b>Edge-to-Edge UI</b><br/>
+  <sub>Fully transparent nav & status bars using Android 15/16 window insets with procedural Notion-style avatars</sub>
+</td>
+</tr>
+</table>
 
 ---
 
 ## 📁 Project Structure
 
 ```
-f:/Source Codes/Dhaaga/
-├── app/
-│   ├── src/main/
-│   │   ├── java/com/dhaaga/app/
-│   │   │   ├── MainActivity.kt               # Central NavHost, edge-to-edge config & routes
-│   │   │   ├── AppViewModel.kt               # Unidirectional StateFlow (Auth, Cart, Products)
-│   │   │   ├── navigation/
-│   │   │   │   └── Routes.kt                 # Type-safe navigation routes & arguments
-│   │   │   ├── data/
-│   │   │   │   ├── model/
-│   │   │   │   │   ├── UserModel.kt          # Artisan/Buyer schema, Shilpi Score, GI tags
-│   │   │   │   │   ├── ProductModel.kt        # Craft specs, Kahaani story, pricing in paise
-│   │   │   │   │   └── OrderModel.kt          # CartItem, Address & Order lifecycle models
-│   │   │   │   ├── mock/
-│   │   │   │   │   └── MockData.kt           # Rich craft dataset across 28 Indian states
-│   │   │   │   └── repository/
-│   │   │   │       └── ImageUploadRepository.kt # Multipart image upload client with logging
-│   │   │   └── ui/
-│   │   │       ├── theme/                    # Color tokens, Typography & DhaagaTheme
-│   │   │       ├── splash/                   # Animated splash screen
-│   │   │       ├── onboarding/               # 22-Language selection, Role switch, Phone OTP
-│   │   │       ├── home/                     # Dynamic Home, Pager Tabs & Category Grids
-│   │   │       ├── product/                  # Kahaani Product Detail, Zoom Gallery, Reviews
-│   │   │       ├── seller/                   # AI Add Product, My Listings, Seller Dashboard
-│   │   │       ├── buyer/                    # Cart, Wishlist, My Orders & Escrow Tracking
-│   │   │       ├── profile/                  # Artisan Storefront, Settings & Wallet
-│   │   │       └── components/               # NotionAvatars, Badges, Shimmer Loaders
-│   │   ├── res/                              # Drawables, layouts, strings, XML rules
-│   │   └── AndroidManifest.xml               # Hardware permissions (Camera, Audio, Storage)
-│   ├── build.gradle.kts                      # Module build file (Compose BOM, Firebase BOM)
-│   ├── google-services.json                  # Firebase configuration file
-│   └── proguard-rules.pro                    # Release optimization & obfuscation rules
-├── server_script/
-│   └── upload.php                            # Custom PHP multipart image upload backend
-├── gradle/
-│   ├── libs.versions.toml                    # Version Catalog (Kotlin 2.3, AGP 9.2, Compose)
-│   └── wrapper/                              # Gradle 9.6.1 wrapper binaries
-├── build.gradle.kts                          # Root project build configuration
-├── settings.gradle.kts                       # Repository & dependency resolution settings
-├── key.properties.example                    # Release keystore configuration template
-└── README.md                                 # Master project documentation
+Dhaaga/
+├── 📱 app/
+│   └── src/main/
+│       ├── java/com/dhaaga/app/
+│       │   ├── 🚀 MainActivity.kt               # Central NavHost, edge-to-edge config & routes
+│       │   ├── 📦 AppViewModel.kt               # Unidirectional StateFlow (Auth, Cart, Products)
+│       │   ├── navigation/
+│       │   │   └── Routes.kt                    # Type-safe navigation routes & arguments
+│       │   ├── data/
+│       │   │   ├── model/
+│       │   │   │   ├── UserModel.kt             # Artisan/Buyer schema, Shilpi Score, GI tags
+│       │   │   │   ├── ProductModel.kt          # Craft specs, Kahaani story, pricing in paise
+│       │   │   │   └── OrderModel.kt            # CartItem, Address & Order lifecycle models
+│       │   │   ├── mock/
+│       │   │   │   └── MockData.kt              # Rich craft dataset across 28 Indian states
+│       │   │   └── repository/
+│       │   │       └── ImageUploadRepository.kt # Multipart image upload client with logging
+│       │   └── ui/
+│       │       ├── 🎨 theme/                    # Color tokens, Typography & DhaagaTheme
+│       │       ├── ✨ splash/                   # Animated splash screen
+│       │       ├── 🌍 onboarding/               # 22-language selection, role switch, Phone OTP
+│       │       ├── 🏠 home/                     # Dynamic Home, Pager Tabs & Category Grids
+│       │       ├── 🖼️ product/                  # Kahaani Product Detail, Zoom Gallery, Reviews
+│       │       ├── 🧵 seller/                   # AI Add Product, My Listings, Seller Dashboard
+│       │       ├── 🛍️ buyer/                    # Cart, Wishlist, My Orders & Escrow Tracking
+│       │       ├── 👤 profile/                  # Artisan Storefront, Settings & Wallet
+│       │       └── 🧩 components/               # NotionAvatars, Badges, Shimmer Loaders
+│       ├── res/                                 # Drawables, layouts, strings, XML rules
+│       └── AndroidManifest.xml                 # Hardware permissions (Camera, Audio, Storage)
+├── ⚙️  app/build.gradle.kts                     # Module build file (Compose BOM, Firebase BOM)
+├── 🔥 app/google-services.json                 # Firebase configuration file
+├── 🛡️  app/proguard-rules.pro                   # Release optimization & obfuscation rules
+├── 🌐 server_script/upload.php                 # Custom PHP multipart image upload backend
+├── 📚 gradle/libs.versions.toml               # Version Catalog (Kotlin 2.3, AGP 9.2, Compose)
+└── 🔑 key.properties.example                  # Release keystore configuration template
 ```
 
 ---
 
-## 📊 Data Models Overview
+## 📊 Data Models
 
 <details>
-<summary><b>🔍 Click to view Core Kotlin Schemas (User, Product, Order)</b></summary>
+<summary><b>🔍 Click to expand — Core Kotlin Schemas (User, Product, Order)</b></summary>
 
 ```kotlin
-// com.dhaaga.app.data.model.UserModel
+// ── UserModel ────────────────────────────────────────────────────────────
 data class UserModel(
     val uid: String = "",
     val phoneNumber: String = "",
     val name: String = "",
-    val role: String = "buyer",             // "seller" | "buyer"
-    val languagePref: String = "en",        // "hi", "en", "bn", "ta", etc.
+    val role: String = "buyer",           // "seller" | "buyer"
+    val languagePref: String = "en",      // "hi", "en", "bn", "ta", etc.
     val village: String = "",
     val district: String = "",
     val state: String = "",
     val craftTypes: List<String> = emptyList(),
-    val shilpiScore: Int = 0,               // Trust metric (0 - 100)
+    val shilpiScore: Int = 0,             // Trust metric (0–100)
     val isGiCertified: Boolean = false,
-    val walletBalance: Long = 0L,           // Stored in paise
+    val walletBalance: Long = 0L,         // Stored in paise
     val totalEarnings: Long = 0L
 )
 
-// com.dhaaga.app.data.model.ProductModel
+// ── ProductModel ─────────────────────────────────────────────────────────
 data class ProductModel(
     val productId: String = "",
     val sellerId: String = "",
@@ -294,127 +359,255 @@ data class ProductModel(
     val titleEn: String = "",
     val titleHi: String = "",
     val descriptionEn: String = "",
-    val craftType: String = "",             // "Warli", "Madhubani", "Dhokra"
+    val craftType: String = "",           // "Warli" | "Madhubani" | "Dhokra" …
     val material: String = "",
     val giTag: String = "",
     val giVerified: Boolean = false,
     val authenticityScore: Int = 95,
-    val priceListed: Long = 0L,             // Price in paise (₹1 = 100 paise)
+    val priceListed: Long = 0L,          // ₹1 = 100 paise
     val stockQuantity: Int = 1,
     val imageUrls: List<String> = emptyList(),
-    val storyEn: String = ""                // Kahaani AI cultural narrative
+    val storyEn: String = ""             // Kahaani AI cultural narrative
 )
+
+// ── OrderModel ───────────────────────────────────────────────────────────
+// Lifecycle: Pending ➔ Confirmed ➔ Packed ➔ Shipped ➔ Delivered
+// One-tap cancellation automatically restocks seller inventory.
 ```
+
 </details>
 
 ---
 
-## 📦 Signed Release APK
-
-The production release APK is built and signed with the official `alphaKey.jks` release keystore.
-
-### 🔑 Signing Configuration (`key.properties`):
-```properties
-storeFile=F:/MyAppKey/alphaKey.jks
-storePassword=Topicno+0987
-keyAlias=key0
-keyPassword=Topicno+0987
-```
-
-### 📍 Artifact Location:
-```text
-app/build/outputs/apk/release/app-release.apk (Size: ~20.7 MB)
-```
-
-### 🔨 Build Commands:
-```bash
-# Build Signed Release APK
-gradlew.bat assembleRelease
-
-# Install Release APK on connected device
-adb install -r app/build/outputs/apk/release/app-release.apk
-```
-
----
-
-## 🚀 Getting Started
+## 🛠️ Getting Started
 
 ### 📋 Prerequisites
-* **Android Studio:** Ladybug (2024.2.1+) or Meerkat (2025.1.1+)
-* **JDK:** OpenJDK 17 or 21
-* **Android SDK:** Compile SDK `37`, Minimum SDK `24` (Android 7.0+)
-* **Gradle:** Version 9.6.1 (managed via Gradle Wrapper)
 
-### 🛠️ Installation & Setup
+<table>
+<tr>
+<td align="center">
+  <img src="https://api.iconify.design/logos/android-icon.svg?width=36&height=36" alt="android studio"/>
+  <br/><b>Android Studio</b>
+  <br/><sub>Ladybug 2024.2.1+<br/>or Meerkat 2025.1.1+</sub>
+</td>
+<td align="center">
+  <img src="https://api.iconify.design/logos/java.svg?width=36&height=36" alt="jdk"/>
+  <br/><b>JDK</b>
+  <br/><sub>OpenJDK 17 or 21</sub>
+</td>
+<td align="center">
+  <img src="https://api.iconify.design/logos/android-icon.svg?width=36&height=36" alt="sdk"/>
+  <br/><b>Android SDK</b>
+  <br/><sub>Compile SDK 37<br/>Min SDK 24 (Android 7.0+)</sub>
+</td>
+<td align="center">
+  <img src="https://api.iconify.design/logos/gradle.svg?width=36&height=36" alt="gradle"/>
+  <br/><b>Gradle</b>
+  <br/><sub>9.6.1 via wrapper</sub>
+</td>
+<td align="center">
+  <img src="https://api.iconify.design/logos/git-icon.svg?width=36&height=36" alt="git"/>
+  <br/><b>Git</b>
+  <br/><sub>Any modern version</sub>
+</td>
+</tr>
+</table>
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/your-username/dhaaga.git
-   cd dhaaga
-   ```
+### 🚀 Installation & Setup
 
-2. **Configure Firebase:**
-   - Create a project on the [Firebase Console](https://console.firebase.google.com/).
-   - Enable **Firebase Authentication** (Phone Provider), **Cloud Firestore**, and **Firebase Storage**.
-   - Download `google-services.json` and place it in the `app/` directory:
-     ```bash
-     cp /path/to/your/google-services.json app/google-services.json
-     ```
+**1 · Clone the repository**
+```bash
+git clone https://github.com/your-username/dhaaga.git
+cd dhaaga
+```
 
-3. **Configure Signing Keys (Optional for Release):**
-   ```bash
-   cp key.properties.example key.properties
-   # Fill in storeFile, storePassword, keyAlias, keyPassword in key.properties
-   ```
+**2 · Configure Firebase**
+```bash
+# Create a project on the Firebase Console and enable:
+#   ✅ Firebase Authentication (Phone Provider)
+#   ✅ Cloud Firestore
+#   ✅ Firebase Storage
 
-4. **Build and Run the Debug APK:**
-   ```bash
-   # On Windows PowerShell
-   .\gradlew.bat assembleDebug
+cp /path/to/your/google-services.json app/google-services.json
+```
 
-   # On Linux / macOS
-   ./gradlew assembleDebug
-   ```
+**3 · Configure release signing** *(optional)*
+```bash
+cp key.properties.example key.properties
+# Edit key.properties — fill in storeFile, storePassword, keyAlias, keyPassword
+```
 
-5. **Deploy the Image Server (Optional):**
-   If you wish to host your own multipart CDN endpoint:
-   - Upload `server_script/upload.php` to any PHP-compatible web server (Apache/Nginx with PHP 7.4+).
-   - Update `DEFAULT_UPLOAD_URL` in [ImageUploadRepository.kt](file:///f:/Source%20Codes/Dhaaga/app/src/main/java/com/dhaaga/app/data/repository/ImageUploadRepository.kt).
+**4 · Build & run**
+```bash
+# Debug build (Windows)
+.\gradlew.bat assembleDebug
+
+# Debug build (macOS / Linux)
+./gradlew assembleDebug
+
+# Install on connected device
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+**5 · (Optional) Deploy the image CDN server**
+```bash
+# Upload server_script/upload.php to any PHP 7.4+ server (Apache/Nginx)
+# Then update DEFAULT_UPLOAD_URL in ImageUploadRepository.kt
+```
+
+### 📦 Release APK
+
+```bash
+# Build signed release APK
+.\gradlew.bat assembleRelease
+
+# Artifact location (~20.7 MB)
+app/build/outputs/apk/release/app-release.apk
+```
+
+> [!IMPORTANT]
+> Never commit `key.properties` or `google-services.json` to version control. Both files are listed in `.gitignore`.
 
 ---
 
-## 🗺️ SIH 2026 Roadmap
+## 🗺️ Roadmap
 
-```
-  [Phase 0: Design & Foundation] ─────────► ✅ Complete (Colors, Typography, Version Catalog, Edge-to-Edge)
-  [Phase 1: Interactive Prototype] ───────► ✅ Complete (Dual Mode NavHost, 14 Screens, Mock Dataset)
-  [Phase 2: Multilingual & TTS Engine] ───► ✅ Complete (22 Languages, Pre-warmed Zero-Delay Audio Guide)
-  [Phase 3: AI Studio & Smart Catalog] ───► ✅ Complete (ML Kit Cutout, Gemini Multimodal Extraction)
-  [Phase 4: Promotions, Stock & Cloud] ───► ✅ Complete (Discounts, Coupons, Voice Search, Firestore Sync)
-  [Phase 5: Production Release] ──────────► ✅ Complete (Signed Release APK with alphaKey.jks)
-```
+<table>
+<tr>
+<th align="center">Phase</th>
+<th>Milestone</th>
+<th align="center">Status</th>
+</tr>
+<tr>
+<td align="center"><b>Phase 0</b></td>
+<td>Design & Foundation — Colors, Typography, Version Catalog, Edge-to-Edge</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 1</b></td>
+<td>Interactive Prototype — Dual Mode NavHost, 14 Screens, Mock Dataset</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 2</b></td>
+<td>Multilingual & TTS Engine — 22 Languages, Pre-warmed Zero-Delay Audio Guide</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 3</b></td>
+<td>AI Studio & Smart Catalog — ML Kit Cutout, Gemini Multimodal Extraction</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 4</b></td>
+<td>Promotions, Stock & Cloud — Discounts, Coupons, Voice Search, Firestore Sync</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 5</b></td>
+<td>Production Release — Signed APK with <code>alphaKey.jks</code></td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 6</b></td>
+<td>ONDC & GeM Integration — Catalog taxonomy compliance & submission automation</td>
+<td align="center">🔜 Planned</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 7</b></td>
+<td>Razorpay Escrow — Real money flow, UPI deep-links & wallet payouts</td>
+<td align="center">🔜 Planned</td>
+</tr>
+</table>
 
 ---
 
 ## 🏆 Smart India Hackathon 2026
 
-* **Problem Statement:** AI-Powered Digital Cataloging, Fair Valuation & Market Access Platform for Indian Artisans and Handicraft Makers.
-* **Domain:** E-Commerce, Generative AI, Rural Empowerment, Inclusive Digital Public Infrastructure (DPI).
-* **Target Audience:** Tribal artisans, weavers, SHGs (Self-Help Groups), handicraft clusters, domestic/international connoisseurs, and institutional buyers.
+<table>
+<tr>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/target.svg?color=%23D4521A&width=36&height=36" alt="target"/>
+  <br/><b>Problem Statement</b><br/>
+  <sub>AI-Powered Digital Cataloging, Fair Valuation & Market Access for Indian Artisans & Handicraft Makers</sub>
+</td>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/layers.svg?color=%23F5A623&width=36&height=36" alt="domain"/>
+  <br/><b>Domain</b><br/>
+  <sub>E-Commerce · Generative AI · Rural Empowerment · Inclusive Digital Public Infrastructure (DPI)</sub>
+</td>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/users.svg?color=%232BB5A0&width=36&height=36" alt="audience"/>
+  <br/><b>Target Audience</b><br/>
+  <sub>Tribal artisans · Weavers · SHGs · Handicraft clusters · Domestic & international connoisseurs</sub>
+</td>
+</tr>
+</table>
 
 ---
 
-## 👥 Contributors & Acknowledgments
+## 👥 Acknowledgments
 
-* **Lead Developers & Architects:** Team Dhaaga (SIH 2026 Finalists)
-* **Special Thanks:**
-  * **Ministry of Textiles, Government of India** — for Geographical Indication data standards.
-  * **Open Network for Digital Commerce (ONDC)** — for open e-commerce protocol specifications.
-  * **Bhashini (National Language Translation Mission)** — for multilingual speech resources.
-  * **Google DeepMind & Gemini API** — for multimodal visual comprehension and structured extraction.
+<table>
+<tr>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/landmark.svg?color=%23D4521A&width=36&height=36" alt="gov"/>
+  <br/><b>Ministry of Textiles</b><br/>
+  <sub>Government of India — Geographical Indication data standards</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/network.svg?color=%23F5A623&width=36&height=36" alt="ondc"/>
+  <br/><b>ONDC</b><br/>
+  <sub>Open Network for Digital Commerce — open e-commerce protocol specifications</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/globe-2.svg?color=%232BB5A0&width=36&height=36" alt="bhashini"/>
+  <br/><b>Bhashini</b><br/>
+  <sub>National Language Translation Mission — multilingual speech resources for 22 languages</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/logos/google-gemini.svg?width=36&height=36" alt="gemini"/>
+  <br/><b>Google DeepMind</b><br/>
+  <sub>Gemini API — multimodal visual comprehension & structured attribute extraction</sub>
+</td>
+</tr>
+</table>
+
+---
+
+## 🛠️ Tech Stack at a Glance
+
+<div align="center">
+
+[![Kotlin](https://img.shields.io/badge/Kotlin-7F52FF?style=flat-square&logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Material 3](https://img.shields.io/badge/Material%203-757575?style=flat-square&logo=material-design&logoColor=white)](https://m3.material.io)
+[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
+[![Firestore](https://img.shields.io/badge/Firestore-FF6F00?style=flat-square&logo=firebase&logoColor=white)](https://firebase.google.com/products/firestore)
+[![Firebase Auth](https://img.shields.io/badge/Firebase%20Auth-FFA000?style=flat-square&logo=firebase&logoColor=white)](https://firebase.google.com/products/auth)
+[![Gemini](https://img.shields.io/badge/Gemini%20AI-8E75FF?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev)
+[![ML Kit](https://img.shields.io/badge/ML%20Kit-4CAF50?style=flat-square&logo=google&logoColor=white)](https://developers.google.com/ml-kit)
+[![Coroutines](https://img.shields.io/badge/Coroutines-7F52FF?style=flat-square&logo=kotlin&logoColor=white)](https://kotlinlang.org/docs/coroutines-overview.html)
+[![Crashlytics](https://img.shields.io/badge/Crashlytics-EE0000?style=flat-square&logo=firebase&logoColor=white)](https://firebase.google.com/products/crashlytics)
+[![PHP CDN](https://img.shields.io/badge/PHP%20CDN-777BB4?style=flat-square&logo=php&logoColor=white)](#)
+[![Bhashini](https://img.shields.io/badge/Bhashini%20STT%2FTTS-FF9800?style=flat-square)](#)
+
+</div>
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ and Pride for India's Artisans • <b>Dhaaga © 2026</b></sub>
+  <br/>
+  <img src="https://api.iconify.design/lucide/heart.svg?color=%23D4521A&width=20&height=20" alt="heart"/>
+  &nbsp;Built with love and pride for India's artisans&nbsp;
+  <img src="https://api.iconify.design/lucide/heart.svg?color=%23D4521A&width=20&height=20" alt="heart"/>
+  <br/><br/>
+  <b>Dhaaga · धागा · ShilpSetu &copy; 2026</b>
+  <br/>
+  <sub>Smart India Hackathon 2026 Finalist</sub>
+  <br/><br/>
+
+  [![Made in India](https://img.shields.io/badge/Made%20in-India%20🇮🇳-FF9933?style=for-the-badge)](https://en.wikipedia.org/wiki/India)
+  [![For Artisans](https://img.shields.io/badge/For-7M%2B%20Artisans-D4521A?style=for-the-badge)](#)
+
 </div>
