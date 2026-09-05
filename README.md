@@ -19,7 +19,7 @@
 
 <br/>
 
-[![SIH 2026](https://img.shields.io/badge/🏆%20SIH-2026%20Finalist-FF9933?style=for-the-badge&labelColor=1a1a2e)](https://sih.gov.in)
+[![SIH 2026](https://img.shields.io/badge/🏆%20SIH-2026-FF9933?style=for-the-badge&labelColor=1a1a2e)](https://sih.gov.in)
 [![Android](https://img.shields.io/badge/Android-Native%20SDK%2037-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 
@@ -253,13 +253,13 @@ Dhaaga's visual identity blends **Indian Heritage & Earthy Textures** with moder
 
 | Token | Hex | Preview | Semantic Role |
 |:---|:---:|:---:|:---|
-| **Saffron Primary** | `#D4521A` | ![#D4521A](https://via.placeholder.com/60x20/D4521A/D4521A.png) | High-emphasis CTAs, active indicators, brand accent |
-| **Warm Gold** | `#F5A623` | ![#F5A623](https://via.placeholder.com/60x20/F5A623/F5A623.png) | Featured craft tags, ratings, star highlights |
-| **Teal Accent** | `#2BB5A0` | ![#2BB5A0](https://via.placeholder.com/60x20/2BB5A0/2BB5A0.png) | Verified badges, chat bubbles, GI verification tags |
-| **Cream Background** | `#FFF8EE` | ![#FFF8EE](https://via.placeholder.com/60x20/FFF8EE/FFF8EE.png) | App canvas background, clean reading comfort |
-| **Peach Card** | `#FDEBD0` | ![#FDEBD0](https://via.placeholder.com/60x20/FDEBD0/FDEBD0.png) | Product listing cards, tonal containers |
-| **Deep Brown Text** | `#3E1F00` | ![#3E1F00](https://via.placeholder.com/60x20/3E1F00/3E1F00.png) | High-contrast readable typography (headings & body) |
-| **GI Tag Green** | `#4CAF50` | ![#4CAF50](https://via.placeholder.com/60x20/4CAF50/4CAF50.png) | Official authenticity seal, success confirmations |
+| **Saffron Primary** | `#D4521A` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-D4521A?style=flat-square&color=D4521A) | High-emphasis CTAs, active indicators, brand accent |
+| **Warm Gold** | `#F5A623` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-F5A623?style=flat-square&color=F5A623) | Featured craft tags, ratings, star highlights |
+| **Teal Accent** | `#2BB5A0` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-2BB5A0?style=flat-square&color=2BB5A0) | Verified badges, chat bubbles, GI verification tags |
+| **Cream Background** | `#FFF8EE` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-FFF8EE?style=flat-square&color=FFF8EE) | App canvas background, clean reading comfort |
+| **Peach Card** | `#FDEBD0` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-FDEBD0?style=flat-square&color=FDEBD0) | Product listing cards, tonal containers |
+| **Deep Brown Text** | `#3E1F00` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-3E1F00?style=flat-square&color=3E1F00) | High-contrast readable typography (headings & body) |
+| **GI Tag Green** | `#4CAF50` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-4CAF50?style=flat-square&color=4CAF50) | Official authenticity seal, success confirmations |
 
 ### 🖋️ Typography & Interactions
 
@@ -604,7 +604,7 @@ app/build/outputs/apk/release/app-release.apk
   <br/><br/>
   <b>Dhaaga · धागा · ShilpSetu &copy; 2026</b>
   <br/>
-  <sub>Smart India Hackathon 2026 Finalist</sub>
+  <sub>Smart India Hackathon 2026</sub>
   <br/><br/>
 
   [![Made in India](https://img.shields.io/badge/Made%20in-India%20🇮🇳-FF9933?style=for-the-badge)](https://en.wikipedia.org/wiki/India)
