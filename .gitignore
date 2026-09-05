@@ -92,3 +92,15 @@ __pycache__/
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+# --------------------------------------------------------------------
+# 📄 Internal Docs & Planning Files (local only, not for public repo)
+# --------------------------------------------------------------------
+DEVELOPMENT_LOG.md
+Dhaaga_Master_Implementation_Plan.md
+RELEASE_NOTES_v0.1.0.md
+ShilpSetu_Complete_Feature_Document.md
+ShilpSetu_Firebase_Architecture.md
+ShilpSetu_SIH2026_Technical_Document.pdf
+ShilpSetu_Technical_Workflows.md
+README.backup.md
