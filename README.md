@@ -1,21 +1,20 @@
-<!-- ═══════════════════════════════════════════════════════════════════ -->
-<!--  DHAAGA • धा�-ा — README                                           -->
-<!--  Theme-aware · Lucide icons · Mobile-first responsive layout      -->
+﻿<!-- ═══════════════════════════════════════════════════════════════════ -->
+<!--  DHAAGA • धागा - README                                           -->
+<!--  Theme-aware · Lucide icons · Responsive layout                   -->
 <!-- ═══════════════════════════════════════════════════════════════════ -->
 
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=52&pause=1200&color=F5A623&center=true&vCenter=true&width=700&height=90&lines=🧵+धा�-ा+•+DHAAGA;ShilpSetu+Platform;Artisan+Commerce+AI">
-  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=52&pause=1200&color=D4521A&center=true&vCenter=true&width=700&height=90&lines=🧵+धा�-ा+•+DHAAGA;ShilpSetu+Platform;Artisan+Commerce+AI" alt="Dhaaga Animated Title"/>
+  <source media="(prefers-color-scheme: dark)" srcset="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=52&pause=1200&color=F5A623&center=true&vCenter=true&width=700&height=90&lines=🧵+धागा+•+DHAAGA;ShilpSetu+Platform;Artisan+Commerce+AI">
+  <img src="https://readme-typing-svg.demolab.com?font=Outfit&weight=800&size=52&pause=1200&color=D4521A&center=true&vCenter=true&width=700&height=90&lines=🧵+धागा+•+DHAAGA;ShilpSetu+Platform;Artisan+Commerce+AI" alt="Dhaaga Animated Title"/>
 </picture>
 
 <br/>
 
 <p align="center">
-  <b>Connecting Hands to Markets</b><br/>
-  <i>From Village Craft to Global Cart in Under 5 Minutes</i><br/>
-  <sub>Empowering 7M+ traditional weavers, sculptors and folk artists across 28 states and 8 UTs of India</sub>
+  <b>Connecting Hands to Markets - From Village Craft to Global Cart in Under 5 Minutes</b><br/>
+  <i>Empowering 7M+ traditional weavers, sculptors and folk artists across 28 states and 8 UTs of India</i>
 </p>
 
 <br/>
@@ -47,7 +46,11 @@
 
 ## 🌟 Overview
 
-> **Dhaaga (धा�-ा · ShilpSetu)** is an AI-powered, multilingual, zero-barrier mobile commerce platform built for India's 7 million+ artisans — eliminating every traditional obstacle between a rural craftsperson and a global buyer.
+> **Dhaaga (धागा · ShilpSetu)** is an AI-powered, multilingual, zero-barrier mobile commerce platform built for India's 7 million+ artisans - eliminating every traditional obstacle between a rural craftsperson and a global buyer.
+
+<table>
+<tr>
+<td width="50%">
 
 ### 🚧 The Problem
 
@@ -55,19 +58,26 @@
 |:---|:---|
 | 📵 Digital illiteracy | Cannot list on e-commerce |
 | 📷 No studio photography | Listings look uncompetitive |
-| 💸 Middlemen take 70–80% | Artisans earn a fraction |
+| 💸 Middlemen take 70-80% | Artisans earn a fraction |
 | 🌐 English-only portals | Excluded from GeM & ONDC |
 | 📝 No copywriting skills | Poor discoverability & SEO |
+
+</td>
+<td width="50%">
 
 ### ✅ The Solution
 
 | Feature | Value |
 |:---|:---|
-| �-�️ Voice onboarding | Zero typing required |
-| �- AI Image Studio | Raw photo to studio listing |
+| 🗣️ Voice onboarding | Zero typing required |
+| 🤖 AI Image Studio | Raw photo → studio listing |
 | 🏷️ Direct sale pricing | No middlemen, fair trade |
 | 🌍 22 Indian languages | Full regional inclusivity |
 | ☁️ Real-time cloud sync | Always-available inventory |
+
+</td>
+</tr>
+</table>
 
 ---
 
@@ -77,37 +87,30 @@
 
 <table>
 <tr>
-<td align="center" width="33%">
+<td align="center" width="20%">
   <img src="https://api.iconify.design/lucide/mic.svg?color=%23D4521A&width=40&height=40" alt="voice"/>
   <br/><b>Voice Onboarding</b>
   <br/><sub>Real-time TTS guide in Hindi & English with zero cold-start via <code>AppTtsManager</code></sub>
 </td>
-<td align="center" width="33%">
+<td align="center" width="20%">
   <img src="https://api.iconify.design/lucide/wand-2.svg?color=%23F5A623&width=40&height=40" alt="ai"/>
   <br/><b>AI Listing Wizard</b>
-  <br/><sub>5-step flow: photo, AI enhance, smart catalog, pricing, one-tap publish</sub>
+  <br/><sub>5-step flow: photo → AI enhance → smart catalog → pricing → one-tap publish</sub>
 </td>
-<td align="center" width="33%">
+<td align="center" width="20%">
   <img src="https://api.iconify.design/lucide/camera.svg?color=%232BB5A0&width=40&height=40" alt="camera"/>
   <br/><b>AI Image Studio</b>
   <br/><sub>ML Kit background removal + studio backdrop filters + Gemini vision enhancement</sub>
 </td>
-</tr>
-<tr>
-<td align="center" width="33%">
+<td align="center" width="20%">
   <img src="https://api.iconify.design/lucide/tag.svg?color=%237F52FF&width=40&height=40" alt="tag"/>
   <br/><b>Coupon Engine</b>
-  <br/><sub>% or ₹ flat discounts, auto-generate codes, validity 10min to 3 months</sub>
+  <br/><sub>% or ₹ flat discounts, auto-generate codes, validity 10min-3 months</sub>
 </td>
-<td align="center" width="33%">
+<td align="center" width="20%">
   <img src="https://api.iconify.design/lucide/layout-dashboard.svg?color=%234CAF50&width=40&height=40" alt="dashboard"/>
   <br/><b>Live Dashboard</b>
   <br/><sub>Inventory cards, status badges, stock tracking & price editing in real-time</sub>
-</td>
-<td align="center" width="33%">
-  <img src="https://api.iconify.design/lucide/shield-check.svg?color=%23D4521A&width=40&height=40" alt="gi"/>
-  <br/><b>GI Tag Verification</b>
-  <br/><sub>Auto-detect & cross-reference 400+ Geographical Indication craft registries</sub>
 </td>
 </tr>
 </table>
@@ -116,27 +119,25 @@
 
 <table>
 <tr>
-<td align="center" width="50%">
+<td align="center" width="25%">
   <img src="https://api.iconify.design/lucide/search.svg?color=%23D4521A&width=36&height=36" alt="search"/>
   <br/><b>Voice Search</b>
-  <br/><sub>Tap the mic on the Home search bar to find authentic crafts by voice</sub>
+  <br/><sub>Tap the mic on the Home search bar - find authentic crafts by voice</sub>
 </td>
-<td align="center" width="50%">
+<td align="center" width="25%">
   <img src="https://api.iconify.design/lucide/book-open.svg?color=%23F5A623&width=36&height=36" alt="story"/>
   <br/><b>Kahaani Stories</b>
   <br/><sub>Cultural narratives, tribal history & artisan workshop credentials per product</sub>
 </td>
-</tr>
-<tr>
-<td align="center" width="50%">
+<td align="center" width="25%">
   <img src="https://api.iconify.design/lucide/shopping-cart.svg?color=%232BB5A0&width=36&height=36" alt="cart"/>
   <br/><b>Smart Checkout</b>
   <br/><sub>Live discount calculations, coupon redemption & instant stock deduction</sub>
 </td>
-<td align="center" width="50%">
+<td align="center" width="25%">
   <img src="https://api.iconify.design/lucide/package.svg?color=%237F52FF&width=36&height=36" alt="orders"/>
   <br/><b>Order Tracking</b>
-  <br/><sub>Pending, Confirmed, Packed, Shipped, Delivered — with one-tap cancellation</sub>
+  <br/><sub>Pending → Confirmed → Packed → Shipped → Delivered with one-tap cancellation</sub>
 </td>
 </tr>
 </table>
@@ -144,6 +145,10 @@
 ### ⚡ Unified Single-APK Engine
 
 One lightweight APK (`com.dhaaga.app`) dynamically reconfigures its entire navigation hierarchy, bottom bars, and feature set based on the authenticated user's role:
+
+<table>
+<tr>
+<td width="50%" align="center">
 
 **🧵 Seller Mode**
 
@@ -155,6 +160,9 @@ One lightweight APK (`com.dhaaga.app`) dynamically reconfigures its entire navig
 | 📊 Dashboard | Sales analytics & earnings |
 | 👤 Artisan Profile | Storefront & wallet |
 
+</td>
+<td width="50%" align="center">
+
 **🛍️ Buyer Mode**
 
 | Screen | Description |
@@ -165,15 +173,19 @@ One lightweight APK (`com.dhaaga.app`) dynamically reconfigures its entire navig
 | 📦 My Orders | Live order tracking |
 | 👤 Buyer Profile | Address & preferences |
 
+</td>
+</tr>
+</table>
+
 ---
 
-## �-️ Architecture
+## 🏗️ Architecture
 
 Dhaaga is engineered on **Modern Android Architecture (MVI / Clean MVVM)** with 100% Kotlin Jetpack Compose and reactive coroutine streams.
 
 ```mermaid
 graph TD
-    subgraph UI ["📱 Android Client — Jetpack Compose"]
+    subgraph UI ["📱 Android Client - Jetpack Compose"]
         A[MainActivity / NavHost] --> B[AppViewModel StateFlow]
         B --> C1[Onboarding and Language Flow]
         B --> C2[HomeScreen and Shared Elements]
@@ -191,12 +203,12 @@ graph TD
     end
 
     subgraph Cloud ["☁️ Cloud and AI Infrastructure"]
-        D3 --> E1["Custom PHP CDN — upload.php"]
-        B --> E2["Firebase Auth — Phone OTP / WhatsApp"]
-        B --> E3["Cloud Firestore — Users, Listings, Orders"]
-        B --> E4["Gemini 1.5 / 2.0 Flash — Vision + Extraction"]
-        B --> E5["Bhashini ASR / TTS — 22 Languages"]
-        B --> E6["Firebase Crashlytics — Real-Time Diagnostics"]
+        D3 --> E1["Custom PHP CDN - upload.php"]
+        B --> E2["Firebase Auth - Phone OTP / WhatsApp"]
+        B --> E3["Cloud Firestore - Users, Listings, Orders"]
+        B --> E4["Gemini 1.5 / 2.0 Flash - Vision + Extraction"]
+        B --> E5["Bhashini ASR / TTS - 22 Languages"]
+        B --> E6["Firebase Crashlytics - Real-Time Diagnostics"]
     end
 ```
 
@@ -205,9 +217,9 @@ graph TD
 ```mermaid
 flowchart LR
     A([📸 Photo Captured]) --> B[Upload to CDN]
-    B --> C[�-�️ Artisan Speaks in Regional Language]
+    B --> C[🗣️ Artisan Speaks in Regional Language]
     C --> D[Bhashini STT converts to Text]
-    D --> E[�- Gemini Multimodal Ingestion]
+    D --> E[🤖 Gemini Multimodal Ingestion]
     E --> F["Extracts: Title, Craft, Dimensions, Material, Colors"]
     F --> G[GI Registry Cross-Reference]
     G --> H[Fair-Price Recommendation]
@@ -225,7 +237,7 @@ sequenceDiagram
     B->>P: Bulk Inquiry via Anonymous P2P Chat
     P->>A: Forward anonymized request
     A->>P: Agree on quote
-    B->>P: Checkout — Funds locked in Escrow Vault
+    B->>P: Checkout - Funds locked in Escrow Vault
     A->>P: Packs and ships item with Tracking ID
     B->>P: Receives and verifies GI tag
     P->>A: Escrow released to Artisan Wallet ✅
@@ -237,7 +249,7 @@ sequenceDiagram
 
 Dhaaga's visual identity blends **Indian Heritage & Earthy Textures** with modern **Glassmorphism & Material 3** principles.
 
-### �-�️ Color Palette
+### 🖌️ Color Palette
 
 | Token | Hex | Preview | Semantic Role |
 |:---|:---:|:---:|:---|
@@ -249,16 +261,27 @@ Dhaaga's visual identity blends **Indian Heritage & Earthy Textures** with moder
 | **Deep Brown Text** | `#3E1F00` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-3E1F00?style=flat-square&color=3E1F00) | High-contrast readable typography (headings & body) |
 | **GI Tag Green** | `#4CAF50` | ![](https://img.shields.io/badge/%20%20%20%20%20%20%20%20-4CAF50?style=flat-square&color=4CAF50) | Official authenticity seal, success confirmations |
 
-### �-�️ Typography & Interactions
+### 🖋️ Typography & Interactions
 
-**Dual-Script Typography**
-Poppins (Latin) + Noto Sans Devanagari for seamless bilingual display across English, Hindi & regional scripts.
-
-**Fintech Precision**
-All monetary values stored in **paise (Long)** — e.g. ₹850.00 = `85000L` — eliminating floating-point errors entirely.
-
-**Edge-to-Edge UI**
-Fully transparent nav & status bars using Android 15/16 window insets with procedural Notion-style avatars.
+<table>
+<tr>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/type.svg?color=%23D4521A&width=32&height=32" alt="type"/>
+  <br/><b>Dual-Script Typography</b><br/>
+  <sub>Poppins (Latin) + Noto Sans Devanagari for seamless bilingual display across English, Hindi & regional scripts</sub>
+</td>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/indian-rupee.svg?color=%23F5A623&width=32&height=32" alt="rupee"/>
+  <br/><b>Fintech Precision</b><br/>
+  <sub>All monetary values stored in <b>paise (Long)</b> - e.g. ₹850.00 = <code>85000L</code> - eliminating floating-point errors</sub>
+</td>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/smartphone.svg?color=%232BB5A0&width=32&height=32" alt="mobile"/>
+  <br/><b>Edge-to-Edge UI</b><br/>
+  <sub>Fully transparent nav & status bars using Android 15/16 window insets with procedural Notion-style avatars</sub>
+</td>
+</tr>
+</table>
 
 ---
 
@@ -287,7 +310,7 @@ Dhaaga/
 │       │       ├── ✨ splash/                   # Animated splash screen
 │       │       ├── 🌍 onboarding/               # 22-language selection, role switch, Phone OTP
 │       │       ├── 🏠 home/                     # Dynamic Home, Pager Tabs & Category Grids
-│       │       ├── �-�️ product/                  # Kahaani Product Detail, Zoom Gallery, Reviews
+│       │       ├── 🖼️ product/                  # Kahaani Product Detail, Zoom Gallery, Reviews
 │       │       ├── 🧵 seller/                   # AI Add Product, My Listings, Seller Dashboard
 │       │       ├── 🛍️ buyer/                    # Cart, Wishlist, My Orders & Escrow Tracking
 │       │       ├── 👤 profile/                  # Artisan Storefront, Settings & Wallet
@@ -307,7 +330,7 @@ Dhaaga/
 ## 📊 Data Models
 
 <details>
-<summary><b>🔍 Click to expand — Core Kotlin Schemas (User, Product, Order)</b></summary>
+<summary><b>🔍 Click to expand - Core Kotlin Schemas (User, Product, Order)</b></summary>
 
 ```kotlin
 // ── UserModel ────────────────────────────────────────────────────────────
@@ -321,7 +344,7 @@ data class UserModel(
     val district: String = "",
     val state: String = "",
     val craftTypes: List<String> = emptyList(),
-    val shilpiScore: Int = 0,             // Trust metric (0–100)
+    val shilpiScore: Int = 0,             // Trust metric (0-100)
     val isGiCertified: Boolean = false,
     val walletBalance: Long = 0L,         // Stored in paise
     val totalEarnings: Long = 0L
@@ -360,19 +383,41 @@ data class ProductModel(
 
 ### 📋 Prerequisites
 
-| Tool | Version | Notes |
-|:---|:---:|:---|
-| �- Android Studio | Ladybug 2024.2.1+ | or Meerkat 2025.1.1+ |
-| ☕ JDK | 17 or 21 | OpenJDK recommended |
-| 📱 Android SDK | Compile 37, Min 24 | Android 7.0+ coverage |
-| 🐘 Gradle | 9.6.1 | Managed via wrapper |
-| 🔀 Git | Any modern | For cloning |
+<table>
+<tr>
+<td align="center">
+  <img src="https://api.iconify.design/logos/android-icon.svg?width=36&height=36" alt="android studio"/>
+  <br/><b>Android Studio</b>
+  <br/><sub>Ladybug 2024.2.1+<br/>or Meerkat 2025.1.1+</sub>
+</td>
+<td align="center">
+  <img src="https://api.iconify.design/logos/java.svg?width=36&height=36" alt="jdk"/>
+  <br/><b>JDK</b>
+  <br/><sub>OpenJDK 17 or 21</sub>
+</td>
+<td align="center">
+  <img src="https://api.iconify.design/logos/android-icon.svg?width=36&height=36" alt="sdk"/>
+  <br/><b>Android SDK</b>
+  <br/><sub>Compile SDK 37<br/>Min SDK 24 (Android 7.0+)</sub>
+</td>
+<td align="center">
+  <img src="https://api.iconify.design/logos/gradle.svg?width=36&height=36" alt="gradle"/>
+  <br/><b>Gradle</b>
+  <br/><sub>9.6.1 via wrapper</sub>
+</td>
+<td align="center">
+  <img src="https://api.iconify.design/logos/git-icon.svg?width=36&height=36" alt="git"/>
+  <br/><b>Git</b>
+  <br/><sub>Any modern version</sub>
+</td>
+</tr>
+</table>
 
 ### 🚀 Installation & Setup
 
 **1 · Clone the repository**
 ```bash
-git clone https://github.com/gtxPrime/dhaaga.git
+git clone https://github.com/your-username/dhaaga.git
 cd dhaaga
 ```
 
@@ -389,7 +434,7 @@ cp /path/to/your/google-services.json app/google-services.json
 **3 · Configure release signing** *(optional)*
 ```bash
 cp key.properties.example key.properties
-# Edit key.properties — fill in storeFile, storePassword, keyAlias, keyPassword
+# Edit key.properties - fill in storeFile, storePassword, keyAlias, keyPassword
 ```
 
 **4 · Build & run**
@@ -425,46 +470,112 @@ app/build/outputs/apk/release/app-release.apk
 
 ---
 
-## �-�️ Roadmap
+## 🗺️ Roadmap
 
-| Phase | Milestone | Status |
-|:---:|:---|:---:|
-| **Phase 0** | Design & Foundation — Colors, Typography, Version Catalog, Edge-to-Edge | ✅ Complete |
-| **Phase 1** | Interactive Prototype — Dual Mode NavHost, 14 Screens, Mock Dataset | ✅ Complete |
-| **Phase 2** | Multilingual & TTS Engine — 22 Languages, Pre-warmed Zero-Delay Audio Guide | ✅ Complete |
-| **Phase 3** | AI Studio & Smart Catalog — ML Kit Cutout, Gemini Multimodal Extraction | ✅ Complete |
-| **Phase 4** | Promotions, Stock & Cloud — Discounts, Coupons, Voice Search, Firestore Sync | ✅ Complete |
-| **Phase 5** | Production Release — Signed APK with `alphaKey.jks` | ✅ Complete |
-| **Phase 6** | ONDC & GeM Integration — Catalog taxonomy compliance & submission automation | 🔜 Planned |
-| **Phase 7** | Razorpay Escrow — Real money flow, UPI deep-links & wallet payouts | 🔜 Planned |
+<table>
+<tr>
+<th align="center">Phase</th>
+<th>Milestone</th>
+<th align="center">Status</th>
+</tr>
+<tr>
+<td align="center"><b>Phase 0</b></td>
+<td>Design & Foundation - Colors, Typography, Version Catalog, Edge-to-Edge</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 1</b></td>
+<td>Interactive Prototype - Dual Mode NavHost, 14 Screens, Mock Dataset</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 2</b></td>
+<td>Multilingual & TTS Engine - 22 Languages, Pre-warmed Zero-Delay Audio Guide</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 3</b></td>
+<td>AI Studio & Smart Catalog - ML Kit Cutout, Gemini Multimodal Extraction</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 4</b></td>
+<td>Promotions, Stock & Cloud - Discounts, Coupons, Voice Search, Firestore Sync</td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 5</b></td>
+<td>Production Release - Signed APK with <code>alphaKey.jks</code></td>
+<td align="center">✅ Complete</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 6</b></td>
+<td>ONDC & GeM Integration - Catalog taxonomy compliance & submission automation</td>
+<td align="center">🔜 Planned</td>
+</tr>
+<tr>
+<td align="center"><b>Phase 7</b></td>
+<td>Razorpay Escrow - Real money flow, UPI deep-links & wallet payouts</td>
+<td align="center">🔜 Planned</td>
+</tr>
+</table>
 
 ---
 
 ## 🏆 Smart India Hackathon 2026
 
-**🎯 Problem Statement**
-AI-Powered Digital Cataloging, Fair Valuation & Market Access for Indian Artisans & Handicraft Makers.
-
-**🧩 Domain**
-E-Commerce · Generative AI · Rural Empowerment · Inclusive Digital Public Infrastructure (DPI)
-
-**👥 Target Audience**
-Tribal artisans · Weavers · SHGs · Handicraft clusters · Domestic & international connoisseurs · Institutional buyers
+<table>
+<tr>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/target.svg?color=%23D4521A&width=36&height=36" alt="target"/>
+  <br/><b>Problem Statement</b><br/>
+  <sub>AI-Powered Digital Cataloging, Fair Valuation & Market Access for Indian Artisans & Handicraft Makers</sub>
+</td>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/layers.svg?color=%23F5A623&width=36&height=36" alt="domain"/>
+  <br/><b>Domain</b><br/>
+  <sub>E-Commerce · Generative AI · Rural Empowerment · Inclusive Digital Public Infrastructure (DPI)</sub>
+</td>
+<td width="33%" align="center">
+  <img src="https://api.iconify.design/lucide/users.svg?color=%232BB5A0&width=36&height=36" alt="audience"/>
+  <br/><b>Target Audience</b><br/>
+  <sub>Tribal artisans · Weavers · SHGs · Handicraft clusters · Domestic & international connoisseurs</sub>
+</td>
+</tr>
+</table>
 
 ---
 
 ## 👥 Acknowledgments
 
-| | Organization | Contribution |
-|:---:|:---|:---|
-| <img src="https://api.iconify.design/lucide/landmark.svg?color=%23D4521A&width=24&height=24" alt="gov"/> | **Ministry of Textiles, GoI** | Geographical Indication data standards |
-| <img src="https://api.iconify.design/lucide/network.svg?color=%23F5A623&width=24&height=24" alt="ondc"/> | **ONDC** | Open e-commerce protocol specifications |
-| <img src="https://api.iconify.design/lucide/globe-2.svg?color=%232BB5A0&width=24&height=24" alt="bhashini"/> | **Bhashini (NLT Mission)** | Multilingual speech resources for 22 languages |
-| <img src="https://api.iconify.design/logos/google-gemini.svg?width=24&height=24" alt="gemini"/> | **Google DeepMind** | Gemini multimodal visual comprehension & attribute extraction |
+<table>
+<tr>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/landmark.svg?color=%23D4521A&width=36&height=36" alt="gov"/>
+  <br/><b>Ministry of Textiles</b><br/>
+  <sub>Government of India - Geographical Indication data standards</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/network.svg?color=%23F5A623&width=36&height=36" alt="ondc"/>
+  <br/><b>ONDC</b><br/>
+  <sub>Open Network for Digital Commerce - open e-commerce protocol specifications</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/lucide/globe-2.svg?color=%232BB5A0&width=36&height=36" alt="bhashini"/>
+  <br/><b>Bhashini</b><br/>
+  <sub>National Language Translation Mission - multilingual speech resources for 22 languages</sub>
+</td>
+<td align="center" width="25%">
+  <img src="https://api.iconify.design/logos/google-gemini.svg?width=36&height=36" alt="gemini"/>
+  <br/><b>Google DeepMind</b><br/>
+  <sub>Gemini API - multimodal visual comprehension & structured attribute extraction</sub>
+</td>
+</tr>
+</table>
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack at a Glance
 
 <div align="center">
 
@@ -491,7 +602,7 @@ Tribal artisans · Weavers · SHGs · Handicraft clusters · Domestic & internat
   &nbsp;Built with love and pride for India's artisans&nbsp;
   <img src="https://api.iconify.design/lucide/heart.svg?color=%23D4521A&width=20&height=20" alt="heart"/>
   <br/><br/>
-  <b>Dhaaga · धा�-ा · ShilpSetu &copy; 2026</b>
+  <b>Dhaaga · धागा · ShilpSetu &copy; 2026</b>
   <br/>
   <sub>Smart India Hackathon 2026</sub>
   <br/><br/>
