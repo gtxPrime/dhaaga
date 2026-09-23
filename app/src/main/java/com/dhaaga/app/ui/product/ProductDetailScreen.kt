@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import com.dhaaga.app.ui.components.CardAsyncImage
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.data.mock.MockData
 import com.dhaaga.app.data.model.ProductModel
@@ -222,13 +223,14 @@ fun ProductDetailScreen(
                         beyondViewportPageCount = 2,
                         modifier = Modifier.fillMaxSize()
                     ) { pageIndex ->
-                        AsyncImage(
+                        CardAsyncImage(
                             model = images[pageIndex],
                             contentDescription = "${product.titleEn} - Image ${pageIndex + 1}",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clickable { isFullscreenImageOpen = true }
+                                .clickable { isFullscreenImageOpen = true },
+                            indicatorSize = 28.dp
                         )
                     }
 
@@ -345,11 +347,13 @@ fun ProductDetailScreen(
                                                 }
                                             }
                                     ) {
-                                        AsyncImage(
+                                        CardAsyncImage(
                                             model = url,
                                             contentDescription = null,
                                             contentScale = ContentScale.Crop,
-                                            modifier = Modifier.fillMaxSize()
+                                            modifier = Modifier.fillMaxSize(),
+                                            indicatorSize = 16.dp,
+                                            shape = RoundedCornerShape(10.dp)
                                         )
                                     }
                                 }
@@ -1026,13 +1030,14 @@ fun ProductDetailScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            AsyncImage(
+                            CardAsyncImage(
                                 model = images[pageIndex],
                                 contentDescription = null,
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .fillMaxHeight(0.85f)
+                                    .fillMaxHeight(0.85f),
+                                indicatorSize = 32.dp
                             )
                         }
                     }

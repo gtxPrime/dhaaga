@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.dhaaga.app.ui.components.CardAsyncImage
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.data.mock.MockData
 import com.dhaaga.app.data.model.CartItemModel
@@ -196,11 +197,12 @@ fun WishlistTabContent(
                                     .size(86.dp)
                                     .clip(RoundedCornerShape(12.dp))
                             ) {
-                                AsyncImage(
+                                CardAsyncImage(
                                     model = product.primaryImageUrl,
                                     contentDescription = product.titleEn,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize(),
+                                    indicatorSize = 20.dp
                                 )
                                 if (product.hasGITag) {
                                     Box(
@@ -416,11 +418,12 @@ fun CartTabContent(
                                     .size(80.dp)
                                     .clip(RoundedCornerShape(12.dp))
                             ) {
-                                AsyncImage(
+                                CardAsyncImage(
                                     model = item.productImageUrl,
                                     contentDescription = item.productTitle,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize(),
+                                    indicatorSize = 20.dp
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
@@ -571,7 +574,8 @@ fun MyOrdersTabContent(
     onExplore: () -> Unit
 ) {
     val context = LocalContext.current
-    val orders by viewModel.artisanOrders.collectAsState()
+    val orders by viewModel.buyerOrders.collectAsState()
+    var selectedOrder by remember { mutableStateOf<com.dhaaga.app.data.model.OrderModel?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TabHeaderBlock(
@@ -637,7 +641,9 @@ fun MyOrdersTabContent(
             ) {
                 items(orders, key = { it.orderId }) { order ->
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedOrder = order },
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -687,11 +693,12 @@ fun MyOrdersTabContent(
                                         .size(72.dp)
                                         .clip(RoundedCornerShape(12.dp))
                                 ) {
-                                    AsyncImage(
+                                    CardAsyncImage(
                                         model = order.productImageUrl,
                                         contentDescription = order.productTitle,
                                         contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier.fillMaxSize(),
+                                        indicatorSize = 20.dp
                                     )
                                 }
                                 Spacer(modifier = Modifier.width(12.dp))
@@ -734,6 +741,14 @@ fun MyOrdersTabContent(
                 }
             }
         }
+    }
+
+    selectedOrder?.let { order ->
+        com.dhaaga.app.ui.buyer.OrderDetailSheet(
+            order = order,
+            viewModel = viewModel,
+            onDismiss = { selectedOrder = null }
+        )
     }
 }
 
@@ -878,11 +893,12 @@ fun MyListingsTabContent(
                                     .size(80.dp)
                                     .clip(RoundedCornerShape(12.dp))
                             ) {
-                                AsyncImage(
+                                CardAsyncImage(
                                     model = product.primaryImageUrl,
                                     contentDescription = product.titleEn,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
+                                    modifier = Modifier.fillMaxSize(),
+                                    indicatorSize = 20.dp
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
@@ -1056,11 +1072,12 @@ fun EditCraftSheet(
                             .size(72.dp)
                             .clip(RoundedCornerShape(12.dp))
                     ) {
-                        AsyncImage(
+                        CardAsyncImage(
                             model = product.primaryImageUrl,
                             contentDescription = product.titleEn,
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            indicatorSize = 20.dp
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -1427,23 +1444,36 @@ fun SellerDashboardTabContent(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
+                    val sellerProducts by viewModel.sellerProducts.collectAsState()
+                    val shilpiScore = (50 + sellerProducts.size * 8).coerceAtMost(100)
+                        Box(
                         modifier = Modifier
                             .size(52.dp)
                             .clip(CircleShape)
                             .background(PaletteForest),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("98", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                        Text("$shilpiScore", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
                     }
                     Spacer(modifier = Modifier.width(14.dp))
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Master Shilpi Verified", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PaletteDarkGreen)
+                            val badge = when {
+                                shilpiScore >= 90 -> "Master Shilpi Verified"
+                                shilpiScore >= 75 -> "Senior Artisan"
+                                shilpiScore >= 60 -> "Verified Artisan"
+                                else              -> "New Artisan"
+                            }
+                            Text(badge, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PaletteDarkGreen)
                             Spacer(modifier = Modifier.width(4.dp))
                             Icon(Icons.Default.Verified, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(16.dp))
                         }
-                        Text("Top 2% authentic guild craft score nationwide", fontSize = 11.sp, color = PaletteSage)
+                        val pctLabel = when {
+                            shilpiScore >= 90 -> "Top 2% authentic guild craft score nationwide"
+                            shilpiScore >= 75 -> "Upload more products to increase your score"
+                            else              -> "Add products and get orders to boost your score"
+                        }
+                        Text(pctLabel, fontSize = 11.sp, color = PaletteSage)
                     }
                 }
             }
@@ -1618,6 +1648,8 @@ fun SellerDashboardTabContent(
 @Composable
 fun ProfileTabContent(
     viewModel: AppViewModel,
+    onMyListings: () -> Unit = {},
+    onMyOrders: () -> Unit = {},
     onLogout: () -> Unit
 ) {
     val context = LocalContext.current
@@ -1653,7 +1685,8 @@ fun ProfileTabContent(
                     NotionAvatar(
                         name = user?.name ?: "Artisan",
                         size = 64.dp,
-                        borderWidth = 2.dp
+                        borderWidth = 2.dp,
+                        imageUrl = user?.profilePhotoUrl
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
@@ -1721,17 +1754,36 @@ fun ProfileTabContent(
             ) {
                 showLanguageSheet = true
             }
-            ProfileOptionRow(icon = Icons.Outlined.LocationOn, label = viewModel.tr("saved_addresses", "Saved Addresses"), value = "Palghar, MH") {
-                Toast.makeText(context, "Addresses Managed", Toast.LENGTH_SHORT).show()
+            if (isSeller) {
+                ProfileOptionRow(icon = Icons.Outlined.Inventory2, label = viewModel.tr("my_crafts", "My Crafts / Listings"), value = "Manage") {
+                    onMyListings()
+                }
+            } else {
+                ProfileOptionRow(icon = Icons.Outlined.Receipt, label = viewModel.tr("order_history", "My Orders"), value = "View All") {
+                    onMyOrders()
+                }
+            }
+            val locationLabel = run {
+                val v = user?.village?.trim() ?: ""
+                val s = user?.state?.trim() ?: ""
+                when {
+                    v.isNotEmpty() && s.isNotEmpty() -> "$v, $s"
+                    v.isNotEmpty() -> v
+                    s.isNotEmpty() -> s
+                    else -> "India"
+                }
+            }
+            ProfileOptionRow(icon = Icons.Outlined.LocationOn, label = viewModel.tr("saved_addresses", "Saved Addresses"), value = locationLabel) {
+                Toast.makeText(context, "Location: $locationLabel", Toast.LENGTH_SHORT).show()
             }
             ProfileOptionRow(icon = Icons.Outlined.AccountBalance, label = viewModel.tr("bank_upi", "Bank & UPI Payouts"), value = "Active") {
-                Toast.makeText(context, "UPI Verified", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "UPI & Bank payouts active for demo", Toast.LENGTH_SHORT).show()
             }
             ProfileOptionRow(icon = Icons.Outlined.SupportAgent, label = viewModel.tr("artisan_helpline", "Artisan Guild Helpline"), value = "24x7") {
-                Toast.makeText(context, "Helpline: 1800-DHAAGA", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Helpline: 1800-DHAAGA (demo)", Toast.LENGTH_SHORT).show()
             }
             ProfileOptionRow(icon = Icons.Outlined.VerifiedUser, label = viewModel.tr("gi_guarantee", "GI & Fair Trade Guarantee"), value = "100%") {
-                Toast.makeText(context, "GI Certified", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "All GI-certified crafts are verified before listing", Toast.LENGTH_SHORT).show()
             }
 
             // Logout

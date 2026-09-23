@@ -21,8 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.dhaaga.app.ui.components.CardAsyncImage
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.ui.theme.*
+import com.dhaaga.app.utils.AppLanguageManager
 
 @Composable
 fun CartScreen(
@@ -30,6 +32,9 @@ fun CartScreen(
     onBack: () -> Unit,
     onCheckout: () -> Unit
 ) {
+    val currentLang by viewModel.selectedLanguage.collectAsState()
+    fun tr(key: String, fallback: String): String = viewModel.tr(key, fallback)
+
     val cart by viewModel.cart.collectAsState()
     val total = cart.sumOf { it.totalPrice }
     val platformFee = (total * 0.08).toLong()
@@ -48,11 +53,11 @@ fun CartScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("back_btn", "Back"), tint = Color.White)
                     }
                     Column {
-                        Text("My Cart", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text("${cart.size} items", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+                        Text(tr("my_cart_title", "My Cart"), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("${cart.size} ${tr("items_count_suffix", "items")}", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
                     }
                 }
             }
@@ -70,29 +75,29 @@ fun CartScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Subtotal", fontSize = 14.sp, color = DhaagaTextMedium)
+                            Text(tr("subtotal", "Subtotal"), fontSize = 14.sp, color = DhaagaTextMedium)
                             Text("₹${total / 100}", fontSize = 14.sp, color = DhaagaTextDark)
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Platform fee (8%)", fontSize = 14.sp, color = DhaagaTextMedium)
+                            Text(tr("platform_fee_label", "Platform fee (8%)"), fontSize = 14.sp, color = DhaagaTextMedium)
                             Text("₹${platformFee / 100}", fontSize = 14.sp, color = DhaagaTextDark)
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Shipping", fontSize = 14.sp, color = DhaagaTextMedium)
-                            Text(if (shipping == 0L) "FREE" else "₹${shipping / 100}", fontSize = 14.sp, color = if (shipping == 0L) DhaagaSuccess else DhaagaTextDark)
+                            Text(tr("shipping_label", "Shipping"), fontSize = 14.sp, color = DhaagaTextMedium)
+                            Text(if (shipping == 0L) tr("shipping_free_badge", "FREE") else "₹${shipping / 100}", fontSize = 14.sp, color = if (shipping == 0L) DhaagaSuccess else DhaagaTextDark)
                         }
                         Divider(modifier = Modifier.padding(vertical = 8.dp), color = DhaagaDivider.copy(alpha = 0.3f))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Total", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                            Text(tr("total_label", "Total"), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
                             Text("₹${grandTotal / 100}", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = DhaagaPrimary)
                         }
                         Spacer(modifier = Modifier.height(12.dp))
@@ -104,7 +109,7 @@ fun CartScreen(
                         ) {
                             Icon(Icons.Default.Payment, contentDescription = null, tint = Color.White)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Proceed to Checkout • ₹${grandTotal / 100}", color = Color.White, fontWeight = FontWeight.SemiBold)
+                            Text("${tr("proceed_to_checkout", "Proceed to Checkout")} • ₹${grandTotal / 100}", color = Color.White, fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
@@ -132,15 +137,15 @@ fun CartScreen(
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Your cart is empty", fontSize = 18.sp, color = DhaagaTextMedium)
+                    Text(tr("your_cart_empty", "Your cart is empty"), fontSize = 18.sp, color = DhaagaTextMedium)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("Discover authentic handmade crafts", fontSize = 14.sp, color = DhaagaTextLight)
+                    Text(tr("discover_handmade_crafts", "Discover authentic handmade crafts"), fontSize = 14.sp, color = DhaagaTextLight)
                     Spacer(modifier = Modifier.height(24.dp))
                     Button(
                         onClick = onBack,
                         colors = ButtonDefaults.buttonColors(containerColor = DhaagaPrimary)
                     ) {
-                        Text("Explore Products", color = Color.White)
+                        Text(tr("explore_products_btn", "Explore Products"), color = Color.White)
                     }
                 }
             }
@@ -167,7 +172,7 @@ fun CartScreen(
                             Icon(Icons.Default.LocalShipping, contentDescription = null, tint = DhaagaAccent, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                "Add ₹$remaining more for FREE shipping!",
+                                "Add ₹$remaining ${tr("add_more_for_free_shipping", "more for FREE shipping!")}",
                                 fontSize = 13.sp,
                                 color = DhaagaAccent,
                                 fontWeight = FontWeight.Medium
@@ -186,7 +191,7 @@ fun CartScreen(
                             Icon(Icons.Default.CheckCircle, contentDescription = null, tint = DhaagaSuccess, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                "You've unlocked FREE shipping!",
+                                tr("unlocked_free_shipping", "You've unlocked FREE shipping!"),
                                 fontSize = 13.sp,
                                 color = DhaagaSuccess,
                                 fontWeight = FontWeight.SemiBold
@@ -198,6 +203,7 @@ fun CartScreen(
                 cart.forEach { item ->
                     CartItemCard(
                         item = item,
+                        currentLang = currentLang,
                         onRemove = { viewModel.removeFromCart(item.productId) },
                         onDecrement = { viewModel.updateCartQuantity(item.productId, item.quantity - 1) },
                         onIncrement = { viewModel.updateCartQuantity(item.productId, item.quantity + 1) }
@@ -211,10 +217,13 @@ fun CartScreen(
 @Composable
 private fun CartItemCard(
     item: com.dhaaga.app.data.model.CartItemModel,
+    currentLang: String,
     onRemove: () -> Unit,
     onDecrement: () -> Unit,
     onIncrement: () -> Unit
 ) {
+    fun tr(key: String, fallback: String): String = AppLanguageManager.translate(key, currentLang, fallback)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
@@ -227,11 +236,12 @@ private fun CartItemCard(
                     .size(80.dp)
                     .clip(RoundedCornerShape(10.dp))
             ) {
-                AsyncImage(
+                CardAsyncImage(
                     model = item.productImageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    indicatorSize = 20.dp
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -246,7 +256,7 @@ private fun CartItemCard(
                         Text(item.sellerName, fontSize = 11.sp, color = DhaagaTextLight)
                     }
                     IconButton(onClick = onRemove, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.Close, contentDescription = "Remove", tint = DhaagaTextLight, modifier = Modifier.size(18.dp))
+                        Icon(Icons.Default.Close, contentDescription = tr("remove_item_cd", "Remove"), tint = DhaagaTextLight, modifier = Modifier.size(18.dp))
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -266,7 +276,7 @@ private fun CartItemCard(
                             .border(1.dp, DhaagaDivider.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
                     ) {
                         IconButton(onClick = onDecrement, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.Remove, contentDescription = "Decrease", tint = DhaagaTextDark, modifier = Modifier.size(14.dp))
+                            Icon(Icons.Default.Remove, contentDescription = tr("decrease_qty_cd", "Decrease"), tint = DhaagaTextDark, modifier = Modifier.size(14.dp))
                         }
                         Text(
                             "${item.quantity}",
@@ -276,7 +286,7 @@ private fun CartItemCard(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
                         IconButton(onClick = onIncrement, modifier = Modifier.size(32.dp)) {
-                            Icon(Icons.Default.Add, contentDescription = "Increase", tint = DhaagaTextDark, modifier = Modifier.size(14.dp))
+                            Icon(Icons.Default.Add, contentDescription = tr("increase_qty_cd", "Increase"), tint = DhaagaTextDark, modifier = Modifier.size(14.dp))
                         }
                     }
                 }

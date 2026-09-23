@@ -1,5 +1,8 @@
 package com.dhaaga.app.data.model
 
+import com.google.firebase.firestore.IgnoreExtraProperties
+
+@IgnoreExtraProperties
 data class OrderModel(
     val orderId: String = "",
     val productId: String = "",
@@ -38,6 +41,7 @@ data class OrderModel(
     }
 }
 
+@IgnoreExtraProperties
 data class AddressModel(
     val name: String = "",
     val phone: String = "",

@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.dhaaga.app.ui.components.CardAsyncImage
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.R
 import com.dhaaga.app.data.model.ProductModel
@@ -225,7 +226,7 @@ fun HomeScreen(
                 3 -> if (isSeller) {
                     SellerDashboardTabContent(
                         viewModel = viewModel,
-                        onViewOrders = { }
+                        onViewOrders = { onOrders() }
                     )
                 } else {
                     MyOrdersTabContent(
@@ -239,6 +240,8 @@ fun HomeScreen(
                 }
                 4 -> ProfileTabContent(
                     viewModel = viewModel,
+                    onMyListings = { onMyListings() },
+                    onMyOrders = { onOrders() },
                     onLogout = {
                         viewModel.logout()
                         onProfile()
@@ -785,10 +788,10 @@ private fun HeaderBlock(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.ShoppingBag,
+                        imageVector = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping,
                         contentDescription = "Shopping Bag",
                         tint = Color.White,
-                        modifier = Modifier.size(17.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                     if (cartCount > 0) {
                         Box(
@@ -837,7 +840,8 @@ private fun HeaderBlock(
                     NotionAvatar(
                         name = user.name,
                         size = 34.dp,
-                        borderWidth = 1.5.dp
+                        borderWidth = 1.5.dp,
+                        imageUrl = user.profilePhotoUrl
                     )
                 }
             }
@@ -855,10 +859,10 @@ private fun HeaderBlock(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    imageVector = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.MagnifyingGlass,
                     contentDescription = "Search",
                     tint = if (searchQuery.isNotEmpty()) PaletteForest else Color(0xFF888888),
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(16.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Box(
@@ -920,10 +924,10 @@ private fun HeaderBlock(
                         modifier = Modifier.size(28.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Mic,
+                            imageVector = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Microphone,
                             contentDescription = "Voice Search",
                             tint = PaletteForest,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -1015,12 +1019,13 @@ private fun HeroBannerSlider(
                         Toast.makeText(context, "Clicked Banner Item ID: ${banner.id}", Toast.LENGTH_SHORT).show()
                     }
             ) {
-                // Background Image
-                AsyncImage(
+                // Background Image with themed loader
+                CardAsyncImage(
                     model = banner.imageUrl,
                     contentDescription = banner.title,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    indicatorSize = 28.dp
                 )
 
                 // Dark Translucent Gradient Scrim for Contrast & Legibility
@@ -1154,11 +1159,13 @@ private fun ProductCardCreative(
             }
 
             Box(modifier = imageBoxModifier) {
-                AsyncImage(
+                CardAsyncImage(
                     model = product.primaryImageUrl,
                     contentDescription = product.titleEn,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    indicatorSize = 24.dp,
+                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                 )
 
                 // Badges Row (Top Left): GI Tag + Small DEMO Tag
@@ -1178,7 +1185,7 @@ private fun ProductCardCreative(
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
-                                    imageVector = Icons.Default.Verified,
+                                    imageVector = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.ShieldCheck,
                                     contentDescription = null,
                                     tint = Color.White,
                                     modifier = Modifier.size(10.dp)
@@ -1223,10 +1230,10 @@ private fun ProductCardCreative(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = if (isWishlisted) Icons.Default.Favorite else Icons.Outlined.FavoriteBorder,
+                        imageVector = if (isWishlisted) com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Heart else Icons.Outlined.FavoriteBorder,
                         contentDescription = "Wishlist",
                         tint = if (isWishlisted) Color.Red else Color(0xFF555555),
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                 }
 
@@ -1258,7 +1265,7 @@ private fun ProductCardCreative(
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Star, contentDescription = null, tint = Color.White, modifier = Modifier.size(10.dp))
+                        Icon(com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Star, contentDescription = null, tint = Color.White, modifier = Modifier.size(10.dp))
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
                             text = "%.1f".format(product.avgRating),
@@ -1358,10 +1365,10 @@ private fun ProductCardCreative(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = if (isInCart) Icons.Default.Check else Icons.Outlined.ShoppingCart,
+                            imageVector = if (isInCart) com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Check else com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping,
                             contentDescription = null,
                             tint = if (isInCart) Color.White else PaletteForest,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(13.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         val btnLabel = if (isInCart) {
@@ -1491,6 +1498,8 @@ fun LoreExactFloatingBottomNav(
             .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
         contentAlignment = Alignment.BottomCenter
     ) {
+        val navIconSize = 24.dp
+
         // Exact Lore App Floating Pill Container (#E2EAD9)
         Box(
             modifier = Modifier
@@ -1514,31 +1523,66 @@ fun LoreExactFloatingBottomNav(
             ) {
                 // Tab 0: Home
                 val isHomeSelected = selectedTab == 0
-                IconButton(onClick = { onTabSelected(0) }, modifier = Modifier.size(40.dp)) {
+                val tab0Scale by animateFloatAsState(
+                    targetValue = if (isHomeSelected) 1.15f else 1.0f,
+                    animationSpec = spring(dampingRatio = 0.52f, stiffness = 420f),
+                    label = "tab0Scale"
+                )
+                val tab0Tint by animateColorAsState(
+                    targetValue = if (isHomeSelected) PaletteForest else Color(0xFF6E8260),
+                    animationSpec = tween(220),
+                    label = "tab0Tint"
+                )
+
+                IconButton(
+                    onClick = { onTabSelected(0) },
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(if (isHomeSelected) PaletteForest.copy(alpha = 0.12f) else Color.Transparent)
+                ) {
                     Icon(
                         imageVector = if (isHomeSelected) Icons.Filled.Home else Icons.Outlined.Home,
                         contentDescription = com.dhaaga.app.utils.AppLanguageManager.translate("home", currentLang, "Home"),
-                        tint = if (isHomeSelected) PaletteForest else Color(0xFF6E8260),
-                        modifier = Modifier.size(24.dp)
+                        tint = tab0Tint,
+                        modifier = Modifier
+                            .size(navIconSize)
+                            .graphicsLayer(scaleX = tab0Scale, scaleY = tab0Scale)
                     )
                 }
 
                 // Tab 1: Listings or Wishlist
                 val isTab1Selected = selectedTab == 1
+                val tab1Scale by animateFloatAsState(
+                    targetValue = if (isTab1Selected) 1.15f else 1.0f,
+                    animationSpec = spring(dampingRatio = 0.52f, stiffness = 420f),
+                    label = "tab1Scale"
+                )
+                val tab1Tint by animateColorAsState(
+                    targetValue = if (isTab1Selected) PaletteForest else Color(0xFF6E8260),
+                    animationSpec = tween(220),
+                    label = "tab1Tint"
+                )
+
                 IconButton(
                     onClick = { onTabSelected(1) },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(if (isTab1Selected) PaletteForest.copy(alpha = 0.12f) else Color.Transparent)
                 ) {
                     Box {
                         Icon(
                             imageVector = if (isSeller) {
                                 if (isTab1Selected) Icons.Filled.Inventory2 else Icons.Outlined.Inventory2
                             } else {
-                                if (isTab1Selected) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder
+                                if (isTab1Selected) com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Heart else Icons.Outlined.FavoriteBorder
                             },
                             contentDescription = if (isSeller) com.dhaaga.app.utils.AppLanguageManager.translate("listings", currentLang, "My Crafts") else com.dhaaga.app.utils.AppLanguageManager.translate("wishlist", currentLang, "Wishlist"),
-                            tint = if (isTab1Selected) PaletteForest else Color(0xFF6E8260),
-                            modifier = Modifier.size(24.dp)
+                            tint = tab1Tint,
+                            modifier = Modifier
+                                .size(navIconSize)
+                                .graphicsLayer(scaleX = tab1Scale, scaleY = tab1Scale)
                         )
                         if (!isSeller && wishlistCount > 0) {
                             Box(
@@ -1569,30 +1613,65 @@ fun LoreExactFloatingBottomNav(
 
                 // Tab 3: Dashboard or Orders
                 val isTab3Selected = selectedTab == 3
+                val tab3Scale by animateFloatAsState(
+                    targetValue = if (isTab3Selected) 1.15f else 1.0f,
+                    animationSpec = spring(dampingRatio = 0.52f, stiffness = 420f),
+                    label = "tab3Scale"
+                )
+                val tab3Tint by animateColorAsState(
+                    targetValue = if (isTab3Selected) PaletteForest else Color(0xFF6E8260),
+                    animationSpec = tween(220),
+                    label = "tab3Tint"
+                )
+
                 IconButton(
                     onClick = { onTabSelected(3) },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(if (isTab3Selected) PaletteForest.copy(alpha = 0.12f) else Color.Transparent)
                 ) {
                     Icon(
                         imageVector = if (isSeller) {
-                            if (isTab3Selected) Icons.Filled.BarChart else Icons.Outlined.BarChart
+                            if (isTab3Selected) Icons.Filled.Dashboard else Icons.Outlined.Dashboard
                         } else {
                             if (isTab3Selected) Icons.Filled.LocalShipping else Icons.Outlined.LocalShipping
                         },
                         contentDescription = if (isSeller) com.dhaaga.app.utils.AppLanguageManager.translate("dashboard", currentLang, "Dashboard") else com.dhaaga.app.utils.AppLanguageManager.translate("orders", currentLang, "Orders"),
-                        tint = if (isTab3Selected) PaletteForest else Color(0xFF6E8260),
-                        modifier = Modifier.size(24.dp)
+                        tint = tab3Tint,
+                        modifier = Modifier
+                            .size(navIconSize)
+                            .graphicsLayer(scaleX = tab3Scale, scaleY = tab3Scale)
                     )
                 }
 
                 // Tab 4: Profile
                 val isTab4Selected = selectedTab == 4
-                IconButton(onClick = { onTabSelected(4) }, modifier = Modifier.size(40.dp)) {
+                val tab4Scale by animateFloatAsState(
+                    targetValue = if (isTab4Selected) 1.15f else 1.0f,
+                    animationSpec = spring(dampingRatio = 0.52f, stiffness = 420f),
+                    label = "tab4Scale"
+                )
+                val tab4Tint by animateColorAsState(
+                    targetValue = if (isTab4Selected) PaletteForest else Color(0xFF6E8260),
+                    animationSpec = tween(220),
+                    label = "tab4Tint"
+                )
+
+                IconButton(
+                    onClick = { onTabSelected(4) },
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(if (isTab4Selected) PaletteForest.copy(alpha = 0.12f) else Color.Transparent)
+                ) {
                     Icon(
                         imageVector = if (isTab4Selected) Icons.Filled.Person else Icons.Outlined.Person,
                         contentDescription = com.dhaaga.app.utils.AppLanguageManager.translate("profile", currentLang, "Profile"),
-                        tint = if (isTab4Selected) PaletteForest else Color(0xFF6E8260),
-                        modifier = Modifier.size(24.dp)
+                        tint = tab4Tint,
+                        modifier = Modifier
+                            .size(navIconSize)
+                            .graphicsLayer(scaleX = tab4Scale, scaleY = tab4Scale)
                     )
                 }
             }
@@ -1650,10 +1729,10 @@ fun LoreExactFloatingBottomNav(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isSeller) Icons.Default.Add else Icons.Default.ShoppingCart,
+                    imageVector = if (isSeller) Icons.Default.Add else com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping,
                     contentDescription = if (isSeller) "Add Product" else "Cart",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(navIconSize)
                 )
             }
 
