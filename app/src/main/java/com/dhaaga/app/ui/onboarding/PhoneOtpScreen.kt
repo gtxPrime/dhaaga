@@ -305,7 +305,7 @@ fun PhoneOtpScreen(
                         color = Color.White
                     )
                     Text(
-                        text = if (!otpSent) "Secure Firebase Phone Login" else "Sent to +91 $phone",
+                        text = if (!otpSent) "Secure Firebase Phone Login" else "Sent to $phone",
                         fontSize = 13.sp,
                         color = Color.White.copy(alpha = 0.85f)
                     )
@@ -347,7 +347,6 @@ fun PhoneOtpScreen(
                     },
                     label = { Text("Phone Number") },
                     placeholder = { Text("10-digit mobile number") },
-                    prefix = { Text("+91  ", color = DhaagaTextMedium) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),

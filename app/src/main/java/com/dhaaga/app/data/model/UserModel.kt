@@ -7,6 +7,7 @@ import com.google.firebase.firestore.IgnoreExtraProperties
 data class UserModel(
     val uid: String = "",
     val phoneNumber: String = "",
+    val email: String = "",
     val name: String = "",
     val role: String = "buyer",          // "seller" | "buyer"
     val languagePref: String = "en",

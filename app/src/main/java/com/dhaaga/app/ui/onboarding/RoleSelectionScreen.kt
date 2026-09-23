@@ -99,7 +99,7 @@ fun RoleSelectionScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 RoleCard(
-                    icon = Icons.Default.Storefront,
+                    icon = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Store,
                     title = "I'm an Artisan",
                     subtitle = "I make & sell crafts",
                     hindiText = "मैं कारीगर हूँ",
@@ -109,7 +109,7 @@ fun RoleSelectionScreen(
                     onSelect = { selectedRole = "seller" }
                 )
                 RoleCard(
-                    icon = Icons.Default.ShoppingBag,
+                    icon = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping,
                     title = "I'm a Buyer",
                     subtitle = "I buy handmade crafts",
                     hindiText = "मैं खरीदार हूँ",
@@ -125,12 +125,12 @@ fun RoleSelectionScreen(
             // Features callout with vector icons
             if (selectedRole == "seller") {
                 InfoCard(
-                    icon = Icons.Default.AutoAwesome,
+                    icon = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.WandMagicSparkles,
                     text = "AI-powered product listing, GI Tag detection, voice cataloger, and seller dashboard"
                 )
             } else if (selectedRole == "buyer") {
                 InfoCard(
-                    icon = Icons.Default.Search,
+                    icon = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.MagnifyingGlass,
                     text = "Browse authentic GI-certified crafts, voice search, bulk enquiry, and order tracking"
                 )
             }
