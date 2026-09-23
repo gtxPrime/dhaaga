@@ -30,8 +30,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         private const val KEY_USER_ROLE = "user_role"
         private const val KEY_USER_VILLAGE = "user_village"
         private const val KEY_USER_PHONE = "user_phone"
+        private const val KEY_USER_EMAIL = "user_email"
         private const val KEY_USER_STATE = "user_state"
         private const val KEY_USER_UID = "user_uid"
+        private const val KEY_USER_PHOTO = "user_photo_url"
     }
 
     private val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -64,16 +66,30 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val sellerProducts: StateFlow<List<ProductModel>> = _sellerProducts.asStateFlow()
     private var sellerProductsListener: com.google.firebase.firestore.ListenerRegistration? = null
 
+    // Real-time orders for the logged-in artisan (seller side)
+    private val _artisanOrders = MutableStateFlow<List<OrderModel>>(loadSavedOrders())
+    val artisanOrders: StateFlow<List<OrderModel>> = _artisanOrders.asStateFlow()
+    private var sellerOrdersListener: com.google.firebase.firestore.ListenerRegistration? = null
+
+    // Real-time orders placed BY the logged-in buyer
+    private val _buyerOrders = MutableStateFlow<List<OrderModel>>(emptyList())
+    val buyerOrders: StateFlow<List<OrderModel>> = _buyerOrders.asStateFlow()
+    private var buyerOrdersListener: com.google.firebase.firestore.ListenerRegistration? = null
+
     // General marketplace products for buyer tab
     private val _products = MutableStateFlow(MockData.mockProducts)
     val products: StateFlow<List<ProductModel>> = _products.asStateFlow()
 
-    private val _wishlist = MutableStateFlow<Set<String>>(emptySet())
+    private val _wishlist = MutableStateFlow<Set<String>>(loadSavedWishlist())
     val wishlist: StateFlow<Set<String>> = _wishlist.asStateFlow()
 
-    // Clean cart: No preset items for buyers, items are only added upon buyer action
-    private val _cart = MutableStateFlow<List<CartItemModel>>(emptyList())
+    // Clean cart: restored from local cache so items survive app restarts
+    private val _cart = MutableStateFlow<List<CartItemModel>>(loadSavedCart())
     val cart: StateFlow<List<CartItemModel>> = _cart.asStateFlow()
+
+    // Loading state for Firestore initial sync
+    private val _isLoading = MutableStateFlow(true)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     // Real-time Cart Animation Event Trigger (Timestamp) & Last Added Product
     private val _cartAnimationEvent = MutableStateFlow<Long>(0L)
@@ -87,6 +103,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         Log.i(TAG, "Dhaaga ViewModel initialized. Initial Session logged in = ${_currentUser.value != null}")
+
+        // 0. Ensure Gemini AI API key is initialized in preferences
+        com.dhaaga.app.data.repository.GeminiAIService.getApiKey(application)
 
         // 1. Load locally cached artisan crafts and prepend to marketplace
         val localCrafts = loadLocalArtisanCrafts()
@@ -108,7 +127,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             refreshUserFromFirestore(initialUser.uid)
             if (initialUser.isSeller) {
                 refreshSellerProducts(initialUser.uid)
+                listenToSellerOrders(initialUser.uid)
+            } else {
+                listenToBuyerOrders(initialUser.uid)
             }
+        } else {
+            // No user logged in — loading is done immediately
+            _isLoading.value = false
         }
     }
 
@@ -122,34 +147,39 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val village = prefs.getString(KEY_USER_VILLAGE, "") ?: ""
         val state = prefs.getString(KEY_USER_STATE, "") ?: ""
         val phone = prefs.getString(KEY_USER_PHONE, "") ?: ""
+        val email = prefs.getString(KEY_USER_EMAIL, "") ?: ""
+        val photo = prefs.getString(KEY_USER_PHOTO, "") ?: ""
         val effectiveUid = if (firebaseUid.isNotEmpty()) firebaseUid else prefs.getString(KEY_USER_UID, "user_${System.currentTimeMillis()}") ?: ""
 
-        if (name.isEmpty() && phone.isEmpty() && effectiveUid.isEmpty()) return null
+        if (name.isEmpty() && phone.isEmpty() && email.isEmpty() && effectiveUid.isEmpty()) return null
 
         return UserModel(
             uid = effectiveUid,
             phoneNumber = phone,
+            email = email,
             name = name,
             role = role,
             village = village,
-            state = state
+            state = state,
+            profilePhotoUrl = photo
         )
     }
 
     val loggedInPhone: String
         get() {
+            fun clean(p: String): String = p.trim().removePrefix("+91").removePrefix("+").trim()
             val uPhone = _currentUser.value?.phoneNumber?.trim()?.ifBlank { null }
-            if (uPhone != null) return uPhone
+            if (uPhone != null) return clean(uPhone)
             val prefPhone = prefs.getString(KEY_USER_PHONE, null)?.trim()?.ifBlank { null }
-            if (prefPhone != null) return prefPhone
+            if (prefPhone != null) return clean(prefPhone)
             val fbPhone = firebaseAuth?.currentUser?.phoneNumber?.trim()?.ifBlank { null }
-            if (fbPhone != null) return fbPhone
+            if (fbPhone != null) return clean(fbPhone)
             val uid = _currentUser.value?.uid ?: ""
             if (uid.startsWith("artisan_") || uid.startsWith("buyer_")) {
                 val extracted = uid.substringAfter("_")
-                if (extracted.length >= 10) return "+91 $extracted"
+                if (extracted.length >= 10) return clean(extracted)
             }
-            return "+91 7668439019"
+            return "7668439019"
         }
 
     fun refreshUserFromFirestore(uid: String) {
@@ -170,6 +200,72 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             }
             ?.addOnFailureListener { e ->
                 Log.w(TAG, "Failed to refresh user from Firestore: ${e.message}")
+            }
+    }
+
+    fun checkExistingUserByUid(uid: String, onResult: (UserModel?) -> Unit) {
+        if (uid.isBlank()) {
+            onResult(null)
+            return
+        }
+
+        // 1. Check local permanent registry first
+        val localRole = accountsRegistry.getString("role_uid_$uid", null)
+        val localName = accountsRegistry.getString("name_uid_$uid", null)
+        val localPhone = accountsRegistry.getString("phone_uid_$uid", "") ?: ""
+        val localEmail = accountsRegistry.getString("email_uid_$uid", "") ?: ""
+        val localVillage = accountsRegistry.getString("village_uid_$uid", "") ?: ""
+        val localState = accountsRegistry.getString("state_uid_$uid", "") ?: ""
+        val localPhoto = accountsRegistry.getString("photo_uid_$uid", "") ?: ""
+
+        if (!localRole.isNullOrBlank() && !localName.isNullOrBlank()) {
+            val localUser = UserModel(
+                uid = uid,
+                phoneNumber = localPhone,
+                email = localEmail,
+                name = localName,
+                role = localRole,
+                village = localVillage,
+                state = localState,
+                profilePhotoUrl = localPhoto
+            )
+            Log.i(TAG, "⚡ Instant permanent registry found for UID $uid: ${localUser.name} (Role: ${localUser.role})")
+            onResult(localUser)
+            return
+        }
+
+        // 2. Query Firestore users collection by document ID (uid)
+        if (firestore == null) {
+            onResult(null)
+            return
+        }
+
+        firestore.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                if (doc != null && doc.exists()) {
+                    val existing = doc.toObject(UserModel::class.java)
+                    if (existing != null && existing.name.isNotBlank() && existing.role.isNotBlank()) {
+                        Log.i(TAG, "🔍 Existing user found in Firestore by UID $uid: ${existing.name}, locked role: ${existing.role}")
+                        accountsRegistry.edit()
+                            .putString("role_uid_$uid", existing.role)
+                            .putString("name_uid_$uid", existing.name)
+                            .putString("phone_uid_$uid", existing.phoneNumber)
+                            .putString("email_uid_$uid", existing.email)
+                            .putString("village_uid_$uid", existing.village)
+                            .putString("state_uid_$uid", existing.state)
+                            .putString("photo_uid_$uid", existing.profilePhotoUrl)
+                            .apply()
+                        onResult(existing)
+                    } else {
+                        onResult(null)
+                    }
+                } else {
+                    onResult(null)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error checking user by UID: ${e.message}")
+                onResult(null)
             }
     }
 
@@ -461,6 +557,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 if (p.couponExpiryTimestamp != null) obj.put("couponExpiryTimestamp", p.couponExpiryTimestamp)
                 obj.put("couponUsageLimit", p.couponUsageLimit)
                 obj.put("couponUsageCount", p.couponUsageCount)
+                if (p.giTag != null) obj.put("giTag", p.giTag)
+                obj.put("giVerified", p.giVerified)
                 val imgArray = JSONArray()
                 p.imageUrls.forEach { imgArray.put(it) }
                 obj.put("imageUrls", imgArray)
@@ -521,7 +619,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                         couponCode = couponCode,
                         couponExpiryTimestamp = couponExpiry,
                         couponUsageLimit = obj.optInt("couponUsageLimit", 0),
-                        couponUsageCount = obj.optInt("couponUsageCount", 0)
+                        couponUsageCount = obj.optInt("couponUsageCount", 0),
+                        giTag = if (obj.has("giTag")) obj.optString("giTag") else null,
+                        giVerified = obj.optBoolean("giVerified", false)
                     )
                 )
             }
@@ -539,7 +639,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             user
         }
 
-        Log.i(TAG, "🔑 User logged in & saved to session: ${effectiveUser.name} (${effectiveUser.role}, UID=${effectiveUser.uid}, Phone=${effectiveUser.phoneNumber})")
+        Log.i(TAG, "🔑 User logged in & saved to session: ${effectiveUser.name} (${effectiveUser.role}, UID=${effectiveUser.uid}, Phone=${effectiveUser.phoneNumber}, Email=${effectiveUser.email})")
         _currentUser.value = effectiveUser
         prefs.edit()
             .putBoolean(KEY_IS_LOGGED_IN, true)
@@ -549,9 +649,23 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             .putString(KEY_USER_VILLAGE, effectiveUser.village)
             .putString(KEY_USER_STATE, effectiveUser.state)
             .putString(KEY_USER_PHONE, effectiveUser.phoneNumber)
+            .putString(KEY_USER_EMAIL, effectiveUser.email)
+            .putString(KEY_USER_PHOTO, effectiveUser.profilePhotoUrl)
             .apply()
 
         // Persist to permanent accounts registry (never deleted by logout)
+        if (effectiveUser.uid.isNotEmpty()) {
+            accountsRegistry.edit()
+                .putString("role_uid_${effectiveUser.uid}", effectiveUser.role)
+                .putString("name_uid_${effectiveUser.uid}", effectiveUser.name)
+                .putString("phone_uid_${effectiveUser.uid}", effectiveUser.phoneNumber)
+                .putString("email_uid_${effectiveUser.uid}", effectiveUser.email)
+                .putString("village_uid_${effectiveUser.uid}", effectiveUser.village)
+                .putString("state_uid_${effectiveUser.uid}", effectiveUser.state)
+                .putString("photo_uid_${effectiveUser.uid}", effectiveUser.profilePhotoUrl)
+                .apply()
+        }
+
         val sanitizedPhone = effectiveUser.phoneNumber.trim().removePrefix("+91").removePrefix("+").trim()
         if (sanitizedPhone.isNotEmpty()) {
             accountsRegistry.edit()
@@ -574,6 +688,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 _products.value = localCrafts + _products.value.filter { it.productId !in localIds }
             }
             refreshSellerProducts(effectiveUser.uid)
+            listenToSellerOrders(effectiveUser.uid)
+        } else {
+            // Buyer: attach real-time listener for their placed orders
+            listenToBuyerOrders(effectiveUser.uid)
         }
 
         // Sync user profile to Firestore
@@ -592,6 +710,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         Log.i(TAG, "🚪 User logged out: ${_currentUser.value?.name}")
         sellerProductsListener?.remove()
         sellerProductsListener = null
+        sellerOrdersListener?.remove()
+        sellerOrdersListener = null
+        buyerOrdersListener?.remove()
+        buyerOrdersListener = null
         // DO NOT wipe _sellerProducts or local crafts! They belong to this device's artisan.
         try {
             firebaseAuth?.signOut()
@@ -601,7 +723,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         _currentUser.value = null
         _cart.value = emptyList()
         _wishlist.value = emptySet()
-        // Only remove login session keys, NEVER wipe local crafts or permanent data!
+        _buyerOrders.value = emptyList()
+        // Clear buyer-specific prefs (cart/wishlist belong to the user session)
         prefs.edit()
             .remove(KEY_IS_LOGGED_IN)
             .remove(KEY_USER_UID)
@@ -610,6 +733,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             .remove(KEY_USER_VILLAGE)
             .remove(KEY_USER_STATE)
             .remove(KEY_USER_PHONE)
+            .remove(KEY_USER_EMAIL)
+            .remove(KEY_USER_PHOTO)
+            .remove("saved_wishlist_json")
+            .remove("saved_cart_json")
             .apply()
     }
 
@@ -627,6 +754,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             Log.d(TAG, "Added product to wishlist: $productId")
         }
         _wishlist.value = current
+        saveWishlist(current)
     }
 
     fun isWishlisted(productId: String) = _wishlist.value.contains(productId)
@@ -651,12 +779,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         _cart.value = updated
         _lastAddedProduct.value = product
         _cartAnimationEvent.value = System.currentTimeMillis()
+        saveCart(updated)
         Log.d(TAG, "Current Cart Total: ₹${cartTotal / 100} across ${_cart.value.size} items")
     }
 
     fun removeFromCart(productId: String) {
         Log.i(TAG, "🛒 Removed product $productId from cart")
-        _cart.value = _cart.value.filter { it.productId != productId }.toMutableList()
+        val updated = _cart.value.filter { it.productId != productId }.toMutableList()
+        _cart.value = updated
+        saveCart(updated)
     }
 
     fun updateCartQuantity(productId: String, quantity: Int) {
@@ -668,10 +799,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             Log.d(TAG, "🛒 Cart item $productId quantity updated to $quantity")
         }
         _cart.value = updated
+        saveCart(updated)
     }
 
     fun clearCart() {
         _cart.value = mutableListOf()
+        saveCart(emptyList())
     }
 
     // ─────────────────────────────────────────────────────────────────────────────
@@ -693,8 +826,6 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     // ─────────────────────────────────────────────────────────────────────────────
     // Dynamic Artisan Orders & Earnings Dashboard
     // ─────────────────────────────────────────────────────────────────────────────
-    private val _artisanOrders = MutableStateFlow<List<OrderModel>>(loadSavedOrders())
-    val artisanOrders: StateFlow<List<OrderModel>> = _artisanOrders.asStateFlow()
 
     val dashboardEarningsPaise: Long get() = _artisanOrders.value.sumOf { it.sellerPayout }
     val dashboardOrdersCount: Int get() = _artisanOrders.value.size
@@ -812,6 +943,60 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         onPlaced()
     }
 
+    /**
+     * Attaches a real-time Firestore listener for orders belonging to the logged-in artisan (seller).
+     * Merges with locally cached orders and saves the merged list so they survive offline/device-switch.
+     */
+    fun listenToSellerOrders(sellerId: String) {
+        if (sellerId.isEmpty() || firestore == null) return
+        sellerOrdersListener?.remove()
+        Log.i(TAG, "📡 Listening to Firestore orders for seller: $sellerId")
+        sellerOrdersListener = firestore.collection("orders")
+            .whereEqualTo("sellerId", sellerId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.w(TAG, "Seller orders listener error: ${error.message}")
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val cloudOrders = snapshot.documents.mapNotNull { doc ->
+                        try { doc.toObject(OrderModel::class.java) } catch (e: Exception) { null }
+                    }
+                    // Merge: cloud takes precedence for freshest status; local fills in any offline-created orders
+                    val localOrders = loadSavedOrders()
+                    val merged = (cloudOrders + localOrders).distinctBy { it.orderId }
+                        .sortedByDescending { it.createdAt }
+                    _artisanOrders.value = merged
+                    saveOrders(merged)
+                    Log.i(TAG, "☁️ Seller orders synced: ${cloudOrders.size} from cloud, ${merged.size} total")
+                }
+            }
+    }
+
+    /**
+     * Attaches a real-time Firestore listener for orders placed BY the logged-in buyer.
+     */
+    fun listenToBuyerOrders(buyerId: String) {
+        if (buyerId.isEmpty() || firestore == null) return
+        buyerOrdersListener?.remove()
+        Log.i(TAG, "📡 Listening to Firestore orders for buyer: $buyerId")
+        buyerOrdersListener = firestore.collection("orders")
+            .whereEqualTo("buyerId", buyerId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.w(TAG, "Buyer orders listener error: ${error.message}")
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val orders = snapshot.documents.mapNotNull { doc ->
+                        try { doc.toObject(OrderModel::class.java) } catch (e: Exception) { null }
+                    }.sortedByDescending { it.createdAt }
+                    _buyerOrders.value = orders
+                    Log.i(TAG, "☁️ Buyer orders synced: ${orders.size} orders")
+                }
+            }
+    }
+
     private fun loadSavedOrders(): List<OrderModel> {
         val json = prefs.getString("saved_orders_json", null)
         if (!json.isNullOrBlank()) {
@@ -844,29 +1029,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 Log.w(TAG, "Failed parsing saved orders: ${e.message}")
             }
         }
-        // Baseline initial orders for demonstration
-        return listOf(
-            OrderModel(
-                orderId = "DHG-8291",
-                productTitle = "Handmade Madhubani Silk Dupatta",
-                totalAmount = 240000L,
-                sellerPayout = 220800L,
-                quantity = 1,
-                status = "confirmed",
-                buyerName = "Ananya Roy",
-                createdAt = System.currentTimeMillis() - 86400000L
-            ),
-            OrderModel(
-                orderId = "DHG-5104",
-                productTitle = "Terracotta Elephant Figurine",
-                totalAmount = 120000L,
-                sellerPayout = 110400L,
-                quantity = 2,
-                status = "packed",
-                buyerName = "Vikram Mehta",
-                createdAt = System.currentTimeMillis() - 172800000L
-            )
-        )
+        // No fallback demo orders — real orders come from Firestore via listenToSellerOrders()
+        return emptyList()
     }
 
     private fun saveOrders(orders: List<OrderModel>) {
@@ -895,4 +1059,70 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             Log.w(TAG, "Failed saving orders: ${e.message}")
         }
     }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Wishlist & Cart Persistence (survives app restarts, cleared on logout)
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    private fun saveWishlist(ids: Set<String>) {
+        try {
+            val array = JSONArray()
+            ids.forEach { array.put(it) }
+            prefs.edit().putString("saved_wishlist_json", array.toString()).apply()
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed saving wishlist: ${e.message}")
+        }
+    }
+
+    private fun loadSavedWishlist(): Set<String> {
+        val json = prefs.getString("saved_wishlist_json", null) ?: return emptySet()
+        return try {
+            val array = JSONArray(json)
+            val set = mutableSetOf<String>()
+            for (i in 0 until array.length()) set.add(array.getString(i))
+            set
+        } catch (e: Exception) { emptySet() }
+    }
+
+    private fun saveCart(items: List<CartItemModel>) {
+        try {
+            val array = JSONArray()
+            items.forEach { item ->
+                val obj = JSONObject()
+                obj.put("productId", item.productId)
+                obj.put("productTitle", item.productTitle)
+                obj.put("productImageUrl", item.productImageUrl)
+                obj.put("sellerName", item.sellerName)
+                obj.put("unitPrice", item.unitPrice)
+                obj.put("quantity", item.quantity)
+                array.put(obj)
+            }
+            prefs.edit().putString("saved_cart_json", array.toString()).apply()
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed saving cart: ${e.message}")
+        }
+    }
+
+    private fun loadSavedCart(): List<CartItemModel> {
+        val json = prefs.getString("saved_cart_json", null) ?: return emptyList()
+        return try {
+            val array = JSONArray(json)
+            val list = mutableListOf<CartItemModel>()
+            for (i in 0 until array.length()) {
+                val obj = array.getJSONObject(i)
+                list.add(
+                    CartItemModel(
+                        productId = obj.optString("productId"),
+                        productTitle = obj.optString("productTitle"),
+                        productImageUrl = obj.optString("productImageUrl"),
+                        sellerName = obj.optString("sellerName"),
+                        unitPrice = obj.optLong("unitPrice"),
+                        quantity = obj.optInt("quantity", 1)
+                    )
+                )
+            }
+            list
+        } catch (e: Exception) { emptyList() }
+    }
 }
+

@@ -25,10 +25,10 @@ fun NotionAvatar(
     name: String,
     modifier: Modifier = Modifier,
     size: Dp = 48.dp,
-    borderWidth: Dp = 2.dp
+    borderWidth: Dp = 2.dp,
+    imageUrl: String? = null
 ) {
     val cleanName = name.trim().ifBlank { "Artisan" }
-    val initial = cleanName.firstOrNull()?.uppercaseChar()?.toString() ?: "A"
 
     val paletteIndex = kotlin.math.abs(cleanName.hashCode()) % 5
     val colors = listOf(
@@ -40,8 +40,9 @@ fun NotionAvatar(
     )
     val (c1, c2) = colors[paletteIndex]
 
-    // High quality avatar API endpoint
-    val avatarUrl = "https://ui-avatars.com/api/?name=${cleanName.replace(" ", "+")}&background=E55A1B&color=ffffff&bold=true&rounded=true&size=256"
+    // High quality avatar fallback
+    val fallbackAvatarUrl = "https://ui-avatars.com/api/?name=${cleanName.replace(" ", "+")}&background=E55A1B&color=ffffff&bold=true&rounded=true&size=512"
+    val effectiveModel = if (!imageUrl.isNullOrBlank()) imageUrl else fallbackAvatarUrl
 
     Box(
         modifier = modifier
@@ -52,7 +53,7 @@ fun NotionAvatar(
         contentAlignment = Alignment.Center
     ) {
         AsyncImage(
-            model = avatarUrl,
+            model = effectiveModel,
             contentDescription = cleanName,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()

@@ -67,13 +67,13 @@ class AudioRecorderHelper(
                             SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
                             SpeechRecognizer.ERROR_CLIENT -> "Client error"
                             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Microphone permission required"
-                            SpeechRecognizer.ERROR_NETWORK -> "Network error"
-                            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
-                            SpeechRecognizer.ERROR_NO_MATCH -> "No speech detected. Please speak clearly."
-                            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognizer busy"
-                            SpeechRecognizer.ERROR_SERVER -> "Speech server error"
-                            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech detected"
-                            else -> "Recognition error ($error)"
+                            SpeechRecognizer.ERROR_NETWORK -> "Network error. Please check your internet or type your note below."
+                            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Speech network timed out. Please try speaking again or type your note below."
+                            SpeechRecognizer.ERROR_NO_MATCH -> "No speech recognized. Please speak close to the microphone."
+                            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Microphone busy. Please wait a moment and tap again."
+                            SpeechRecognizer.ERROR_SERVER -> "Speech recognition server temporarily busy. Please try again."
+                            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "Microphone timed out. Please tap and speak immediately."
+                            else -> "Recognition error ($error). Please speak again or type your note."
                         }
                         Log.w(TAG, "SpeechRecognizer error: $errorMsg")
                         onError(errorMsg)
@@ -104,6 +104,10 @@ class AudioRecorderHelper(
                 putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, languageCode)
                 putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+                // Generous silence intervals to prevent premature timeouts
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 5000L)
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 4000L)
+                putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 3500L)
             }
 
             speechRecognizer?.startListening(intent)

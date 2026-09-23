@@ -6,12 +6,8 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -26,6 +22,7 @@ import com.dhaaga.app.ui.buyer.CartScreen
 import com.dhaaga.app.ui.buyer.MyOrdersScreen
 import com.dhaaga.app.ui.buyer.WishlistScreen
 import com.dhaaga.app.ui.home.HomeScreen
+import com.dhaaga.app.ui.onboarding.GoogleLoginScreen
 import com.dhaaga.app.ui.onboarding.LanguageSelectionScreen
 import com.dhaaga.app.ui.onboarding.PhoneOtpScreen
 import com.dhaaga.app.ui.onboarding.ProfileSetupScreen
@@ -65,11 +62,15 @@ class MainActivity : FragmentActivity() {
 @Composable
 fun DhaagaApp(viewModel: AppViewModel) {
     val navController = rememberNavController()
+    val appContext = androidx.compose.ui.platform.LocalContext.current
 
     // Track onboarding state
     var selectedRole by remember { mutableStateOf("") }
     var userPhone by remember { mutableStateOf("") }
     var userUid by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
+    var userName by remember { mutableStateOf("") }
+    var userPhotoUrl by remember { mutableStateOf("") }
 
     SharedTransitionLayout(modifier = Modifier.fillMaxSize()) {
         NavHost(
@@ -98,7 +99,33 @@ fun DhaagaApp(viewModel: AppViewModel) {
                     viewModel = viewModel,
                     onLanguageSelected = { lang ->
                         viewModel.setLanguage(lang)
-                        navController.navigate(Routes.PHONE_OTP)
+                        navController.navigate(Routes.GOOGLE_LOGIN)
+                    }
+                )
+            }
+
+            composable(Routes.GOOGLE_LOGIN) {
+                GoogleLoginScreen(
+                    viewModel = viewModel,
+                    onReturningUser = { existingUser ->
+                        // User account already exists & type is locked!
+                        // Direct entry to app! No type selection!
+                        selectedRole = existingUser.role
+                        viewModel.loginAs(existingUser)
+                        navController.navigate(Routes.home(0)) {
+                            popUpTo(Routes.SPLASH) { inclusive = true }
+                        }
+                    },
+                    onNewUser = { uid, email, name, photoUrl ->
+                        // Brand new user: record Google info, then prompt "Who are you?" (Role Selection: Artisan vs Buyer)
+                        userUid = uid
+                        userEmail = email
+                        userName = name
+                        userPhotoUrl = photoUrl
+                        navController.navigate(Routes.ROLE_SELECT)
+                    },
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }
@@ -133,7 +160,33 @@ fun DhaagaApp(viewModel: AppViewModel) {
                 )
             }
 
-            composable(Routes.ROLE_SELECT) {
+            composable(
+                route = Routes.ROLE_SELECT,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow)
+                    ) + fadeIn(animationSpec = tween(350))
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow)
+                    ) + fadeIn(animationSpec = tween(350))
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 RoleSelectionScreen(
                     viewModel = viewModel,
                     onRoleSelected = { role ->
@@ -143,10 +196,39 @@ fun DhaagaApp(viewModel: AppViewModel) {
                 )
             }
 
-            composable(Routes.PROFILE_SETUP) {
+            composable(
+                route = Routes.PROFILE_SETUP,
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow)
+                    ) + fadeIn(animationSpec = tween(350))
+                },
+                exitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Start,
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                },
+                popEnterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow)
+                    ) + fadeIn(animationSpec = tween(350))
+                },
+                popExitTransition = {
+                    slideOutOfContainer(
+                        AnimatedContentTransitionScope.SlideDirection.End,
+                        animationSpec = tween(300)
+                    ) + fadeOut(animationSpec = tween(300))
+                }
+            ) {
                 ProfileSetupScreen(
                     role = selectedRole,
                     phone = userPhone,
+                    email = userEmail,
+                    initialName = userName,
+                    photoUrl = userPhotoUrl,
                     uid = userUid,
                     viewModel = viewModel,
                     onComplete = { user ->
@@ -167,10 +249,27 @@ fun DhaagaApp(viewModel: AppViewModel) {
                         defaultValue = 0
                     }
                 ),
-                enterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
-                exitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
-                popEnterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
-                popExitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) }
+                enterTransition = {
+                    slideIntoContainer(
+                        AnimatedContentTransitionScope.SlideDirection.Up,
+                        animationSpec = spring(
+                            dampingRatio = 0.82f,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    ) + fadeIn(animationSpec = tween(450, easing = FastOutSlowInEasing)) +
+                    scaleIn(initialScale = 0.94f, animationSpec = tween(450, easing = FastOutSlowInEasing))
+                },
+                exitTransition = {
+                    fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing)) +
+                    scaleOut(targetScale = 0.96f, animationSpec = tween(300, easing = FastOutSlowInEasing))
+                },
+                popEnterTransition = {
+                    fadeIn(animationSpec = tween(350, easing = FastOutSlowInEasing)) +
+                    scaleIn(initialScale = 0.95f, animationSpec = tween(350, easing = FastOutSlowInEasing))
+                },
+                popExitTransition = {
+                    fadeOut(animationSpec = tween(300, easing = FastOutSlowInEasing))
+                }
             ) { backStack ->
                 val initialTab = backStack.arguments?.getInt("tab") ?: 0
                 HomeScreen(
@@ -182,15 +281,20 @@ fun DhaagaApp(viewModel: AppViewModel) {
                         navController.navigate(Routes.productDetail(productId, key))
                     },
                     onProfile = {
-                        viewModel.logout()
-                        navController.navigate(Routes.LANGUAGE_SELECT) {
-                            popUpTo(Routes.HOME) { inclusive = true }
-                        }
+                        navController.navigate(Routes.PROFILE)
                     },
                     onCart = {
                         navController.navigate(Routes.CART)
                     },
-                    onChatList = {}
+                    onOrders = {
+                        navController.navigate(Routes.MY_ORDERS)
+                    },
+                    onMyListings = {
+                        navController.navigate(Routes.MY_LISTINGS)
+                    },
+                    onChatList = {
+                        android.widget.Toast.makeText(appContext, "Chat with artisans — Coming Soon!", android.widget.Toast.LENGTH_SHORT).show()
+                    }
                 )
             }
 
@@ -227,7 +331,13 @@ fun DhaagaApp(viewModel: AppViewModel) {
                             navController.navigate(Routes.home(2))
                         }
                     },
-                    onBulkEnquiry = { }
+                    onBulkEnquiry = { product ->
+                        android.widget.Toast.makeText(
+                            appContext,
+                            "Bulk enquiry sent to ${product.sellerName}! They'll contact you shortly.",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
+                    }
                 )
             }
 
@@ -236,6 +346,8 @@ fun DhaagaApp(viewModel: AppViewModel) {
             ProfileScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
+                onMyListings = { navController.navigate(Routes.MY_LISTINGS) },
+                onMyOrders = { navController.navigate(Routes.MY_ORDERS) },
                 onLogout = {
                     viewModel.logout()
                     navController.navigate(Routes.LANGUAGE_SELECT) {
@@ -247,7 +359,10 @@ fun DhaagaApp(viewModel: AppViewModel) {
 
         // ── Seller screens ─────────────────────────────────────────────
         composable(Routes.SELLER_DASHBOARD) {
-            SellerDashboardScreen(onBack = { navController.popBackStack() })
+            SellerDashboardScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(Routes.MY_LISTINGS) {
@@ -296,6 +411,7 @@ fun DhaagaApp(viewModel: AppViewModel) {
 
         composable(Routes.MY_ORDERS) {
             MyOrdersScreen(
+                viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onOrderClick = { orderId -> }
             )

@@ -5,6 +5,7 @@ object Routes {
     // Onboarding
     const val SPLASH = "splash"
     const val LANGUAGE_SELECT = "language_select"
+    const val GOOGLE_LOGIN = "google_login"
     const val ROLE_SELECT = "role_select"
     const val PHONE_OTP = "phone_otp"
     const val PROFILE_SETUP = "profile_setup"

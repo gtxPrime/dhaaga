@@ -42,6 +42,7 @@ val DhaagaWarning = Color(0xFF86A03C)
 
 // Dividers & Badges
 val DhaagaDivider = PaletteSage
+val DhaagaBorder = PaletteSageLight
 val DhaagaGIBadge = PaletteForest
 
 // Gradients
