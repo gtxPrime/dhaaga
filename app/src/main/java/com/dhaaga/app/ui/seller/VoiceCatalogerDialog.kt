@@ -31,6 +31,7 @@ import com.dhaaga.app.data.repository.CatalogResult
 import com.dhaaga.app.data.repository.GeminiAIService
 import com.dhaaga.app.ui.components.AudioRecorderHelper
 import com.dhaaga.app.ui.theme.*
+import com.dhaaga.app.utils.AppLanguageManager
 import kotlinx.coroutines.launch
 
 data class LanguageOption(val name: String, val code: String)
@@ -53,6 +54,10 @@ fun VoiceCatalogerDialog(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val currentLang = remember { AppLanguageManager.getCurrentLanguage(context) }
+
+    fun tr(key: String, fallback: String): String =
+        AppLanguageManager.translate(key, currentLang, fallback)
 
     var selectedLanguage by remember { mutableStateOf(SUPPORTED_LANGUAGES[0]) }
     var transcriptText by remember { mutableStateOf("") }
@@ -60,6 +65,9 @@ fun VoiceCatalogerDialog(
     var isAnalyzingAI by remember { mutableStateOf(false) }
     var recordingRms by remember { mutableStateOf(0f) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showAISettingsDialog by remember { mutableStateOf(false) }
+    val hasApiKey = remember(showAISettingsDialog) { GeminiAIService.getApiKey(context).isNotBlank() }
+    var includePhotoInAnalysis by remember { mutableStateOf(productBitmap != null) }
 
     val recorderHelper = remember {
         AudioRecorderHelper(
@@ -91,7 +99,7 @@ fun VoiceCatalogerDialog(
             errorMessage = null
             recorderHelper.startListening(selectedLanguage.code)
         } else {
-            errorMessage = "Microphone permission is required to record voice notes."
+            errorMessage = tr("mic_permission_required", "Microphone permission is required to record voice notes.")
         }
     }
 
@@ -147,20 +155,56 @@ fun VoiceCatalogerDialog(
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
-                            Text("Multilingual Auto-Cataloger", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
-                            Text("AI Multilingual Voice Intelligence", fontSize = 12.sp, color = DhaagaPrimary, fontWeight = FontWeight.Medium)
+                            Text(tr("voice_cataloger_title", "Multilingual Auto-Cataloger"), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                            Text(tr("voice_cataloger_badge", "AI Multilingual Voice Intelligence"), fontSize = 12.sp, color = DhaagaPrimary, fontWeight = FontWeight.Medium)
                         }
                     }
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = DhaagaTextMedium)
+                        Icon(Icons.Default.Close, contentDescription = tr("close_btn", "Close"), tint = DhaagaTextMedium)
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // API Status Chip & Settings Launcher
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (hasApiKey) DhaagaAccent.copy(alpha = 0.08f) else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f))
+                        .clickable { showAISettingsDialog = true }
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            if (hasApiKey) Icons.Default.Bolt else Icons.Default.KeyOff,
+                            contentDescription = null,
+                            tint = if (hasApiKey) DhaagaAccent else MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            if (hasApiKey) tr("gemini_engine_active", "Gemini AI Engine Active") else tr("api_key_missing", "API Key Missing — Tap to configure"),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (hasApiKey) DhaagaAccent else MaterialTheme.colorScheme.error
+                        )
+                    }
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = tr("settings_ai_title", "Settings"),
+                        tint = DhaagaTextMedium,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
 
                 // Language Selection Chips
                 Text(
-                    "Speak in your preferred language:",
+                    tr("speak_preferred_lang", "Speak in your preferred language:"),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = DhaagaTextDark,
@@ -227,7 +271,7 @@ fun VoiceCatalogerDialog(
                 ) {
                     Icon(
                         imageVector = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
-                        contentDescription = "Record",
+                        contentDescription = tr("record_audio_cd", "Record"),
                         tint = Color.White,
                         modifier = Modifier.size(42.dp)
                     )
@@ -235,19 +279,38 @@ fun VoiceCatalogerDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    if (isRecording) "Listening... Speak now about your craft" else "Tap to Speak (Voice Note)",
+                    if (isRecording) tr("listening_speak_now", "Listening... Speak now about your craft") else tr("tap_to_speak", "Tap to Speak (Voice Note)"),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isRecording) Color(0xFFE53935) else DhaagaPrimary
                 )
 
                 if (errorMessage != null) {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        errorMessage ?: "",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.ErrorOutline,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                errorMessage ?: "",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.error,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -255,9 +318,12 @@ fun VoiceCatalogerDialog(
                 // Live Transcript / Input Box
                 OutlinedTextField(
                     value = transcriptText,
-                    onValueChange = { transcriptText = it },
-                    label = { Text("Spoken Voice Transcript / Artisan Note") },
-                    placeholder = { Text("e.g. मैंने हाथ से यह बागरू ब्लॉक प्रिंट दुपट्टा बनाया है प्राकृतिक रंगों से 2.5 मीटर लंबा है", fontSize = 12.sp, color = DhaagaTextLight) },
+                    onValueChange = {
+                        transcriptText = it
+                        if (errorMessage != null) errorMessage = null
+                    },
+                    label = { Text(tr("voice_transcript_label", "Spoken Voice Transcript / Artisan Note")) },
+                    placeholder = { Text(tr("voice_transcript_placeholder", "e.g. Handcrafted Bagru block print dupatta with natural indigo dyes..."), fontSize = 12.sp, color = DhaagaTextLight) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(min = 90.dp, max = 130.dp),
@@ -271,19 +337,49 @@ fun VoiceCatalogerDialog(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Quick sample voice note template button for convenience
+                // Adaptive AI Mode Selector (Fast text vs Vision mode)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(
-                        onClick = {
-                            transcriptText = "मैंने शुद्ध खादी कॉटन पर हाथ से बागरू डाबू ब्लॉक प्रिंट किया है प्राकृतिक नील और कत्था रंग से। 2.5 मीटर लंबाई है। 3 दिन में तैयार किया।"
+                    if (productBitmap != null) {
+                        FilterChip(
+                            selected = includePhotoInAnalysis,
+                            onClick = { includePhotoInAnalysis = !includePhotoInAnalysis },
+                            label = {
+                                Text(
+                                    if (includePhotoInAnalysis) tr("vision_voice_chip", "Vision + Voice") else tr("fast_voice_chip", "Fast Voice Only"),
+                                    fontSize = 11.sp
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    if (includePhotoInAnalysis) com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Camera else com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Bolt,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                            },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = DhaagaPrimary.copy(alpha = 0.15f),
+                                selectedLabelColor = DhaagaPrimary
+                            )
+                        )
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Bolt, contentDescription = null, tint = DhaagaAccent, modifier = Modifier.size(13.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(tr("fast_voice_active", "Fast Voice Mode Active"), fontSize = 11.sp, color = DhaagaAccent, fontWeight = FontWeight.SemiBold)
                         }
-                    ) {
-                        Icon(Icons.Default.FormatQuote, contentDescription = null, modifier = Modifier.size(16.dp), tint = DhaagaPrimary)
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Use Sample Artisan Note", fontSize = 12.sp, color = DhaagaPrimary, fontWeight = FontWeight.Medium)
+                    }
+
+                    if (transcriptText.isNotBlank()) {
+                        TextButton(
+                            onClick = { transcriptText = "" },
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text(tr("clear_btn", "Clear"), fontSize = 11.sp, color = DhaagaTextMedium)
+                        }
                     }
                 }
 
@@ -292,23 +388,32 @@ fun VoiceCatalogerDialog(
                 // Bottom Action: Generate with Gemini
                 Button(
                     onClick = {
-                        if (transcriptText.isNotBlank() && !isAnalyzingAI) {
+                        val input = transcriptText.trim()
+                        val imageToUse = if (includePhotoInAnalysis) productBitmap else null
+                        if (input.isBlank() && imageToUse == null) {
+                            errorMessage = tr("record_note_first", "Please record a voice note or enter craft details first.")
+                            return@Button
+                        }
+                        if (!isAnalyzingAI) {
                             coroutineScope.launch {
                                 isAnalyzingAI = true
+                                errorMessage = null
                                 val result = GeminiAIService.autoCatalogProduct(
                                     context = context,
-                                    inputSpeechOrText = transcriptText,
-                                    productImageBitmap = productBitmap
+                                    inputSpeechOrText = input,
+                                    productImageBitmap = imageToUse
                                 )
                                 isAnalyzingAI = false
                                 result.onSuccess { catalog ->
                                     onCatalogGenerated(catalog)
                                     onDismiss()
+                                }.onFailure { err ->
+                                    errorMessage = err.message ?: tr("catalog_failed", "Failed to generate catalog. Please try again.")
                                 }
                             }
                         }
                     },
-                    enabled = transcriptText.isNotBlank() && !isAnalyzingAI,
+                    enabled = !isAnalyzingAI,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
@@ -318,14 +423,22 @@ fun VoiceCatalogerDialog(
                     if (isAnalyzingAI) {
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                         Spacer(modifier = Modifier.width(10.dp))
-                        Text("AI Translating & Cataloging...", color = Color.White, fontSize = 14.sp)
+                        Text(
+                            if (includePhotoInAnalysis && productBitmap != null) tr("ai_vision_analyzing", "AI Vision Analyzing...") else tr("ai_generating_fast", "AI Generating (Fast Mode)..."),
+                            color = Color.White,
+                            fontSize = 14.sp
+                        )
                     } else {
                         Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Generate Bilingual Catalog (EN + HI)", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(tr("generate_catalog_btn", "Generate Bilingual Catalog (EN + HI)"), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
         }
+    }
+
+    if (showAISettingsDialog) {
+        AISettingsDialog(onDismiss = { showAISettingsDialog = false })
     }
 }
