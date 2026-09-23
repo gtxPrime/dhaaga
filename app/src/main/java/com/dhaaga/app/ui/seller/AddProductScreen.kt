@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.RotateLeft
 import androidx.compose.material.icons.automirrored.filled.RotateRight
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,6 +38,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.dhaaga.app.ui.components.CardAsyncImage
+import com.dhaaga.app.ui.components.FontAwesomeIcons
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.data.model.ProductModel
 import com.dhaaga.app.data.repository.GeminiAIService
@@ -44,6 +47,7 @@ import com.dhaaga.app.data.repository.ImageUploadRepository
 import com.dhaaga.app.data.repository.PricingAnalysisResult
 import com.dhaaga.app.ui.onboarding.DhaagaTextField
 import com.dhaaga.app.ui.theme.*
+import com.dhaaga.app.utils.AppLanguageManager
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -58,6 +62,11 @@ fun AddProductScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val currentLang = remember { AppLanguageManager.getCurrentLanguage(context) }
+
+    fun tr(key: String, fallback: String): String =
+        viewModel?.tr(key, fallback)?.ifBlank { AppLanguageManager.translate(key, currentLang, fallback) }
+            ?: AppLanguageManager.translate(key, currentLang, fallback)
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -83,6 +92,7 @@ fun AddProductScreen(
     var couponCode by remember { mutableStateOf("") }
     var couponDurationMinutes by remember { mutableStateOf(10080L) } // 7 days default
     var couponUsageLimit by remember { mutableStateOf(0) }
+    var hasGITag by remember { mutableStateOf(false) } // GI Geographical Indication Tag
 
     // AI & Dialog States
     var showAIStudioDialog by remember { mutableStateOf(false) }
@@ -124,7 +134,7 @@ fun AddProductScreen(
                 Toast.makeText(context, "Cannot launch camera: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(context, "Camera permission is required to capture product photos.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, tr("camera_permission_required", "Camera permission is required to capture product photos."), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -174,7 +184,7 @@ fun AddProductScreen(
                 selectedBitmap = enhancedBitmap
                 isStudioEnhanced = true
                 showAIStudioDialog = false
-                Toast.makeText(context, "✨ Studio Enhanced Photo Applied!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, tr("studio_photo_applied_toast", "Studio Enhanced Photo Applied!"), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -197,7 +207,7 @@ fun AddProductScreen(
                     price = catalog.suggestedPrice.toString()
                 }
                 showVoiceCatalogerDialog = false
-                Toast.makeText(context, "✅ Bilingual Product Details Auto-Filled!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, tr("bilingual_details_applied_toast", "Bilingual Product Details Auto-Filled!"), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -218,409 +228,747 @@ fun AddProductScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            // ==========================================
-            // Step 1: AI Image Enhancer & Studio
-            // ==========================================
-            StepCard(
-                step = "1",
-                title = "AI Image Enhancer & Studio",
-                icon = Icons.Default.AutoAwesome,
-                subtitle = "Camera capture & Nano Banana studio formatting"
+            // =========================================================================
+            // 1. CRAFT PHOTOS & AI STUDIO (Minimalist Hero Dropzone & Controls)
+            // =========================================================================
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
             ) {
-                if (selectedImageUri != null) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(230.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xFFF4F1EA))
-                            .border(1.dp, DhaagaDivider.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        AsyncImage(
-                            model = selectedImageUri,
-                            contentDescription = "Selected Product",
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier.fillMaxSize()
-                        )
-
-                        // Top Studio Badge
+                        Column {
+                            Text(
+                                text = tr("craft_photos_title", "Craft Photography"),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PaletteDarkGreen
+                            )
+                            Text(
+                                text = tr("craft_photos_sub", "High-clarity photos increase buyer interest"),
+                                fontSize = 11.5.sp,
+                                color = PaletteSage
+                            )
+                        }
                         if (isStudioEnhanced) {
                             Box(
                                 modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(10.dp)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(DhaagaPrimary.copy(alpha = 0.92f))
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    .background(PaletteForest.copy(alpha = 0.12f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(12.dp))
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(12.dp))
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("STUDIO ENHANCED", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    Text("STUDIO", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = PaletteForest)
                                 }
-                            }
-                        }
-
-                        // Bottom Action Controls
-                        Row(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f))))
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            TextButton(
-                                onClick = {
-                                    // Change Photo option
-                                    selectedImageUri = null
-                                    selectedBitmap = null
-                                    isStudioEnhanced = false
-                                }
-                            ) {
-                                Text("Retake", color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp)
-                            }
-
-                            Button(
-                                onClick = { showAIStudioDialog = true },
-                                colors = ButtonDefaults.buttonColors(containerColor = DhaagaPrimary),
-                                shape = RoundedCornerShape(20.dp),
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                            ) {
-                                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    if (isStudioEnhanced) "AI White Studio (Applied)" else "AI Studio Enhance",
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = { rotateSelectedImage(-90f) },
-                            modifier = Modifier.weight(1f).height(40.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.RotateLeft, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Rotate Left", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
-                        }
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                        OutlinedButton(
-                            onClick = { rotateSelectedImage(90f) },
-                            modifier = Modifier.weight(1f).height(40.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp)
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.RotateRight, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Rotate Right", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
-                        }
-                    }
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        PhotoOptionButton(
-                            icon = Icons.Default.PhotoCamera,
-                            label = "Built-in Camera",
-                            sublabel = "Product framing guide",
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                                    try {
-                                        cameraLauncher.launch(null)
-                                    } catch (e: Exception) {
-                                        Toast.makeText(context, "Cannot open camera: ${e.message}", Toast.LENGTH_SHORT).show()
-                                    }
-                                } else {
-                                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                                }
-                            }
-                        )
-                        PhotoOptionButton(
-                            icon = Icons.Default.PhotoLibrary,
-                            label = "Gallery",
-                            sublabel = "Pick from device",
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                try {
-                                    imagePickerLauncher.launch("image/*")
-                                } catch (e: Exception) {
-                                    Toast.makeText(context, "Cannot open gallery: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-
-            // ==========================================
-            // Step 2: Multilingual Auto-Cataloger (Voice Note)
-            // ==========================================
-            StepCard(
-                step = "2",
-                title = "Multilingual Auto-Cataloger",
-                icon = Icons.Default.Mic,
-                subtitle = "Artisan voice note in regional language"
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(DhaagaPrimary.copy(alpha = 0.08f), DhaagaPrimaryLight.copy(alpha = 0.12f))
-                            )
-                        )
-                        .border(1.dp, DhaagaPrimary.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
-                        .clickable { showVoiceCatalogerDialog = true }
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
+                    if (selectedImageUri != null) {
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(DhaagaPrimary),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .height(230.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color(0xFFF4F1EA))
                         ) {
-                            Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
-                        }
-                        Spacer(modifier = Modifier.width(14.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Record Voice Note / Auto-Catalog",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = DhaagaPrimary
+                            CardAsyncImage(
+                                model = selectedImageUri,
+                                contentDescription = tr("original_photo_cd", "Selected Product"),
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier.fillMaxSize(),
+                                indicatorSize = 28.dp,
+                                shape = RoundedCornerShape(16.dp)
                             )
-                            Text(
-                                "Speak in Hindi, Tamil, Bengali, etc. AI auto-translates & formats into SEO catalog.",
-                                fontSize = 12.sp,
-                                color = DhaagaTextMedium,
-                                lineHeight = 16.sp
-                            )
-                        }
-                        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = DhaagaPrimary)
-                    }
-                }
-            }
 
-            // ==========================================
-            // Step 3: Product Details (Bilingual & Editable)
-            // ==========================================
-            StepCard(
-                step = "3",
-                title = "Product Details",
-                icon = Icons.Default.EditNote,
-                subtitle = "Auto-filled by AI. Edit as needed."
-            ) {
-                DhaagaTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = "Product Title (English - SEO Optimized)",
-                    placeholder = "e.g. Handcrafted Bagru Dabu Indigo Cotton Dupatta",
-                    capitalization = KeyboardCapitalization.Words
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                DhaagaTextField(
-                    value = titleHi,
-                    onValueChange = { titleHi = it },
-                    label = "Product Title (Hindi - हिंदी में शीर्षक)",
-                    placeholder = "e.g. हस्तनिर्मित बागरू डाबू प्राकृतिक नील कॉटन दुपट्टा"
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        DhaagaTextField(
-                            value = craftType,
-                            onValueChange = { craftType = it },
-                            label = "Craft Type",
-                            placeholder = "e.g. Bagru Print, Dhokra",
-                            capitalization = KeyboardCapitalization.Words
-                        )
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        DhaagaTextField(
-                            value = material,
-                            onValueChange = { material = it },
-                            label = "Material",
-                            placeholder = "e.g. 100% Khadi Cotton",
-                            capitalization = KeyboardCapitalization.Words
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        DhaagaTextField(
-                            value = size,
-                            onValueChange = { size = it },
-                            label = "Size / Dimensions",
-                            placeholder = "e.g. 2.5m x 1m",
-                            capitalization = KeyboardCapitalization.Words
-                        )
-                    }
-                    Box(modifier = Modifier.weight(1f)) {
-                        DhaagaTextField(
-                            value = region,
-                            onValueChange = { region = it },
-                            label = "Artisan Region",
-                            placeholder = "e.g. Jaipur, Rajasthan",
-                            capitalization = KeyboardCapitalization.Words
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(12.dp))
+                            // Clean Bottom Action Bar
+                            Row(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .fillMaxWidth()
+                                    .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.82f))))
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                TextButton(
+                                    onClick = {
+                                        selectedImageUri = null
+                                        selectedBitmap = null
+                                        isStudioEnhanced = false
+                                    }
+                                ) {
+                                    Text(tr("retake_btn", "Retake"), color = Color.White.copy(alpha = 0.9f), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                                }
 
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("SEO Product Story (English)") },
-                    placeholder = { Text("AI generated e-commerce description...", color = DhaagaTextLight) },
-                    minLines = 3,
-                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = DhaagaPrimary,
-                        focusedLabelColor = DhaagaPrimary,
-                        cursorColor = DhaagaPrimary
-                    )
-                )
+                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    IconButton(
+                                        onClick = { rotateSelectedImage(-90f) },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(Icons.AutoMirrored.Filled.RotateLeft, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    }
+                                    IconButton(
+                                        onClick = { rotateSelectedImage(90f) },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(Icons.AutoMirrored.Filled.RotateRight, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                    }
+                                }
 
-                if (descriptionHi.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = descriptionHi,
-                        onValueChange = { descriptionHi = it },
-                        label = { Text("Product Story (Hindi - विवरण)") },
-                        minLines = 2,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = DhaagaPrimary,
-                            focusedLabelColor = DhaagaPrimary,
-                            cursorColor = DhaagaPrimary
-                        )
-                    )
-                }
-            }
-
-            // ==========================================
-            // Step 4: Dynamic Pricing Assistant
-            // ==========================================
-            StepCard(
-                step = "4",
-                title = "Set Your Price & Market Comparison",
-                icon = Icons.Default.Payments,
-                subtitle = "AI cost breakdown & competitor intelligence"
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedTextField(
-                        value = price,
-                        onValueChange = { price = it.filter { c -> c.isDigit() } },
-                        label = { Text("Price (₹)") },
-                        placeholder = { Text("850", color = DhaagaTextLight) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = DhaagaPrimary,
-                            focusedLabelColor = DhaagaPrimary,
-                            cursorColor = DhaagaPrimary
-                        ),
-                        prefix = { Text("₹ ") }
-                    )
-                    OutlinedTextField(
-                        value = quantity,
-                        onValueChange = { quantity = it.filter { c -> c.isDigit() } },
-                        label = { Text("Stock Quantity") },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = DhaagaPrimary,
-                            focusedLabelColor = DhaagaPrimary,
-                            cursorColor = DhaagaPrimary
-                        )
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Integrated Dynamic Pricing Card
-                DynamicPricingCard(
-                    pricingResult = pricingResult,
-                    isLoading = isPricingLoading,
-                    onCalculateRequested = {
-                        coroutineScope.launch {
-                            isPricingLoading = true
-                            val currentPriceLong = price.toLongOrNull() ?: 0L
-                            val result = GeminiAIService.analyzeDynamicPricing(
-                                context = context,
-                                productImageBitmap = selectedBitmap,
-                                title = title.ifBlank { "Handcrafted Product" },
-                                craftType = craftType.ifBlank { "Traditional Craft" },
-                                material = material.ifBlank { "Handmade Material" },
-                                size = size.ifBlank { "Standard" },
-                                enteredPrice = currentPriceLong
-                            )
-                            isPricingLoading = false
-                            result.onSuccess { res ->
-                                pricingResult = res
+                                Button(
+                                    onClick = { showAIStudioDialog = true },
+                                    colors = ButtonDefaults.buttonColors(containerColor = PaletteForest),
+                                    shape = RoundedCornerShape(20.dp),
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
+                                    Spacer(modifier = Modifier.width(5.dp))
+                                    Text(
+                                        if (isStudioEnhanced) tr("ai_studio_applied", "Studio Ready") else tr("ai_studio_enhance", "AI Studio"),
+                                        color = Color.White,
+                                        fontSize = 11.5.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
-                    },
-                    onApplyPrice = { suggestedPrice ->
-                        price = suggestedPrice.toString()
-                        Toast.makeText(context, "Optimal Price ₹$suggestedPrice applied!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // Clean, Aesthetic Empty Dropzone with Dual Pills
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color(0xFFF7FAF4))
+                                .border(1.dp, PaletteSage.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                                .padding(vertical = 24.dp, horizontal = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(CircleShape)
+                                        .background(PaletteForest.copy(alpha = 0.1f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.AddPhotoAlternate,
+                                        contentDescription = null,
+                                        tint = PaletteForest,
+                                        modifier = Modifier.size(26.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Text(
+                                    text = tr("add_photo_prompt", "Add Craft Photo"),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PaletteDarkGreen
+                                )
+                                Text(
+                                    text = tr("add_photo_hint", "Use camera or select from your gallery"),
+                                    fontSize = 11.5.sp,
+                                    color = PaletteSage,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    Button(
+                                        onClick = {
+                                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                                                try {
+                                                    cameraLauncher.launch(null)
+                                                } catch (e: Exception) {
+                                                    Toast.makeText(context, "Cannot open camera: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                }
+                                            } else {
+                                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                            }
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = PaletteForest),
+                                        shape = RoundedCornerShape(24.dp),
+                                        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 9.dp)
+                                    ) {
+                                        Icon(Icons.Default.PhotoCamera, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(tr("camera_btn", "Camera"), fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                                    }
+
+                                    OutlinedButton(
+                                        onClick = {
+                                            try {
+                                                imagePickerLauncher.launch("image/*")
+                                            } catch (e: Exception) {
+                                                Toast.makeText(context, "Cannot open gallery: ${e.message}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        },
+                                        shape = RoundedCornerShape(24.dp),
+                                        border = BorderStroke(1.2.dp, PaletteForest),
+                                        contentPadding = PaddingValues(horizontal = 18.dp, vertical = 9.dp)
+                                    ) {
+                                        Icon(Icons.Default.PhotoLibrary, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(tr("gallery_btn", "Gallery"), fontSize = 12.5.sp, fontWeight = FontWeight.SemiBold, color = PaletteForest)
+                                    }
+                                }
+                            }
+                        }
                     }
-                )
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Discounts, Coupons & Sale Pricing Component
-                com.dhaaga.app.ui.components.ProductDiscountCouponCard(
-                    basePriceRupees = price.toLongOrNull() ?: 0L,
-                    enableSalePrice = enableSalePrice,
-                    onEnableSalePriceChange = { enableSalePrice = it },
-                    salePriceRupees = salePrice,
-                    onSalePriceChange = { salePrice = it },
-                    enableCoupon = enableCoupon,
-                    onEnableCouponChange = { enableCoupon = it },
-                    discountType = discountType,
-                    onDiscountTypeChange = { discountType = it },
-                    discountValue = discountValue,
-                    onDiscountValueChange = { discountValue = it },
-                    couponCode = couponCode,
-                    onCouponCodeChange = { couponCode = it },
-                    durationMinutes = couponDurationMinutes,
-                    onDurationMinutesChange = { couponDurationMinutes = it },
-                    usageLimit = couponUsageLimit,
-                    onUsageLimitChange = { couponUsageLimit = it }
-                )
+                }
             }
 
-            // ==========================================
-            // Step 5: Publish Button with Image Upload
-            // ==========================================
+            // =========================================================================
+            // 2. SMART VOICE AUTO-CATALOGER (Modern 1-Tap Assistant Banner)
+            // =========================================================================
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(
+                                PaletteForest.copy(alpha = 0.08f),
+                                PaletteGreenTint.copy(alpha = 0.75f)
+                            )
+                        )
+                    )
+                    .border(1.dp, PaletteForest.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+                    .clickable { showVoiceCatalogerDialog = true }
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(PaletteForest),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = tr("voice_quick_title", "Auto-Fill with Voice Note"),
+                                fontSize = 13.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PaletteDarkGreen
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(5.dp))
+                                    .background(PaletteForest)
+                                    .padding(horizontal = 5.dp, vertical = 1.dp)
+                            ) {
+                                Text("AI", fontSize = 8.5.sp, fontWeight = FontWeight.Black, color = Color.White)
+                            }
+                        }
+                        Text(
+                            text = tr("voice_quick_sub", "Speak in any Indian language. AI formats titles, specs & story."),
+                            fontSize = 11.sp,
+                            color = PaletteSage,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(PaletteForest.copy(alpha = 0.12f))
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
+                        Text(tr("speak_btn", "Speak"), fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = PaletteForest)
+                    }
+                }
+            }
+
+            // =========================================================================
+            // 3. CRAFT DETAILS (Unified, Clean Form Card)
+            // =========================================================================
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = tr("step_3_title", "Craft Details"),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PaletteDarkGreen
+                    )
+                    Text(
+                        text = tr("step_3_subtitle", "Product details auto-filled or edited by you"),
+                        fontSize = 11.5.sp,
+                        color = PaletteSage
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    DhaagaTextField(
+                        value = title,
+                        onValueChange = { title = it },
+                        label = tr("title_en_label", "Product Title (English - SEO Optimized)"),
+                        placeholder = "e.g. Handcrafted Bagru Dabu Indigo Cotton Dupatta",
+                        capitalization = KeyboardCapitalization.Words
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    DhaagaTextField(
+                        value = titleHi,
+                        onValueChange = { titleHi = it },
+                        label = tr("title_hi_label", "Product Title (Hindi - हिंदी में शीर्षक)"),
+                        placeholder = "e.g. हस्तनिर्मित बागरू डाबू प्राकृतिक नील कॉटन दुपट्टा"
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            DhaagaTextField(
+                                value = craftType,
+                                onValueChange = { craftType = it },
+                                label = tr("craft_type_label", "Craft Type"),
+                                placeholder = "e.g. Bagru Print",
+                                capitalization = KeyboardCapitalization.Words
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            DhaagaTextField(
+                                value = material,
+                                onValueChange = { material = it },
+                                label = tr("material_label", "Material"),
+                                placeholder = "e.g. 100% Khadi Cotton",
+                                capitalization = KeyboardCapitalization.Words
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            DhaagaTextField(
+                                value = size,
+                                onValueChange = { size = it },
+                                label = tr("size_dimensions_label", "Size / Dimensions"),
+                                placeholder = "e.g. 2.5m x 1m",
+                                capitalization = KeyboardCapitalization.Words
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            DhaagaTextField(
+                                value = region,
+                                onValueChange = { region = it },
+                                label = tr("artisan_region_label", "Artisan Region"),
+                                placeholder = "e.g. Jaipur, Rajasthan",
+                                capitalization = KeyboardCapitalization.Words
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { description = it },
+                        label = { Text(tr("description_en_label", "SEO Product Story (English)")) },
+                        placeholder = { Text("AI-generated product story...", color = DhaagaTextLight) },
+                        minLines = 3,
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PaletteForest,
+                            focusedLabelColor = PaletteForest,
+                            cursorColor = PaletteForest
+                        )
+                    )
+
+                    if (descriptionHi.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        OutlinedTextField(
+                            value = descriptionHi,
+                            onValueChange = { descriptionHi = it },
+                            label = { Text(tr("description_hi_label", "Product Story (Hindi - विवरण)")) },
+                            minLines = 2,
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PaletteForest,
+                                focusedLabelColor = PaletteForest,
+                                cursorColor = PaletteForest
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Minimalist GI Tag Row (No heavy card nesting!)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (hasGITag) PaletteForest.copy(alpha = 0.08f) else Color(0xFFF7FAF4))
+                            .border(1.dp, if (hasGITag) PaletteForest.copy(alpha = 0.35f) else Color(0xFFE2EAD9), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Verified,
+                            contentDescription = null,
+                            tint = if (hasGITag) PaletteForest else PaletteSage,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    tr("gi_tag_title", "Geographical Indication (GI) Tag"),
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (hasGITag) PaletteForest else PaletteDarkGreen
+                                )
+                                if (hasGITag) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(PaletteForest)
+                                            .padding(horizontal = 5.dp, vertical = 1.dp)
+                                    ) {
+                                        Text("GI", fontSize = 8.5.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                            Text(
+                                tr("gi_tag_sub", "Certified authentic regional handicraft certification"),
+                                fontSize = 11.sp,
+                                color = PaletteSage
+                            )
+                        }
+                        Switch(
+                            checked = hasGITag,
+                            onCheckedChange = { hasGITag = it },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = PaletteForest,
+                                checkedTrackColor = PaletteForest.copy(alpha = 0.3f)
+                            )
+                        )
+                    }
+                }
+            }
+
+            // =========================================================================
+            // 4. PRICING & INVENTORY (Clean Card with Expandable Tools)
+            // =========================================================================
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = tr("price_inventory_title", "Price & Inventory"),
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PaletteDarkGreen
+                    )
+                    Text(
+                        text = tr("price_inventory_sub", "Set your price and stock availability"),
+                        fontSize = 11.5.sp,
+                        color = PaletteSage
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(
+                            value = price,
+                            onValueChange = { price = it.filter { c -> c.isDigit() } },
+                            label = { Text(tr("price_label", "Price (₹)")) },
+                            placeholder = { Text("850", color = DhaagaTextLight) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PaletteForest,
+                                focusedLabelColor = PaletteForest,
+                                cursorColor = PaletteForest
+                            ),
+                            prefix = { Text("₹ ", fontWeight = FontWeight.Bold, color = PaletteForest) }
+                        )
+                        OutlinedTextField(
+                            value = quantity,
+                            onValueChange = { quantity = it.filter { c -> c.isDigit() } },
+                            label = { Text(tr("stock_quantity_label", "Stock Quantity")) },
+                            placeholder = { Text("1", color = DhaagaTextLight) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = PaletteForest,
+                                focusedLabelColor = PaletteForest,
+                                cursorColor = PaletteForest
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Minimalist AI Dynamic Pricing Strip
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFFF7FAF4))
+                            .border(1.dp, PaletteSage.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                            .padding(horizontal = 14.dp, vertical = 12.dp)
+                    ) {
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .clip(RoundedCornerShape(9.dp))
+                                            .background(PaletteForest.copy(alpha = 0.12f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            Icons.AutoMirrored.Filled.TrendingUp,
+                                            contentDescription = null,
+                                            tint = PaletteForest,
+                                            modifier = Modifier.size(17.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = tr("dynamic_pricing_title", "AI Price Assistant"),
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = PaletteDarkGreen,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = tr("dynamic_pricing_sub", "Market intelligence & cost benchmarking"),
+                                            fontSize = 10.5.sp,
+                                            color = PaletteSage,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                if (pricingResult == null) {
+                                    Button(
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                isPricingLoading = true
+                                                val currentPriceLong = price.toLongOrNull() ?: 0L
+                                                val result = GeminiAIService.analyzeDynamicPricing(
+                                                    context = context,
+                                                    productImageBitmap = selectedBitmap,
+                                                    title = title.ifBlank { "Handcrafted Product" },
+                                                    craftType = craftType.ifBlank { "Traditional Craft" },
+                                                    material = material.ifBlank { "Handmade Material" },
+                                                    size = size.ifBlank { "Standard" },
+                                                    enteredPrice = currentPriceLong
+                                                )
+                                                isPricingLoading = false
+                                                result.onSuccess { res -> pricingResult = res }
+                                            }
+                                        },
+                                        enabled = !isPricingLoading,
+                                        shape = RoundedCornerShape(20.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = PaletteForest),
+                                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
+                                        modifier = Modifier
+                                            .height(34.dp)
+                                            .defaultMinSize(minWidth = 84.dp)
+                                    ) {
+                                        if (isPricingLoading) {
+                                            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(14.dp), strokeWidth = 1.8.dp)
+                                        } else {
+                                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
+                                            Spacer(modifier = Modifier.width(5.dp))
+                                            Text(
+                                                text = tr("suggest_btn", "Suggest"),
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
+                                } else {
+                                    IconButton(
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                isPricingLoading = true
+                                                val currentPriceLong = price.toLongOrNull() ?: 0L
+                                                val result = GeminiAIService.analyzeDynamicPricing(
+                                                    context = context,
+                                                    productImageBitmap = selectedBitmap,
+                                                    title = title.ifBlank { "Handcrafted Product" },
+                                                    craftType = craftType.ifBlank { "Traditional Craft" },
+                                                    material = material.ifBlank { "Handmade Material" },
+                                                    size = size.ifBlank { "Standard" },
+                                                    enteredPrice = currentPriceLong
+                                                )
+                                                isPricingLoading = false
+                                                result.onSuccess { res -> pricingResult = res }
+                                            }
+                                        },
+                                        modifier = Modifier.size(34.dp)
+                                    ) {
+                                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = PaletteForest, modifier = Modifier.size(18.dp))
+                                    }
+                                }
+                            }
+
+                            if (pricingResult != null) {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(PaletteForest.copy(alpha = 0.08f))
+                                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column {
+                                        Text(tr("suggested_price_tag", "AI Recommendation"), fontSize = 10.5.sp, color = PaletteSage)
+                                        Text("₹${pricingResult!!.recommendedPrice}", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PaletteForest)
+                                    }
+                                    Button(
+                                        onClick = {
+                                            price = pricingResult!!.recommendedPrice.toString()
+                                            Toast.makeText(context, "Applied ₹${pricingResult!!.recommendedPrice}", Toast.LENGTH_SHORT).show()
+                                        },
+                                        shape = RoundedCornerShape(16.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = PaletteForest),
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                                    ) {
+                                        Text(tr("apply_btn", "Apply"), fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // Minimalist Collapsible Accordion: Discounts & Special Offers (ZERO Nested Cards)
+                    var showDiscountsAccordion by remember { mutableStateOf(false) }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color(0xFFF7FAF4))
+                            .border(1.dp, Color(0xFFE2EAD9), RoundedCornerShape(12.dp))
+                            .clickable { showDiscountsAccordion = !showDiscountsAccordion }
+                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = FontAwesomeIcons.Solid.Tag,
+                                contentDescription = null,
+                                tint = PaletteForest,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = tr("discounts_coupons_title", "Discounts & Special Offers"),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = PaletteDarkGreen
+                            )
+                            if (enableSalePrice || enableCoupon) {
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(PaletteForest)
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                ) {
+                                    Text("ACTIVE", fontSize = 8.5.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                }
+                            }
+                        }
+
+                        Icon(
+                            imageVector = if (showDiscountsAccordion) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = null,
+                            tint = PaletteSage
+                        )
+                    }
+
+                    AnimatedVisibility(visible = showDiscountsAccordion) {
+                        Column(modifier = Modifier.padding(top = 10.dp)) {
+                            com.dhaaga.app.ui.components.ProductDiscountCouponCard(
+                                basePriceRupees = price.toLongOrNull() ?: 0L,
+                                enableSalePrice = enableSalePrice,
+                                onEnableSalePriceChange = { enableSalePrice = it },
+                                salePriceRupees = salePrice,
+                                onSalePriceChange = { salePrice = it },
+                                enableCoupon = enableCoupon,
+                                onEnableCouponChange = { enableCoupon = it },
+                                discountType = discountType,
+                                onDiscountTypeChange = { discountType = it },
+                                discountValue = discountValue,
+                                onDiscountValueChange = { discountValue = it },
+                                couponCode = couponCode,
+                                onCouponCodeChange = { couponCode = it },
+                                durationMinutes = couponDurationMinutes,
+                                onDurationMinutesChange = { couponDurationMinutes = it },
+                                usageLimit = couponUsageLimit,
+                                onUsageLimitChange = { couponUsageLimit = it },
+                                wrapInCard = false,
+                                showTitle = false
+                            )
+                        }
+                    }
+                }
+            }
+
+            // =========================================================================
+            // 5. PUBLISH BUTTON (Full-Width Forest Sage Button)
+            // =========================================================================
             Button(
                 onClick = {
                     val currentUser = viewModel?.currentUser?.value
@@ -674,32 +1022,35 @@ fun AddProductScreen(
                             couponCode = if (enableCoupon && couponCode.isNotBlank()) couponCode else null,
                             couponExpiryTimestamp = if (enableCoupon && couponCode.isNotBlank()) System.currentTimeMillis() + (couponDurationMinutes * 60 * 1000L) else null,
                             couponUsageLimit = if (enableCoupon) couponUsageLimit else 0,
-                            couponUsageCount = 0
+                            couponUsageCount = 0,
+                            giTag = if (hasGITag) craftType.ifBlank { "Traditional Craft" } else null,
+                            giVerified = hasGITag
                         )
 
                         // Save directly to Firestore and local state
                         viewModel?.addUploadedProduct(newProduct)
 
                         isPublishing = false
-                        Toast.makeText(context, "Craft Published to Dhaaga!", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, tr("craft_published_toast", "Craft Published to Dhaaga!"), Toast.LENGTH_LONG).show()
                         onPublish()
                     }
                 },
                 enabled = !isPublishing,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(54.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = DhaagaPrimary)
+                colors = ButtonDefaults.buttonColors(containerColor = PaletteForest),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
                 if (isPublishing) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text("Publishing with Studio Media...", fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    Text(tr("step_5_publishing", "Publishing Craft to Dhaaga..."), fontSize = 14.5.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
                 } else {
-                    Icon(Icons.Default.Publish, contentDescription = null, tint = Color.White)
+                    Icon(Icons.Default.Publish, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(viewModel?.tr("publish_craft", "Publish to Dhaaga + ONDC") ?: "Publish to Dhaaga + ONDC", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                    Text(tr("step_5_publish", "Publish to Dhaaga + ONDC"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
 
@@ -714,7 +1065,7 @@ fun AddProductScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Brush.horizontalGradient(listOf(DhaagaPrimary, DhaagaPrimaryLight)))
+                        .background(Color.White)
                         .statusBarsPadding()
                         .padding(horizontal = 8.dp, vertical = 8.dp)
                 ) {
@@ -725,16 +1076,22 @@ fun AddProductScreen(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             IconButton(onClick = onBack) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("back", "Back"), tint = PaletteForest)
                             }
                             Column {
-                                Text(viewModel?.tr("list_new_craft", "Add Product") ?: "Add Product", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                                Text("AI Studio & Smart Cataloging", fontSize = 12.sp, color = Color.White.copy(alpha = 0.85f))
+                                Text(tr("list_new_craft", "List New Craft"), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = PaletteDarkGreen)
+                                Text(tr("ai_studio_smart_cataloging", "AI studio & smart cataloging"), fontSize = 11.5.sp, color = PaletteSage)
                             }
                         }
 
-                        IconButton(onClick = { showAISettingsDialog = true }) {
-                            Icon(Icons.Default.SettingsSuggest, contentDescription = "AI Settings", tint = Color.White)
+                        IconButton(
+                            onClick = { showAISettingsDialog = true },
+                            modifier = Modifier
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(PaletteForest.copy(alpha = 0.08f))
+                        ) {
+                            Icon(Icons.Default.SettingsSuggest, contentDescription = tr("settings_ai_title", "AI Settings"), tint = PaletteForest, modifier = Modifier.size(20.dp))
                         }
                     }
                 }
@@ -751,7 +1108,7 @@ fun AddProductScreen(
                     .fillMaxWidth()
                     .background(Color.White)
                     .statusBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 20.dp, vertical = 14.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -759,115 +1116,21 @@ fun AddProductScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column {
-                        Text(viewModel?.tr("list_new_craft", "List New Craft") ?: "List New Craft", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
-                        Text("AI Studio & Smart Cataloging", fontSize = 12.sp, color = DhaagaTextMedium)
+                        Text(tr("list_new_craft", "List New Craft"), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = PaletteDarkGreen)
+                        Text(tr("ai_studio_smart_cataloging", "AI studio & smart cataloging"), fontSize = 12.sp, color = PaletteSage)
                     }
-                    IconButton(onClick = { showAISettingsDialog = true }) {
-                        Icon(Icons.Default.SettingsSuggest, contentDescription = "AI Settings", tint = DhaagaPrimary)
+                    IconButton(
+                        onClick = { showAISettingsDialog = true },
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(PaletteForest.copy(alpha = 0.08f))
+                    ) {
+                        Icon(Icons.Default.SettingsSuggest, contentDescription = tr("settings_ai_title", "AI Settings"), tint = PaletteForest, modifier = Modifier.size(20.dp))
                     }
                 }
             }
             formContent()
-        }
-    }
-}
-
-@Composable
-private fun StepCard(
-    step: String,
-    title: String,
-    icon: ImageVector,
-    subtitle: String,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = DhaagaSurface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(DhaagaPrimary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(step, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Icon(imageVector = icon, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(title, fontSize = 14.5.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
-                    Text(subtitle, fontSize = 11.5.sp, color = DhaagaTextMedium, lineHeight = 15.sp)
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            content()
-        }
-    }
-}
-
-@Composable
-private fun PhotoOptionButton(
-    icon: ImageVector,
-    label: String,
-    sublabel: String = "",
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier.defaultMinSize(minHeight = 108.dp),
-        shape = RoundedCornerShape(14.dp),
-        color = Color.White,
-        border = BorderStroke(1.dp, PaletteSage.copy(alpha = 0.35f)),
-        shadowElevation = 1.dp
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(CircleShape)
-                    .background(PaletteForest.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = label,
-                    tint = PaletteForest,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = label,
-                fontSize = 12.5.sp,
-                color = PaletteDarkGreen,
-                fontWeight = FontWeight.Bold,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                maxLines = 1
-            )
-            if (sublabel.isNotBlank()) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = sublabel,
-                    fontSize = 10.sp,
-                    color = PaletteSage,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    lineHeight = 13.sp,
-                    maxLines = 2
-                )
-            }
         }
     }
 }

@@ -19,14 +19,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dhaaga.app.data.repository.PricingAnalysisResult
 import com.dhaaga.app.ui.theme.*
+import com.dhaaga.app.utils.AppLanguageManager
 
 @Composable
 fun DynamicPricingCard(
     pricingResult: PricingAnalysisResult?,
     isLoading: Boolean,
     onCalculateRequested: () -> Unit,
-    onApplyPrice: (Long) -> Unit
+    onApplyPrice: (Long) -> Unit,
+    currentLang: String = "en"
 ) {
+    fun tr(key: String, fallback: String): String = AppLanguageManager.translate(key, currentLang, fallback)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -52,8 +56,8 @@ fun DynamicPricingCard(
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Column {
-                        Text("Dynamic Pricing Assistant", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
-                        Text("AI Market Intelligence & Cost Analysis", fontSize = 11.sp, color = DhaagaTextMedium)
+                        Text(tr("pricing_assistant_title", "Dynamic Pricing Assistant"), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                        Text(tr("pricing_assistant_sub", "AI Market Intelligence & Cost Analysis"), fontSize = 11.sp, color = DhaagaTextMedium)
                     }
                 }
 
@@ -63,7 +67,7 @@ fun DynamicPricingCard(
                         enabled = !isLoading,
                         modifier = Modifier.size(32.dp)
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = DhaagaPrimary, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Refresh, contentDescription = tr("refresh_btn", "Refresh"), tint = DhaagaPrimary, modifier = Modifier.size(20.dp))
                     }
                 }
             }
@@ -83,7 +87,7 @@ fun DynamicPricingCard(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            "Get an AI-recommended selling price based on raw material costs, artisan labor hours, and competitor pricing on Amazon, Flipkart, & GeM.",
+                            tr("pricing_prompt_desc", "Get an AI-recommended selling price based on raw material costs, artisan labor hours, and competitor pricing on Amazon, Flipkart, & GeM."),
                             fontSize = 12.sp,
                             color = DhaagaTextMedium,
                             lineHeight = 18.sp
@@ -98,11 +102,11 @@ fun DynamicPricingCard(
                             if (isLoading) {
                                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Analyzing Market Trends...", fontSize = 13.sp)
+                                Text(tr("analyzing_market_trends", "Analyzing Market Trends..."), fontSize = 13.sp)
                             } else {
                                 Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Analyze & Suggest Price", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                                Text(tr("analyze_suggest_price", "Analyze & Suggest Price"), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                             }
                         }
                     }
@@ -121,9 +125,9 @@ fun DynamicPricingCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text("Recommended Price", fontSize = 12.sp, color = Color.White.copy(alpha = 0.85f))
+                            Text(tr("recommended_price", "Recommended Price"), fontSize = 12.sp, color = Color.White.copy(alpha = 0.85f))
                             Text("₹${pricingResult.recommendedPrice}", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                            Text("Floor (MOQ): ₹${pricingResult.floorPrice}", fontSize = 11.sp, color = Color.White.copy(alpha = 0.75f))
+                            Text("${tr("floor_price_label", "Floor (MOQ):")} ₹${pricingResult.floorPrice}", fontSize = 11.sp, color = Color.White.copy(alpha = 0.75f))
                         }
 
                         Button(
@@ -132,7 +136,7 @@ fun DynamicPricingCard(
                             shape = RoundedCornerShape(10.dp),
                             contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                         ) {
-                            Text("Apply ₹${pricingResult.recommendedPrice}", color = DhaagaPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Text("${tr("apply_label", "Apply")} ₹${pricingResult.recommendedPrice}", color = DhaagaPrimary, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }
                     }
 
@@ -145,12 +149,12 @@ fun DynamicPricingCard(
                             .padding(12.dp)
                     ) {
                         Column {
-                            Text("Estimated Cost Breakdown", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                            Text(tr("cost_breakdown_title", "Estimated Cost Breakdown"), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            CostRow(label = "Raw Materials", amount = pricingResult.costMaterials, color = Color(0xFFE57373))
-                            CostRow(label = "Artisan Labor (Fair Wage)", amount = pricingResult.costLabor, color = Color(0xFF81C784))
-                            CostRow(label = "Logistics & Platform", amount = pricingResult.costPlatform, color = Color(0xFFFFB74D))
+                            CostRow(label = tr("raw_materials_label", "Raw Materials"), amount = pricingResult.costMaterials, color = Color(0xFFE57373))
+                            CostRow(label = tr("labor_wage_label", "Artisan Labor (Fair Wage)"), amount = pricingResult.costLabor, color = Color(0xFF81C784))
+                            CostRow(label = tr("logistics_platform_label", "Logistics & Platform"), amount = pricingResult.costPlatform, color = Color(0xFFFFB74D))
 
                             HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp), color = DhaagaDivider.copy(alpha = 0.4f))
 
@@ -158,7 +162,7 @@ fun DynamicPricingCard(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Artisan Net Profit Margin", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DhaagaSuccess)
+                                Text(tr("net_profit_margin_label", "Artisan Net Profit Margin"), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = DhaagaSuccess)
                                 Text("${pricingResult.marginPercent}%", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DhaagaSuccess)
                             }
                         }
@@ -176,7 +180,7 @@ fun DynamicPricingCard(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Storefront, contentDescription = null, tint = DhaagaAccent, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Marketplace Intelligence", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                Text(tr("marketplace_intelligence", "Marketplace Intelligence"), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
 

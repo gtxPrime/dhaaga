@@ -72,39 +72,37 @@ fun ProductDiscountCouponCard(
     onDurationMinutesChange: (Long) -> Unit,
     usageLimit: Int,
     onUsageLimitChange: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    wrapInCard: Boolean = true,
+    showTitle: Boolean = true
 ) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = DhaagaSurface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+    val content = @Composable {
+        Column(modifier = if (wrapInCard) Modifier.padding(16.dp) else Modifier) {
             // Header
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(PaletteForest),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.LocalOffer,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+            if (showTitle) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(PaletteForest),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocalOffer,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Discounts, Coupons & Special Offers", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                        Text("Direct price reduction, promo codes, timer & usage limits", fontSize = 11.5.sp, color = DhaagaTextMedium)
+                    }
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Discounts, Coupons & Special Offers", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
-                    Text("Direct price reduction, promo codes, timer & usage limits", fontSize = 11.5.sp, color = DhaagaTextMedium)
-                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             // ─────────────────────────────────────────────────────────────
             // 1. DIRECT SALE PRICE OPTION
@@ -162,12 +160,21 @@ fun ProductDiscountCouponCard(
                         val savings = basePriceRupees - enteredSale
                         val pct = ((savings.toDouble() / basePriceRupees) * 100).toInt()
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "✨ Buyers save ₹$savings ($pct% OFF) with instant sale pricing!",
-                            fontSize = 11.5.sp,
-                            color = PaletteForest,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = FontAwesomeIcons.Solid.Tag,
+                                contentDescription = null,
+                                tint = PaletteForest,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Buyers save ₹$savings ($pct% OFF) with instant sale pricing!",
+                                fontSize = 11.5.sp,
+                                color = PaletteForest,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                     } else if (enteredSale >= basePriceRupees && enteredSale > 0) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
@@ -373,6 +380,21 @@ fun ProductDiscountCouponCard(
                     }
                 }
             }
+        }
+    }
+
+    if (wrapInCard) {
+        Card(
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = DhaagaSurface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            content()
+        }
+    } else {
+        Box(modifier = modifier.fillMaxWidth()) {
+            content()
         }
     }
 }

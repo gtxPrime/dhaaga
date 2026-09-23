@@ -21,8 +21,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.dhaaga.app.ui.components.CardAsyncImage
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.ui.theme.*
+import com.dhaaga.app.utils.AppLanguageManager
 
 @Composable
 fun MyListingsScreen(
@@ -31,6 +33,9 @@ fun MyListingsScreen(
     onProductClick: (String) -> Unit,
     onAddProduct: () -> Unit
 ) {
+    val currentLang by viewModel.selectedLanguage.collectAsState()
+    fun tr(key: String, fallback: String): String = viewModel.tr(key, fallback)
+
     val sellerProducts by viewModel.sellerProducts.collectAsState()
     val user by viewModel.currentUser.collectAsState()
 
@@ -47,7 +52,11 @@ fun MyListingsScreen(
         else -> activeProducts
     }
 
-    val tabs = listOf("Active (${activeProducts.size})", "Draft (${draftProducts.size})", "Sold (${soldProducts.size})")
+    val tabs = listOf(
+        "${tr("tab_active", "Active")} (${activeProducts.size})",
+        "${tr("tab_draft", "Draft")} (${draftProducts.size})",
+        "${tr("tab_sold", "Sold")} (${soldProducts.size})"
+    )
 
     Scaffold(
         containerColor = DhaagaBackground,
@@ -61,11 +70,11 @@ fun MyListingsScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("back_btn", "Back"), tint = Color.White)
                     }
                     Column {
-                        Text("My Listings", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                        Text("${sellerProducts.size} products", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
+                        Text(tr("listings", "My Listings"), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text("${sellerProducts.size} ${tr("products_label", "products")}", fontSize = 12.sp, color = Color.White.copy(alpha = 0.8f))
                     }
                 }
             }
@@ -76,7 +85,7 @@ fun MyListingsScreen(
                 containerColor = DhaagaPrimary,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Product", tint = Color.White)
+                Icon(Icons.Default.Add, contentDescription = tr("add_product_title", "Add Product"), tint = Color.White)
             }
         }
     ) { padding ->
@@ -143,10 +152,10 @@ fun MyListingsScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 when (selectedTab) {
-                                    0 -> "No Active Crafts"
-                                    1 -> "No Draft Crafts"
-                                    2 -> "No Sold Crafts"
-                                    else -> "No Listings Yet"
+                                    0 -> tr("no_active_crafts", "No Active Crafts")
+                                    1 -> tr("no_draft_crafts", "No Draft Crafts")
+                                    2 -> tr("no_sold_crafts", "No Sold Crafts")
+                                    else -> tr("no_listings_yet", "No Listings Yet")
                                 },
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
@@ -157,7 +166,7 @@ fun MyListingsScreen(
                                 onClick = onAddProduct,
                                 colors = ButtonDefaults.buttonColors(containerColor = DhaagaPrimary)
                             ) {
-                                Text("Add Your First Product", color = Color.White)
+                                Text(tr("add_first_product", "Add Your First Product"), color = Color.White)
                             }
                         }
                     }
@@ -178,11 +187,12 @@ fun MyListingsScreen(
                                         .size(80.dp)
                                         .clip(RoundedCornerShape(10.dp))
                                 ) {
-                                    AsyncImage(
+                                    CardAsyncImage(
                                         model = product.primaryImageUrl,
                                         contentDescription = null,
                                         contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
+                                        modifier = Modifier.fillMaxSize(),
+                                        indicatorSize = 20.dp
                                     )
                                     if (product.hasGITag) {
                                         Box(
@@ -218,9 +228,9 @@ fun MyListingsScreen(
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Chip(text = "${product.viewCount} views", icon = Icons.Default.RemoveRedEye)
-                                        Chip(text = "${product.reviewCount} reviews", icon = Icons.Default.Star)
-                                        Chip(text = "${product.stockQuantity} left", icon = Icons.Default.Inventory)
+                                        Chip(text = "${product.viewCount} ${tr("views_suffix", "views")}", icon = Icons.Default.RemoveRedEye)
+                                        Chip(text = "${product.reviewCount} ${tr("reviews_suffix", "reviews")}", icon = Icons.Default.Star)
+                                        Chip(text = "${product.stockQuantity} ${tr("left_in_stock", "left")}", icon = Icons.Default.Inventory)
                                     }
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -231,7 +241,7 @@ fun MyListingsScreen(
                                             shape = RoundedCornerShape(8.dp),
                                             border = BorderStroke(1.dp, DhaagaPrimary)
                                         ) {
-                                            Text("Edit", fontSize = 12.sp, color = DhaagaPrimary)
+                                            Text(tr("edit_btn", "Edit"), fontSize = 12.sp, color = DhaagaPrimary)
                                         }
                                         OutlinedButton(
                                             onClick = {},
@@ -240,7 +250,7 @@ fun MyListingsScreen(
                                             shape = RoundedCornerShape(8.dp),
                                             border = BorderStroke(1.dp, DhaagaError)
                                         ) {
-                                            Text("Pause", fontSize = 12.sp, color = DhaagaError)
+                                            Text(tr("pause_btn", "Pause"), fontSize = 12.sp, color = DhaagaError)
                                         }
                                     }
                                 }
