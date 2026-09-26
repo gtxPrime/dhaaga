@@ -213,9 +213,9 @@ fun StudioLoadingDialog(
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = if (generationMode == ImageGenerationMode.API)
-                                    "Magic Hour API • $activeModel (${AppLanguageManager.translate("slot_label", currentLang, "Slot")} #$activeKeySlot)"
+                                    "Better Quality Studio • Processing"
                                 else
-                                    AppLanguageManager.translate("mode_on_device_sub", currentLang, "On-Device Studio • ML Kit Engine"),
+                                    "Fast Gen Studio • Processing",
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = DhaagaPrimary

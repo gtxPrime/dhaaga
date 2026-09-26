@@ -186,7 +186,7 @@ fun VoiceCatalogerDialog(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            if (hasApiKey) tr("gemini_engine_active", "Gemini AI Engine Active") else tr("api_key_missing", "API Key Missing — Tap to configure"),
+                            if (hasApiKey) tr("gemini_engine_active", "Fast Gen Engine Active") else tr("api_key_missing", "Fast Gen Engine Initializing"),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = if (hasApiKey) DhaagaAccent else MaterialTheme.colorScheme.error

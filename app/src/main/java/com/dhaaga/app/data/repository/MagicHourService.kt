@@ -173,7 +173,7 @@ object MagicHourService {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putInt(KEY_ACTIVE_KEY_INDEX, nextIdx).apply()
         val newKey = keys[nextIdx]
-        Log.w(TAG, "🔄 Auto-rotated API Key from slot #$currentIdx to slot #$nextIdx (${newKey.take(12)}...)")
+        Log.w(TAG, "[KeyRotation] Auto-rotated API Key from slot #$currentIdx to slot #$nextIdx (${newKey.take(12)}...)")
         return newKey
     }
 

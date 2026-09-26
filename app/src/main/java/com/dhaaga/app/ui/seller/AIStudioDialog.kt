@@ -93,9 +93,9 @@ fun AIStudioDialog(
             coroutineScope.launch {
                 isProcessing = true
                 statusMessage = if (generationMode == ImageGenerationMode.API)
-                    "${tr("initializing_magic_hour", "Initializing Magic Hour")} ($activeModel)..."
+                    "Initializing Studio Engine (Better Quality)..."
                 else
-                    tr("ondevice_segmenting", "On-Device Studio: Segmenting subject with ML Kit...")
+                    "On-Device Studio: Fast Gen Processing..."
 
                 val result = GeminiAIService.enhanceProductImage(
                     context = context,
@@ -179,9 +179,9 @@ fun AIStudioDialog(
                             Text(tr("studio_title", "AI Studio Photography"), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
                             Text(
                                 if (generationMode == ImageGenerationMode.API)
-                                    "Magic Hour API • $activeModel (${tr("slot_label", "Slot")} #$activeKeyIndex)"
+                                    "Better Quality Studio • Active"
                                 else
-                                    tr("mode_on_device_sub", "On-Device Studio • ML Kit Engine"),
+                                    "Fast Gen Studio • Local Engine",
                                 fontSize = 11.sp,
                                 color = DhaagaPrimary,
                                 fontWeight = FontWeight.SemiBold

@@ -33,7 +33,7 @@ object ImageSegmentationHelper {
 
             val fgBitmap = result.foregroundBitmap
             if (fgBitmap != null) {
-                Log.i(TAG, "✅ Successfully extracted product foreground with ML Kit Subject Segmentation!")
+                Log.i(TAG, "[MLKit] Successfully extracted product foreground with ML Kit Subject Segmentation!")
                 return fgBitmap
             }
 

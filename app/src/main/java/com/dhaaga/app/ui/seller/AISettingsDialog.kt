@@ -1,11 +1,15 @@
 package com.dhaaga.app.ui.seller
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -28,8 +32,10 @@ import com.dhaaga.app.data.repository.MagicHourService
 import com.dhaaga.app.ui.theme.*
 import com.dhaaga.app.utils.AppLanguageManager
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AISettingsDialog(
+    initialShowDeveloperKeys: Boolean = false,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -38,16 +44,18 @@ fun AISettingsDialog(
     fun tr(key: String, fallback: String): String =
         AppLanguageManager.translate(key, currentLang, fallback)
 
-    // Magic Hour State
+    // Generation Mode & Quality State
     var selectedGenMode by remember { mutableStateOf(MagicHourService.getGenerationMode(context)) }
     var selectedModel by remember { mutableStateOf(MagicHourService.getSelectedModel(context)) }
     var magicHourKeysText by remember { mutableStateOf(MagicHourService.getKeys(context).joinToString("\n")) }
     var activeKeyIndex by remember { mutableStateOf(MagicHourService.getActiveKeyIndex(context)) }
 
-    // Gemini State
+    // Fast Gen Catalog State
     val activeGeminiKey = GeminiAIService.getApiKey(context)
     var geminiKeyText by remember { mutableStateOf(if (activeGeminiKey.isNotBlank()) activeGeminiKey else GeminiAIService.DEFAULT_API_KEY) }
 
+    // Developer Mode: Revealed when triggered (e.g. on avatar pfp long press)
+    var showDeveloperKeys by remember { mutableStateOf(initialShowDeveloperKeys) }
     var saveSuccess by remember { mutableStateOf(false) }
 
     Dialog(
@@ -68,9 +76,21 @@ fun AISettingsDialog(
                     .fillMaxSize()
                     .padding(20.dp)
             ) {
-                // Header
+                // Header (Long press to toggle developer mode)
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .combinedClickable(
+                            onLongClick = {
+                                showDeveloperKeys = !showDeveloperKeys
+                                Toast.makeText(
+                                    context,
+                                    if (showDeveloperKeys) "Developer Mode: API Keys Unlocked" else "Developer Mode: API Keys Secured",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            },
+                            onClick = {}
+                        ),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -82,12 +102,26 @@ fun AISettingsDialog(
                                 .background(DhaagaPrimary.copy(alpha = 0.12f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.SettingsSuggest, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(20.dp))
+                            Icon(
+                                if (showDeveloperKeys) Icons.Default.LockOpen else Icons.Default.Tune,
+                                contentDescription = null,
+                                tint = DhaagaPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
-                            Text(tr("settings_ai_title", "AI Studio & Model Settings"), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
-                            Text(tr("settings_ai_sub", "Image generation, API rotation & NLP config"), fontSize = 11.sp, color = DhaagaTextMedium)
+                            Text(
+                                tr("settings_ai_title", "Studio Quality & Speed"),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = DhaagaTextDark
+                            )
+                            Text(
+                                tr("settings_ai_sub", "Fast Gen & Better Quality settings"),
+                                fontSize = 11.sp,
+                                color = DhaagaTextMedium
+                            )
                         }
                     }
                     IconButton(onClick = onDismiss) {
@@ -106,7 +140,7 @@ fun AISettingsDialog(
                 ) {
 
                     // ----------------------------------------------------
-                    // SECTION 1: IMAGE GENERATION ENGINE (API vs ON-DEVICE)
+                    // SECTION 1: STUDIO GENERATION SPEED & QUALITY
                     // ----------------------------------------------------
                     Card(
                         shape = RoundedCornerShape(16.dp),
@@ -122,7 +156,7 @@ fun AISettingsDialog(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.AutoFixHigh, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(tr("settings_engine_title", "Image Generation Engine"), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                Text("Studio Generation Mode", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
                             }
 
                             // Mode Selector Pills
@@ -130,16 +164,16 @@ fun AISettingsDialog(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                // Cloud API Mode
-                                val isApi = selectedGenMode == ImageGenerationMode.API
+                                // Better Quality Mode
+                                val isBetterQuality = selectedGenMode == ImageGenerationMode.API
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(if (isApi) DhaagaPrimary else Color.White)
+                                        .background(if (isBetterQuality) DhaagaPrimary else Color.White)
                                         .border(
-                                            width = if (isApi) 1.5.dp else 1.dp,
-                                            color = if (isApi) DhaagaPrimary else DhaagaDivider,
+                                            width = if (isBetterQuality) 1.5.dp else 1.dp,
+                                            color = if (isBetterQuality) DhaagaPrimary else DhaagaDivider,
                                             shape = RoundedCornerShape(12.dp)
                                         )
                                         .clickable {
@@ -151,29 +185,29 @@ fun AISettingsDialog(
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
-                                            tr("mode_cloud_api", "Cloud API Model"),
+                                            "Better Quality",
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (isApi) Color.White else DhaagaTextDark
+                                            color = if (isBetterQuality) Color.White else DhaagaTextDark
                                         )
                                         Text(
-                                            tr("mode_cloud_api_sub", "Magic Hour (Default)"),
+                                            "Studio Lighting (Default)",
                                             fontSize = 10.sp,
-                                            color = if (isApi) Color.White.copy(alpha = 0.85f) else DhaagaTextMedium
+                                            color = if (isBetterQuality) Color.White.copy(alpha = 0.85f) else DhaagaTextMedium
                                         )
                                     }
                                 }
 
-                                // On-Device Mode
-                                val isOnDevice = selectedGenMode == ImageGenerationMode.ON_DEVICE
+                                // Fast Gen Mode
+                                val isFastGen = selectedGenMode == ImageGenerationMode.ON_DEVICE
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .clip(RoundedCornerShape(12.dp))
-                                        .background(if (isOnDevice) DhaagaPrimary else Color.White)
+                                        .background(if (isFastGen) DhaagaPrimary else Color.White)
                                         .border(
-                                            width = if (isOnDevice) 1.5.dp else 1.dp,
-                                            color = if (isOnDevice) DhaagaPrimary else DhaagaDivider,
+                                            width = if (isFastGen) 1.5.dp else 1.dp,
+                                            color = if (isFastGen) DhaagaPrimary else DhaagaDivider,
                                             shape = RoundedCornerShape(12.dp)
                                         )
                                         .clickable {
@@ -185,15 +219,15 @@ fun AISettingsDialog(
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text(
-                                            tr("mode_on_device", "On-Device"),
+                                            "Fast Gen",
                                             fontSize = 12.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (isOnDevice) Color.White else DhaagaTextDark
+                                            color = if (isFastGen) Color.White else DhaagaTextDark
                                         )
                                         Text(
-                                            tr("mode_on_device_sub", "ML Kit Engine"),
+                                            "Instant Local Processing",
                                             fontSize = 10.sp,
-                                            color = if (isOnDevice) Color.White.copy(alpha = 0.85f) else DhaagaTextMedium
+                                            color = if (isFastGen) Color.White.copy(alpha = 0.85f) else DhaagaTextMedium
                                         )
                                     }
                                 }
@@ -202,19 +236,19 @@ fun AISettingsDialog(
                             Row(verticalAlignment = Alignment.Top) {
                                 Icon(
                                     imageVector = if (selectedGenMode == ImageGenerationMode.API)
-                                        com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.WandMagicSparkles
+                                        Icons.Default.WorkspacePremium
                                     else
-                                        com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Bolt,
+                                        Icons.Default.Bolt,
                                     contentDescription = null,
                                     tint = DhaagaPrimary,
-                                    modifier = Modifier.size(13.dp).padding(top = 2.dp)
+                                    modifier = Modifier.size(14.dp).padding(top = 2.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = if (selectedGenMode == ImageGenerationMode.API)
-                                        tr("mode_cloud_note", "High-fidelity commercial product editing rendered in the cloud with auto-rotating API keys.")
+                                        "High-fidelity commercial product editing with studio lighting and natural textures."
                                     else
-                                        tr("mode_ondevice_note", "Fast local subject isolation without network dependency. Creates pure white cyclorama studio shots."),
+                                        "Fast local subject isolation with instant pure white cyclorama studio finish.",
                                     fontSize = 11.sp,
                                     color = DhaagaTextMedium
                                 )
@@ -223,7 +257,7 @@ fun AISettingsDialog(
                     }
 
                     // ----------------------------------------------------
-                    // SECTION 2: MAGIC HOUR MODEL SELECTION (When in API mode)
+                    // SECTION 2: QUALITY LEVEL SELECTION (When in Better Quality mode)
                     // ----------------------------------------------------
                     if (selectedGenMode == ImageGenerationMode.API) {
                         Card(
@@ -243,39 +277,27 @@ fun AISettingsDialog(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.ModelTraining, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Default.Layers, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(18.dp))
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text(tr("select_ai_model", "Select AI Model"), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                        Text("Detail & Quality Preset", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
                                     }
-                                    Text(tr("free_tier_badge", "Free Tier Compatible"), fontSize = 10.sp, fontWeight = FontWeight.Bold, color = DhaagaSuccess)
+                                    Text("Free Tier Included", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = DhaagaSuccess)
                                 }
 
-                                MagicHourService.AVAILABLE_MODELS.forEach { modelInfo ->
-                                    val isCurrent = selectedModel == modelInfo.id
-                                    val localizedModelName = when (modelInfo.id) {
-                                        "qwen-edit" -> tr("model_qwen_name", modelInfo.name)
-                                        "flux-2-klein" -> tr("model_flux_name", modelInfo.name)
-                                        "krea-2" -> tr("model_krea_name", modelInfo.name)
-                                        else -> modelInfo.name
-                                    }
-                                    val localizedCostTag = when (modelInfo.id) {
-                                        "qwen-edit" -> tr("model_qwen_cost", modelInfo.costTag)
-                                        "flux-2-klein" -> tr("model_flux_cost", modelInfo.costTag)
-                                        "krea-2" -> tr("model_krea_cost", modelInfo.costTag)
-                                        else -> modelInfo.costTag
-                                    }
-                                    val localizedDescription = when (modelInfo.id) {
-                                        "qwen-edit" -> tr("model_qwen_desc", modelInfo.description)
-                                        "flux-2-klein" -> tr("model_flux_desc", modelInfo.description)
-                                        "krea-2" -> tr("model_krea_desc", modelInfo.description)
-                                        else -> modelInfo.description
-                                    }
+                                val presets = listOf(
+                                    Triple("qwen-edit", "Balanced Studio (Better Quality)", "High-precision e-commerce product staging & authentic shadows"),
+                                    Triple("flux-2-klein", "Ultra-Fast Mode (Fast Gen)", "Lightweight and lightning-fast studio rendering"),
+                                    Triple("krea-2", "High Detail Mode (Studio Quality)", "Vibrant textures and artistic commercial enhancements")
+                                )
+
+                                presets.forEach { (modelId, presetName, presetDesc) ->
+                                    val isCurrent = selectedModel == modelId
                                     Surface(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(10.dp))
                                             .clickable {
-                                                selectedModel = modelInfo.id
+                                                selectedModel = modelId
                                                 saveSuccess = false
                                             },
                                         shape = RoundedCornerShape(10.dp),
@@ -294,25 +316,27 @@ fun AISettingsDialog(
                                         ) {
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                                    Text(localizedModelName, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .clip(RoundedCornerShape(4.dp))
-                                                            .background(Color(0xFFE8F5E9))
-                                                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                                                    ) {
-                                                        Text(localizedCostTag, fontSize = 9.sp, fontWeight = FontWeight.Bold, color = DhaagaSuccess)
+                                                    Text(presetName, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                                    if (modelId == "qwen-edit") {
+                                                        Spacer(modifier = Modifier.width(6.dp))
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .clip(RoundedCornerShape(4.dp))
+                                                                .background(Color(0xFFE8F5E9))
+                                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        ) {
+                                                            Text("Recommended", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = DhaagaSuccess)
+                                                        }
                                                     }
                                                 }
                                                 Spacer(modifier = Modifier.height(2.dp))
-                                                Text(localizedDescription, fontSize = 10.sp, color = DhaagaTextMedium)
+                                                Text(presetDesc, fontSize = 10.sp, color = DhaagaTextMedium)
                                             }
 
                                             RadioButton(
                                                 selected = isCurrent,
                                                 onClick = {
-                                                    selectedModel = modelInfo.id
+                                                    selectedModel = modelId
                                                     saveSuccess = false
                                                 },
                                                 colors = RadioButtonDefaults.colors(selectedColor = DhaagaPrimary)
@@ -322,10 +346,58 @@ fun AISettingsDialog(
                                 }
                             }
                         }
+                    }
 
-                        // ----------------------------------------------------
-                        // SECTION 3: MULTI-KEY POOL & AUTO-ROTATION
-                        // ----------------------------------------------------
+                    // ----------------------------------------------------
+                    // SECTION 3: SYSTEM ENGINE STATUS
+                    // ----------------------------------------------------
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = DhaagaCardBg),
+                        border = BorderStroke(1.dp, DhaagaDivider.copy(alpha = 0.5f))
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(DhaagaSuccess)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Fast Gen Engine Status", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(DhaagaSuccess.copy(alpha = 0.12f))
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text("Operational", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = DhaagaSuccess)
+                                }
+                            }
+
+                            Text(
+                                "Intelligent Multilingual Auto-Cataloger and Dynamic Pricing engines are connected and optimized for high-speed catalog generation.",
+                                fontSize = 11.sp,
+                                color = DhaagaTextMedium
+                            )
+                        }
+                    }
+
+                    // Developer Credentials (only visible when unlocked via Avatar PFP long-press)
+                    if (showDeveloperKeys) {
+                        // Cloud Keys
                         Card(
                             shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = DhaagaCardBg),
@@ -343,9 +415,9 @@ fun AISettingsDialog(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.Key, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(18.dp))
+                                        Icon(Icons.Default.Key, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(16.dp))
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text(tr("settings_keys_title", "Magic Hour API Keys (Auto-Rotating)"), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                        Text("Studio Cloud Rotation Keys", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
                                     }
                                     TextButton(
                                         onClick = {
@@ -357,20 +429,19 @@ fun AISettingsDialog(
                                         },
                                         contentPadding = PaddingValues(0.dp)
                                     ) {
-                                        Text("${tr("reset_btn", "Reset")} (${MagicHourService.BUNDLED_KEYS.size} ${tr("keys_count_label", "Keys")})", fontSize = 11.sp, color = DhaagaPrimary)
+                                        Text("Reset (${MagicHourService.BUNDLED_KEYS.size} Keys)", fontSize = 11.sp, color = DhaagaPrimary)
                                     }
                                 }
 
                                 val parsedKeys = magicHourKeysText.split("\n", ",").map { it.trim() }.filter { it.isNotBlank() }
 
-                                // Key Status Pill & Active Key Indicator
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        "${tr("configured_label", "Configured")}: ${parsedKeys.size} ${tr("keys_count_label", "key(s)")} | ${tr("active_slot_label", "Active Slot")}: #${activeKeyIndex + 1}",
+                                        "Configured: ${parsedKeys.size} key(s) | Active Slot: #${activeKeyIndex + 1}",
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.SemiBold,
                                         color = DhaagaPrimary
@@ -387,15 +458,9 @@ fun AISettingsDialog(
                                     ) {
                                         Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(12.dp))
                                         Spacer(modifier = Modifier.width(4.dp))
-                                        Text(tr("rotate_key_btn", "Rotate Key"), fontSize = 10.sp, color = DhaagaTextDark)
+                                        Text("Rotate Key", fontSize = 10.sp, color = DhaagaTextDark)
                                     }
                                 }
-
-                                Text(
-                                    tr("keys_help_text", "Enter keys separated by newline. If a key runs out of credits (HTTP 402), Dhaaga automatically switches to the next slot seamlessly:"),
-                                    fontSize = 10.5.sp,
-                                    color = DhaagaTextMedium
-                                )
 
                                 OutlinedTextField(
                                     value = magicHourKeysText,
@@ -403,10 +468,10 @@ fun AISettingsDialog(
                                         magicHourKeysText = it
                                         saveSuccess = false
                                     },
-                                    placeholder = { Text("mhk_live_...\nmhk_live_...", fontSize = 11.sp) },
+                                    placeholder = { Text("Enter cloud service keys (one per line)...", fontSize = 11.sp) },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(110.dp),
+                                        .height(100.dp),
                                     shape = RoundedCornerShape(12.dp),
                                     textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp),
                                     colors = OutlinedTextFieldDefaults.colors(
@@ -416,90 +481,82 @@ fun AISettingsDialog(
                                 )
                             }
                         }
-                    }
 
-                    // ----------------------------------------------------
-                    // SECTION 4: GOOGLE GEMINI NLP & CATALOGING KEY
-                    // ----------------------------------------------------
-                    Card(
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = DhaagaCardBg),
-                        border = BorderStroke(1.dp, DhaagaDivider.copy(alpha = 0.5f))
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(14.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        // Catalog Service Key
+                        Card(
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = DhaagaCardBg),
+                            border = BorderStroke(1.dp, DhaagaDivider.copy(alpha = 0.5f))
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.RecordVoiceOver, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(18.dp))
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text(tr("gemini_nlp_title", "Google Gemini (Catalog & Voice)"), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.RecordVoiceOver, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text("Fast Gen Catalog Access Key", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                    }
+                                    if (GeminiAIService.DEFAULT_API_KEY.isNotBlank() && geminiKeyText != GeminiAIService.DEFAULT_API_KEY) {
+                                        TextButton(
+                                            onClick = {
+                                                geminiKeyText = GeminiAIService.DEFAULT_API_KEY
+                                                GeminiAIService.setApiKey(context, geminiKeyText)
+                                                saveSuccess = true
+                                            },
+                                            contentPadding = PaddingValues(0.dp)
+                                        ) {
+                                            Text("Use Bundled", fontSize = 11.sp, color = DhaagaPrimary)
+                                        }
+                                    }
                                 }
-                                if (GeminiAIService.DEFAULT_API_KEY.isNotBlank() && geminiKeyText != GeminiAIService.DEFAULT_API_KEY) {
-                                    TextButton(
-                                        onClick = {
+
+                                OutlinedTextField(
+                                    value = geminiKeyText,
+                                    onValueChange = {
+                                        geminiKeyText = it
+                                        saveSuccess = false
+                                    },
+                                    placeholder = { Text("Paste catalog service access key", fontSize = 11.sp) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = DhaagaPrimary,
+                                        cursorColor = DhaagaPrimary
+                                    ),
+                                    trailingIcon = {
+                                        IconButton(onClick = {
+                                            GeminiAIService.resetApiKey(context)
                                             geminiKeyText = GeminiAIService.DEFAULT_API_KEY
-                                            GeminiAIService.setApiKey(context, geminiKeyText)
                                             saveSuccess = true
-                                        },
-                                        contentPadding = PaddingValues(0.dp)
-                                    ) {
-                                        Text(tr("use_bundled_btn", "Use Bundled"), fontSize = 11.sp, color = DhaagaPrimary)
+                                        }) {
+                                            Icon(Icons.Default.RestartAlt, contentDescription = "Reset", tint = DhaagaTextMedium)
+                                        }
                                     }
-                                }
+                                )
                             }
-
-                            Text(
-                                tr("gemini_nlp_sub", "Powers Multilingual Auto-Cataloger (EN+HI) and Dynamic Pricing Assistant."),
-                                fontSize = 10.5.sp,
-                                color = DhaagaTextMedium
-                            )
-
-                            OutlinedTextField(
-                                value = geminiKeyText,
-                                onValueChange = {
-                                    geminiKeyText = it
-                                    saveSuccess = false
-                                },
-                                placeholder = { Text(tr("paste_gemini_key", "Paste Gemini API Key"), fontSize = 11.sp) },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                textStyle = androidx.compose.ui.text.TextStyle(fontSize = 11.sp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedBorderColor = DhaagaPrimary,
-                                    cursorColor = DhaagaPrimary
-                                ),
-                                trailingIcon = {
-                                    IconButton(onClick = {
-                                        GeminiAIService.resetApiKey(context)
-                                        geminiKeyText = GeminiAIService.DEFAULT_API_KEY
-                                        saveSuccess = true
-                                    }) {
-                                        Icon(Icons.Default.RestartAlt, contentDescription = tr("reset_btn", "Reset"), tint = DhaagaTextMedium)
-                                    }
-                                }
-                            )
                         }
                     }
 
                     if (saveSuccess) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.CircleCheck,
+                                imageVector = Icons.Default.CheckCircle,
                                 contentDescription = null,
                                 tint = DhaagaSuccess,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                tr("settings_saved_msg", "AI Studio & Model configurations saved successfully!"),
+                                "Studio Quality & Speed preferences saved successfully!",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = DhaagaSuccess
@@ -525,15 +582,11 @@ fun AISettingsDialog(
 
                     Button(
                         onClick = {
-                            // Save Magic Hour Preferences
                             MagicHourService.setGenerationMode(context, selectedGenMode)
                             MagicHourService.setSelectedModel(context, selectedModel)
                             val keyList = magicHourKeysText.split("\n", ",").map { it.trim() }.filter { it.isNotBlank() }
                             MagicHourService.saveKeys(context, keyList)
-
-                            // Save Gemini Preference
                             GeminiAIService.setApiKey(context, geminiKeyText)
-
                             saveSuccess = true
                         },
                         modifier = Modifier.weight(1.3f).height(46.dp),

@@ -72,13 +72,13 @@ object ImageUploadRepository {
             val inputStream: InputStream? = try {
                 context.contentResolver.openInputStream(imageUri)
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Failed to open InputStream from URI: $imageUri", e)
+                Log.e(TAG, "[Upload] Failed to open InputStream from URI: $imageUri", e)
                 null
             }
 
             if (inputStream == null) {
                 val err = "Cannot open image stream from URI: $imageUri"
-                Log.e(TAG, "❌ $err")
+                Log.e(TAG, "[Upload] $err")
                 return@withContext Result.failure(Exception(err))
             }
 
@@ -123,23 +123,23 @@ object ImageUploadRepository {
                 val status = json.optString("status")
                 if (status == "success") {
                     val imageUrl = json.getString("url")
-                    Log.i(TAG, "✅ UPLOAD SUCCESSFUL! Image URL: $imageUrl")
+                    Log.i(TAG, "[Upload] UPLOAD SUCCESSFUL! Image URL: $imageUrl")
                     Log.i(TAG, "================ END IMAGE UPLOAD ================")
                     Result.success(imageUrl)
                 } else {
                     val msg = json.optString("message", "Upload failed")
-                    Log.e(TAG, "❌ Server returned non-success status: $status | Message: $msg")
+                    Log.e(TAG, "[Upload] Server returned non-success status: $status | Message: $msg")
                     Log.i(TAG, "================ END IMAGE UPLOAD ================")
                     Result.failure(Exception("Server Error: $msg"))
                 }
             } else {
-                Log.e(TAG, "❌ HTTP Error $responseCode: $responseText")
+                Log.e(TAG, "[Upload] HTTP Error $responseCode: $responseText")
                 Log.i(TAG, "================ END IMAGE UPLOAD ================")
                 Result.failure(Exception("HTTP Error $responseCode: $responseText"))
             }
 
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Exception occurred during image upload: ${e.message}", e)
+            Log.e(TAG, "[Upload] Exception occurred during image upload: ${e.message}", e)
             Log.i(TAG, "================ END IMAGE UPLOAD ================")
             Result.failure(e)
         } finally {
