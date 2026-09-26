@@ -212,7 +212,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 val extracted = uid.substringAfter("_")
                 if (extracted.length >= 10) return clean(extracted)
             }
-            return "7668439019"
+            return ""
         }
 
     fun refreshUserFromFirestore(uid: String) {

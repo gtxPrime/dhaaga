@@ -49,13 +49,11 @@
 
 ---
 
-### Quick Verification Credentials
+### Authentication & Cloud Data Integrity
 
-| Role | Method | Test Number | Verification Code |
-| :--- | :---: | :---: | :---: |
-| **Master Artisan** (Kavita Devi - Madhubani, Bihar) | Phone OTP | `7668439019` | `123456` |
-| **Verified Buyer** (Aarav Sharma - Mumbai, Maharashtra) | Phone OTP | `7668439019` | `696969` |
-| **Google Sign-In** | One-Tap | *Any active account* | Google Play Services |
+* **100% Dynamic Firebase Authentication:** Completely purged all hardcoded demo credentials, mock users, and test OTP bypasses.
+* **Live Phone Verification:** Uses real Firebase Phone Auth SMS verification codes (`PhoneAuthProvider`) with dynamic Cloud Firestore profile lookup and registration.
+* **Google Play Services:** Full Google Sign-In with real UID account persistence and automatic returning-user profile sync.
 
 ---
 

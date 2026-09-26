@@ -77,42 +77,6 @@ fun PhoneOtpScreen(
 
     fun handleSuccessfulAuth(formattedPhone: String, uid: String) {
         isLoading = true
-        val sanitizedPhone = formattedPhone.trim().removePrefix("+91").removePrefix("+").trim()
-
-        // Artisan Test Creds: 7668439019 with OTP 123456
-        if (otp == "123456") {
-            Log.i(TAG, "[Auth] Artisan test login with OTP 123456 for $formattedPhone")
-            val artisanUser = UserModel(
-                uid = "artisan_$sanitizedPhone",
-                phoneNumber = formattedPhone,
-                name = "Kavita Devi",
-                role = "seller",
-                village = "Madhubani",
-                state = "Bihar"
-            )
-            viewModel.loginAs(artisanUser)
-            isLoading = false
-            onVerified(formattedPhone, artisanUser.uid, artisanUser)
-            return
-        }
-
-        // Buyer Test Creds: 7668439019 with OTP 696969
-        if (otp == "696969") {
-            Log.i(TAG, "[Auth] Buyer test login with OTP 696969 for $formattedPhone")
-            val buyerUser = UserModel(
-                uid = "buyer_$sanitizedPhone",
-                phoneNumber = formattedPhone,
-                name = "Aarav Sharma",
-                role = "buyer",
-                village = "Mumbai",
-                state = "Maharashtra"
-            )
-            viewModel.loginAs(buyerUser)
-            isLoading = false
-            onVerified(formattedPhone, buyerUser.uid, buyerUser)
-            return
-        }
-
         viewModel.checkExistingUserByPhone(formattedPhone) { existingUser ->
             isLoading = false
             if (existingUser != null) {
@@ -156,14 +120,7 @@ fun PhoneOtpScreen(
                 override fun onVerificationFailed(e: FirebaseException) {
                     Log.w(TAG, "[Auth] Phone Auth verification failed: ${e.message}")
                     isLoading = false
-                    // When Firebase rejects due to SMS Region policy (Error 17006) on debug builds,
-                    // automatically switch to dev testing mode and pre-fill 123456 so testing continues seamlessly.
-                    storedVerificationId = "dev_otp_${System.currentTimeMillis()}"
-                    otpSent = true
-                    countdown = 60
-                    otp = "123456"
-                    isDevOtpMode = true
-                    errorMsg = ""
+                    errorMsg = e.localizedMessage ?: "Phone verification failed. Please try again."
                 }
 
                 override fun onCodeSent(
@@ -236,13 +193,8 @@ fun PhoneOtpScreen(
                 }
                 .addOnFailureListener { e ->
                     Log.w(TAG, "[Auth] Phone Auth OTP verification failed: ${e.message}")
-                    if (otp == "123456" || otp == "696969") {
-                        val uid = firebaseAuth.currentUser?.uid ?: "user_${sanitizedPhone}"
-                        handleSuccessfulAuth(formattedPhone, uid)
-                    } else {
-                        isLoading = false
-                        errorMsg = "Invalid OTP code. Please check and try again."
-                    }
+                    isLoading = false
+                    errorMsg = "Invalid OTP code. Please check and try again."
                 }
         } else {
             // Dev fallback or local verification
@@ -333,9 +285,6 @@ fun PhoneOtpScreen(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Testing phase note requested by user with Artisan & Buyer test creds
-                TestCredentialsCard(onSelectRole = onSelectTestCreds, viewModel = viewModel)
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Phone input
@@ -386,12 +335,8 @@ fun PhoneOtpScreen(
                         Text("Send Verification Code", fontSize = 16.sp, color = Color.White, fontWeight = FontWeight.SemiBold)
                     }
                 }
-
             } else {
                 // OTP input
-                TestCredentialsCard(onSelectRole = onSelectTestCreds, viewModel = viewModel)
-
-                Spacer(modifier = Modifier.height(14.dp))
 
                 Text(
                     text = "Enter the 6-digit OTP sent to your phone",
@@ -468,107 +413,4 @@ fun PhoneOtpScreen(
     }
 }
 
-@Composable
-private fun TestCredentialsCard(
-    viewModel: AppViewModel,
-    onSelectRole: (phone: String, otp: String) -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(PaletteGreenTint)
-            .border(1.dp, PaletteForest.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
-            .padding(14.dp)
-    ) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    Icons.Default.Info,
-                    contentDescription = null,
-                    tint = PaletteForest,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    "SMS Restricted (Testing Phase)",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PaletteDarkGreen
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                "Use 7668439019 with OTP: 123456 (Artisan) or 696969 (Buyer). Tap below to auto-fill:",
-                fontSize = 11.5.sp,
-                color = DhaagaTextMedium,
-                lineHeight = 16.sp
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Artisan Creds Chip
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = PaletteForest,
-                    shadowElevation = 2.dp,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { onSelectRole("7668439019", "123456") }
-                ) {
-                    Column(
-                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 6.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            viewModel.tr("artisan_test_creds", "Artisan Creds"),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            "OTP: 123456",
-                            fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                    }
-                }
-
-                // Buyer Creds Chip
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = Color(0xFF2C5E7A),
-                    shadowElevation = 2.dp,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable { onSelectRole("7668439019", "696969") }
-                ) {
-                    Column(
-                        modifier = Modifier.padding(vertical = 8.dp, horizontal = 6.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            viewModel.tr("buyer_test_creds", "Buyer Creds"),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            "OTP: 696969",
-                            fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 

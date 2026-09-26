@@ -36,13 +36,9 @@ Version **0.2.0** of **Dhaaga (धागा • ShilpSetu)** brings major upgrad
 
 ---
 
-### 🧪 Quick Demo Logins
+### 🔐 Cloud Authentication & Dynamic Sync
 
-| Role | Login Method | Credential | Verification |
-|:---|:---:|:---:|:---:|
-| **Artisan (Kavita Devi - Madhubani)** | Phone OTP | `7668439019` | `123456` |
-| **Buyer (Aarav Sharma - Connoisseur)** | Phone OTP | `7668439019` | `696969` |
-| **Google Sign-In** | Google Account | *Any test account* | Google One-Tap |
+All authentication is 100% cloud-driven through Firebase Phone Auth and Google Sign-In with real-time profile lookup in Cloud Firestore. No static demo credentials or mock bypasses are used.
 
 ---
 
