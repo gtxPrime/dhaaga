@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -49,6 +51,8 @@ import com.dhaaga.app.R
 import com.dhaaga.app.data.model.ProductModel
 import com.dhaaga.app.data.model.UserModel
 import com.dhaaga.app.ui.components.NotionAvatar
+import com.dhaaga.app.ui.components.LocationPermissionDialog
+import com.dhaaga.app.utils.LocationHelper
 import com.dhaaga.app.ui.theme.*
 import kotlinx.coroutines.delay
 
@@ -60,7 +64,7 @@ data class HomeBannerItem(
     val imageUrl: String
 )
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     viewModel: AppViewModel,
@@ -73,10 +77,13 @@ fun HomeScreen(
     onWishlist: () -> Unit = {},
     onOrders: () -> Unit = {},
     onProfile: () -> Unit = {},
+    onLogout: () -> Unit = {},
     onChatList: () -> Unit = {},
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null
 ) {
+    val context = LocalContext.current
+    var showAISettingsDialogWithKeys by remember { mutableStateOf(false) }
     val user by viewModel.currentUser.collectAsState()
     val products by viewModel.products.collectAsState()
     val wishlist by viewModel.wishlist.collectAsState()
@@ -98,6 +105,18 @@ fun HomeScreen(
     var bannerProduct by remember { mutableStateOf<ProductModel?>(null) }
     var lastHandledBannerEvent by remember { mutableStateOf(cartAnimationEvent) }
 
+    var showLocationPermissionDialog by remember { mutableStateOf(false) }
+
+    // Automatic location detection on launch if permission already granted, or prompt if first launch
+    LaunchedEffect(Unit) {
+        if (LocationHelper.hasLocationPermission(context)) {
+            viewModel.detectLocation(context)
+        } else {
+            delay(1500)
+            showLocationPermissionDialog = true
+        }
+    }
+
     LaunchedEffect(cartAnimationEvent) {
         if (cartAnimationEvent > 0L && cartAnimationEvent != lastHandledBannerEvent && lastAddedProduct != null) {
             lastHandledBannerEvent = cartAnimationEvent
@@ -116,7 +135,7 @@ fun HomeScreen(
         }
     }
 
-    // Demo Banners for Auto-Loop Slider (Uploaded to Live Server)
+    // Featured Banners for Auto-Loop Slider (Uploaded to Live Server)
     val bannerItems = remember(currentLang) {
         listOf(
             HomeBannerItem(
@@ -176,7 +195,23 @@ fun HomeScreen(
                     },
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
-                    currentLang = currentLang
+                    currentLang = currentLang,
+                    onAvatarClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(4, animationSpec = tween(350, easing = FastOutSlowInEasing))
+                        }
+                    },
+                    onAvatarLongClick = {
+                        showAISettingsDialogWithKeys = true
+                        Toast.makeText(context, "Developer Mode: API Keys Unlocked", Toast.LENGTH_SHORT).show()
+                    },
+                    onLocationClick = {
+                        if (LocationHelper.hasLocationPermission(context)) {
+                            viewModel.detectLocation(context)
+                        } else {
+                            showLocationPermissionDialog = true
+                        }
+                    }
                 )
                 1 -> if (isSeller) {
                     MyListingsTabContent(
@@ -242,10 +277,7 @@ fun HomeScreen(
                     viewModel = viewModel,
                     onMyListings = { onMyListings() },
                     onMyOrders = { onOrders() },
-                    onLogout = {
-                        viewModel.logout()
-                        onProfile()
-                    }
+                    onLogout = onLogout
                 )
             }
         }
@@ -369,6 +401,22 @@ fun HomeScreen(
             },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+
+        if (showAISettingsDialogWithKeys) {
+            com.dhaaga.app.ui.seller.AISettingsDialog(
+                initialShowDeveloperKeys = true,
+                onDismiss = { showAISettingsDialogWithKeys = false }
+            )
+        }
+
+        if (showLocationPermissionDialog) {
+            LocationPermissionDialog(
+                onDismiss = { showLocationPermissionDialog = false },
+                onPermissionGranted = {
+                    viewModel.detectLocation(context)
+                }
+            )
+        }
     }
 }
 
@@ -391,9 +439,14 @@ private fun HomeFeedTab(
     onNavigateToCart: () -> Unit = {},
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
-    currentLang: String = "en"
+    currentLang: String = "en",
+    onAvatarClick: () -> Unit = {},
+    onAvatarLongClick: () -> Unit = {},
+    onLocationClick: () -> Unit = {}
 ) {
     val isSearching = searchQuery.isNotBlank() || selectedCategory != "All"
+    val userLocation by viewModel.userLocation.collectAsState()
+    val isLocating by viewModel.isLocating.collectAsState()
 
     val filteredProducts = remember(products, searchQuery, selectedCategory) {
         products.filter { product ->
@@ -450,7 +503,12 @@ private fun HomeFeedTab(
                     onNotificationClick = {},
                     cartCount = cart.size,
                     onCartClick = onNavigateToCart,
-                    currentLang = currentLang
+                    currentLang = currentLang,
+                    onAvatarClick = onAvatarClick,
+                    onAvatarLongClick = onAvatarLongClick,
+                    userLocation = userLocation,
+                    isLocating = isLocating,
+                    onLocationClick = onLocationClick
                 )
             }
 
@@ -679,6 +737,7 @@ private fun HomeFeedTab(
 /**
  * Top Header going seamlessly under the status bar (#60734E -> #738861 Forest Sage)
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HeaderBlock(
     user: UserModel?,
@@ -691,7 +750,12 @@ private fun HeaderBlock(
     onNotificationClick: () -> Unit,
     cartCount: Int = 0,
     onCartClick: () -> Unit = {},
-    currentLang: String = "en"
+    currentLang: String = "en",
+    onAvatarClick: () -> Unit = {},
+    onAvatarLongClick: () -> Unit = {},
+    userLocation: com.dhaaga.app.utils.UserLocationInfo? = null,
+    isLocating: Boolean = false,
+    onLocationClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -740,21 +804,45 @@ private fun HeaderBlock(
                             .height(48.dp)
                             .wrapContentWidth(Alignment.Start)
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.9f),
-                            modifier = Modifier.size(11.dp)
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 6.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable { onLocationClick() }
+                            .padding(vertical = 2.dp)
+                    ) {
+                        if (isLocating) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 1.5.dp,
+                                modifier = Modifier.size(10.dp)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = Color.White.copy(alpha = 0.95f),
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(3.dp))
                         val userLabel = if (isSeller) com.dhaaga.app.utils.AppLanguageManager.translate("artisan_label", currentLang, "Artisan") else com.dhaaga.app.utils.AppLanguageManager.translate("craft_lover", currentLang, "Craft Lover")
-                        val userPlace = if (isSeller) (user?.village ?: "India") else (user?.name?.split(" ")?.firstOrNull() ?: "India")
+                        val placeText = when {
+                            isLocating -> "Detecting GPS..."
+                            userLocation != null -> userLocation.displayLocation
+                            isSeller && !user?.village.isNullOrBlank() -> "${user.village}, ${user.state.ifBlank { "India" }}"
+                            user != null && user.state.isNotBlank() -> user.state
+                            else -> "Tap to enable location"
+                        }
                         Text(
-                            text = "$userLabel • $userPlace",
+                            text = "$userLabel • $placeText",
                             fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.9f),
-                            fontWeight = FontWeight.Medium
+                            color = Color.White.copy(alpha = 0.95f),
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -769,7 +857,7 @@ private fun HeaderBlock(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.Chat,
+                        imageVector = Icons.AutoMirrored.Outlined.Chat,
                         contentDescription = "Chat",
                         tint = Color.White,
                         modifier = Modifier.size(17.dp)
@@ -778,43 +866,51 @@ private fun HeaderBlock(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Shopping Bag button (Instant access for Artisan and Buyer)
+                // Shopping Bag button (Unclipped badge container so numbers render perfectly without truncation)
                 Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.2f))
-                        .clickable { onCartClick() },
+                    modifier = Modifier.size(36.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping,
-                        contentDescription = "Shopping Bag",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.2f))
+                            .clickable { onCartClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping,
+                            contentDescription = "Shopping Bag",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                     if (cartCount > 0) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .offset(x = 4.dp, y = (-2).dp)
-                                .defaultMinSize(minWidth = 14.dp, minHeight = 14.dp)
+                                .offset(x = 4.dp, y = (-3).dp)
+                                .defaultMinSize(minWidth = 16.dp, minHeight = 16.dp)
                                 .clip(CircleShape)
                                 .background(Color(0xFFE53935))
+                                .border(1.2.dp, Color.White, CircleShape)
                                 .padding(horizontal = 3.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = if (cartCount > 99) "99+" else "$cartCount",
-                                fontSize = 8.sp,
+                                fontSize = 8.5.sp,
                                 color = Color.White,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 10.sp
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(10.dp))
 
                 // Notification button
                 Box(
@@ -837,12 +933,21 @@ private fun HeaderBlock(
 
                 // User Notion Avatar
                 if (user != null) {
-                    NotionAvatar(
-                        name = user.name,
-                        size = 34.dp,
-                        borderWidth = 1.5.dp,
-                        imageUrl = user.profilePhotoUrl
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .combinedClickable(
+                                onClick = onAvatarClick,
+                                onLongClick = onAvatarLongClick
+                            )
+                    ) {
+                        NotionAvatar(
+                            name = user.name,
+                            size = 34.dp,
+                            borderWidth = 1.5.dp,
+                            imageUrl = user.profilePhotoUrl
+                        )
+                    }
                 }
             }
 
@@ -873,7 +978,9 @@ private fun HeaderBlock(
                         Text(
                             text = com.dhaaga.app.utils.AppLanguageManager.translate("search_placeholder", currentLang, "Search products, artisans, crafts..."),
                             color = Color(0xFF888888),
-                            fontSize = 13.sp
+                            fontSize = 13.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                     BasicTextField(
@@ -1168,7 +1275,7 @@ private fun ProductCardCreative(
                     shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                 )
 
-                // Badges Row (Top Left): GI Tag + Small DEMO Tag
+                // Badges Row (Top Left): GI Certification Tag
                 Row(
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -1199,22 +1306,6 @@ private fun ProductCardCreative(
                                 )
                             }
                         }
-                    }
-
-                    // Small Tag for Demo Listed items
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(Color(0xFF2C5E7A))
-                            .padding(horizontal = 5.dp, vertical = 2.5.dp)
-                    ) {
-                        Text(
-                            text = "DEMO",
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            letterSpacing = 0.5.sp
-                        )
                     }
                 }
 

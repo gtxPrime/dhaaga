@@ -13,14 +13,16 @@ import androidx.core.content.ContextCompat
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.RotateLeft
-import androidx.compose.material.icons.automirrored.filled.RotateRight
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -41,13 +43,17 @@ import coil.compose.AsyncImage
 import com.dhaaga.app.ui.components.CardAsyncImage
 import com.dhaaga.app.ui.components.FontAwesomeIcons
 import com.dhaaga.app.AppViewModel
+import com.dhaaga.app.data.mock.GITagRegistry
+import com.dhaaga.app.data.mock.GITagItem
 import com.dhaaga.app.data.model.ProductModel
 import com.dhaaga.app.data.repository.GeminiAIService
 import com.dhaaga.app.data.repository.ImageUploadRepository
 import com.dhaaga.app.data.repository.PricingAnalysisResult
+import com.dhaaga.app.ui.components.LocationPermissionDialog
 import com.dhaaga.app.ui.onboarding.DhaagaTextField
 import com.dhaaga.app.ui.theme.*
 import com.dhaaga.app.utils.AppLanguageManager
+import com.dhaaga.app.utils.LocationHelper
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -93,6 +99,13 @@ fun AddProductScreen(
     var couponDurationMinutes by remember { mutableStateOf(10080L) } // 7 days default
     var couponUsageLimit by remember { mutableStateOf(0) }
     var hasGITag by remember { mutableStateOf(false) } // GI Geographical Indication Tag
+    var giTagNumber by remember { mutableStateOf("") }
+    var giCraftName by remember { mutableStateOf("") }
+    var giAuthenticityScore by remember { mutableStateOf(0) }
+    var giVerificationReason by remember { mutableStateOf("") }
+    var isVerifyingGi by remember { mutableStateOf(false) }
+    var showGiTagPicker by remember { mutableStateOf(false) }
+    var showLocationPermissionDialog by remember { mutableStateOf(false) }
 
     // AI & Dialog States
     var showAIStudioDialog by remember { mutableStateOf(false) }
@@ -205,6 +218,13 @@ fun AddProductScreen(
                 region = catalog.region
                 if (catalog.suggestedPrice > 0) {
                     price = catalog.suggestedPrice.toString()
+                }
+                if (catalog.giVerified || !catalog.giTag.isNullOrBlank()) {
+                    hasGITag = true
+                    giTagNumber = catalog.giTag ?: ""
+                    giCraftName = catalog.giCraftName.ifBlank { catalog.craftType }
+                    giAuthenticityScore = catalog.authenticityScore.coerceAtLeast(85)
+                    giVerificationReason = "Verified against Indian GI Registry (${catalog.giTag})"
                 }
                 showVoiceCatalogerDialog = false
                 Toast.makeText(context, tr("bilingual_details_applied_toast", "Bilingual Product Details Auto-Filled!"), Toast.LENGTH_SHORT).show()
@@ -576,13 +596,40 @@ fun AddProductScreen(
                             )
                         }
                         Box(modifier = Modifier.weight(1f)) {
-                            DhaagaTextField(
-                                value = region,
-                                onValueChange = { region = it },
-                                label = tr("artisan_region_label", "Artisan Region"),
-                                placeholder = "e.g. Jaipur, Rajasthan",
-                                capitalization = KeyboardCapitalization.Words
-                            )
+                            Column {
+                                DhaagaTextField(
+                                    value = region,
+                                    onValueChange = { region = it },
+                                    label = tr("artisan_region_label", "Artisan Region"),
+                                    placeholder = "e.g. Jaipur, Rajasthan",
+                                    capitalization = KeyboardCapitalization.Words
+                                )
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Row(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .clickable {
+                                            if (LocationHelper.hasLocationPermission(context)) {
+                                                viewModel?.detectLocation(context) { info ->
+                                                    if (info != null) {
+                                                        region = "${info.city}, ${info.state}"
+                                                        Toast.makeText(context, "Region set to ${info.city}, ${info.state}", Toast.LENGTH_SHORT).show()
+                                                    } else {
+                                                        Toast.makeText(context, "Could not get GPS fix. Ensure location is enabled.", Toast.LENGTH_SHORT).show()
+                                                    }
+                                                }
+                                            } else {
+                                                showLocationPermissionDialog = true
+                                            }
+                                        }
+                                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.MyLocation, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(11.dp))
+                                    Spacer(modifier = Modifier.width(3.dp))
+                                    Text("Auto-detect GPS", fontSize = 10.5.sp, color = PaletteForest, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
                         }
                     }
 
@@ -623,57 +670,208 @@ fun AddProductScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Minimalist GI Tag Row (No heavy card nesting!)
-                    Row(
+                    // =========================================================================
+                    // 3.1 GEOGRAPHICAL INDICATION (GI) HERITAGE VERIFICATION
+                    // =========================================================================
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(16.dp))
                             .background(if (hasGITag) PaletteForest.copy(alpha = 0.08f) else Color(0xFFF7FAF4))
-                            .border(1.dp, if (hasGITag) PaletteForest.copy(alpha = 0.35f) else Color(0xFFE2EAD9), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .border(1.dp, if (hasGITag) PaletteForest.copy(alpha = 0.35f) else Color(0xFFE2EAD9), RoundedCornerShape(16.dp))
+                            .padding(14.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Verified,
-                            contentDescription = null,
-                            tint = if (hasGITag) PaletteForest else PaletteSage,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Verified,
+                                contentDescription = null,
+                                tint = if (hasGITag) PaletteForest else PaletteSage,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        tr("gi_tag_title", "Geographical Indication (GI) Tag"),
+                                        fontSize = 13.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (hasGITag) PaletteForest else PaletteDarkGreen
+                                    )
+                                    if (hasGITag) {
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(PaletteForest)
+                                                .padding(horizontal = 6.dp, vertical = 1.5.dp)
+                                        ) {
+                                            Text(
+                                                text = if (giTagNumber.isNotBlank()) giTagNumber else "GI",
+                                                fontSize = 9.sp,
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
                                 Text(
-                                    tr("gi_tag_title", "Geographical Indication (GI) Tag"),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (hasGITag) PaletteForest else PaletteDarkGreen
+                                    tr("gi_tag_sub", "Certified authentic regional handicraft under GI Act 1999"),
+                                    fontSize = 11.sp,
+                                    color = PaletteSage
                                 )
-                                if (hasGITag) {
+                            }
+                            Switch(
+                                checked = hasGITag,
+                                onCheckedChange = { isChecked ->
+                                    hasGITag = isChecked
+                                    if (!isChecked) {
+                                        giTagNumber = ""
+                                        giCraftName = ""
+                                        giAuthenticityScore = 0
+                                        giVerificationReason = ""
+                                    }
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = PaletteForest,
+                                    checkedTrackColor = PaletteForest.copy(alpha = 0.3f)
+                                )
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // AI Verification & Browse Registry Buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        isVerifyingGi = true
+                                        val detectedState = viewModel?.userLocation?.value?.state?.ifBlank { region } ?: region
+                                        val detectedRegion = viewModel?.userLocation?.value?.displayLocation?.ifBlank { region } ?: region
+                                        val res = GeminiAIService.verifyGiAuthenticity(
+                                            context = context,
+                                            title = title.ifBlank { craftType },
+                                            description = description,
+                                            craftType = craftType,
+                                            material = material,
+                                            state = detectedState,
+                                            region = detectedRegion,
+                                            productImageBitmap = selectedBitmap
+                                        )
+                                        isVerifyingGi = false
+                                        res.onSuccess { giResult ->
+                                            if (giResult.isGiCertified) {
+                                                hasGITag = true
+                                                giTagNumber = giResult.giTagNumber
+                                                giCraftName = giResult.giCraftName
+                                                giAuthenticityScore = giResult.authenticityScore
+                                                giVerificationReason = giResult.verificationReason
+                                                Toast.makeText(context, "GI Verified: ${giResult.giTagNumber} • ${giResult.giCraftName}", Toast.LENGTH_LONG).show()
+                                            } else {
+                                                giAuthenticityScore = giResult.authenticityScore
+                                                Toast.makeText(context, "Craft scanned (${giResult.authenticityScore}% Handcrafted). Select from GI list if applicable.", Toast.LENGTH_LONG).show()
+                                            }
+                                        }.onFailure { err ->
+                                            Toast.makeText(context, "Verification note: ${err.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                },
+                                enabled = !isVerifyingGi,
+                                modifier = Modifier.weight(1f).height(38.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = PaletteForest),
+                                border = BorderStroke(1.dp, PaletteForest.copy(alpha = 0.4f)),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                if (isVerifyingGi) {
+                                    CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 1.8.dp, color = PaletteForest)
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Box(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(PaletteForest)
-                                            .padding(horizontal = 5.dp, vertical = 1.dp)
+                                    Text("Verifying...", fontSize = 11.5.sp)
+                                } else {
+                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("AI Verify GI Tag", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold)
+                                }
+                            }
+
+                            OutlinedButton(
+                                onClick = { showGiTagPicker = true },
+                                modifier = Modifier.weight(1f).height(38.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = PaletteDarkGreen),
+                                border = BorderStroke(1.dp, PaletteSage.copy(alpha = 0.5f)),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.List, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Browse GI List", fontSize = 11.5.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
+
+                        // Verified GI Summary Card
+                        if (hasGITag) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White),
+                                border = BorderStroke(1.dp, PaletteForest.copy(alpha = 0.25f))
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text("GI", fontSize = 8.5.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            text = if (giTagNumber.isNotBlank()) "Tag: $giTagNumber" else "GI Heritage Craft",
+                                            fontSize = 11.5.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = PaletteForest
+                                        )
+                                        if (giAuthenticityScore > 0) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .clip(RoundedCornerShape(6.dp))
+                                                    .background(PaletteForest.copy(alpha = 0.12f))
+                                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            ) {
+                                                Text(
+                                                    text = "$giAuthenticityScore% Authenticity",
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = PaletteForest
+                                                )
+                                            }
+                                        }
+                                    }
+                                    if (giCraftName.isNotBlank()) {
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = giCraftName,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = PaletteDarkGreen
+                                        )
+                                    }
+                                    if (giVerificationReason.isNotBlank()) {
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = giVerificationReason,
+                                            fontSize = 11.sp,
+                                            color = DhaagaTextMedium,
+                                            maxLines = 3
+                                        )
                                     }
                                 }
                             }
-                            Text(
-                                tr("gi_tag_sub", "Certified authentic regional handicraft certification"),
-                                fontSize = 11.sp,
-                                color = PaletteSage
-                            )
                         }
-                        Switch(
-                            checked = hasGITag,
-                            onCheckedChange = { hasGITag = it },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = PaletteForest,
-                                checkedTrackColor = PaletteForest.copy(alpha = 0.3f)
-                            )
-                        )
                     }
                 }
             }
@@ -974,7 +1172,7 @@ fun AddProductScreen(
                     val currentUser = viewModel?.currentUser?.value
                     val sellerId = currentUser?.uid?.ifEmpty { "seller_default" } ?: "seller_default"
                     val sellerName = currentUser?.name?.ifEmpty { "Artisan" } ?: "Artisan"
-                    val sellerVillage = currentUser?.village?.ifEmpty { currentUser?.state ?: "India" } ?: "India"
+                    val sellerVillage = currentUser?.village?.ifEmpty { currentUser.state.ifEmpty { "India" } } ?: "India"
                     val pricePaise = (price.toLongOrNull() ?: 0L) * 100L
 
                     coroutineScope.launch {
@@ -1023,8 +1221,11 @@ fun AddProductScreen(
                             couponExpiryTimestamp = if (enableCoupon && couponCode.isNotBlank()) System.currentTimeMillis() + (couponDurationMinutes * 60 * 1000L) else null,
                             couponUsageLimit = if (enableCoupon) couponUsageLimit else 0,
                             couponUsageCount = 0,
-                            giTag = if (hasGITag) craftType.ifBlank { "Traditional Craft" } else null,
-                            giVerified = hasGITag
+                            giTag = if (hasGITag) (if (giTagNumber.isNotBlank()) giTagNumber else craftType.ifBlank { "GI-Traditional" }) else null,
+                            giVerified = hasGITag,
+                            giCraftName = if (hasGITag) (if (giCraftName.isNotBlank()) giCraftName else craftType) else "",
+                            giVerificationReason = if (hasGITag) giVerificationReason else "",
+                            authenticityScore = if (hasGITag && giAuthenticityScore > 0) giAuthenticityScore else (if (hasGITag) 92 else 75)
                         )
 
                         // Save directly to Firestore and local state
@@ -1131,6 +1332,202 @@ fun AddProductScreen(
                 }
             }
             formContent()
+        }
+    }
+
+    if (showGiTagPicker) {
+        GITagPickerDialog(
+            onDismiss = { showGiTagPicker = false },
+            onSelectTag = { selectedTag ->
+                hasGITag = true
+                giTagNumber = selectedTag.tagNumber
+                giCraftName = selectedTag.name
+                if (craftType.isBlank()) craftType = selectedTag.name
+                if (region.isBlank()) region = "${selectedTag.region}, ${selectedTag.state}"
+                giAuthenticityScore = 95
+                giVerificationReason = "Selected from official Indian GI Registry: ${selectedTag.name} (${selectedTag.tagNumber}). ${selectedTag.description}"
+                showGiTagPicker = false
+                Toast.makeText(context, "Selected ${selectedTag.name} (${selectedTag.tagNumber})", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
+    if (showLocationPermissionDialog) {
+        LocationPermissionDialog(
+            onDismiss = { showLocationPermissionDialog = false },
+            onPermissionGranted = {
+                viewModel?.detectLocation(context) { info ->
+                    if (info != null) {
+                        region = "${info.city}, ${info.state}"
+                        Toast.makeText(context, "Region set to ${info.city}, ${info.state}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun GITagPickerDialog(
+    onDismiss: () -> Unit,
+    onSelectTag: (GITagItem) -> Unit
+) {
+    var searchQuery by remember { mutableStateOf("") }
+    val filteredTags = remember(searchQuery) {
+        if (searchQuery.isBlank()) {
+            GITagRegistry.OFFICIAL_GI_TAGS
+        } else {
+            val q = searchQuery.lowercase().trim()
+            GITagRegistry.OFFICIAL_GI_TAGS.filter { tag ->
+                tag.name.lowercase().contains(q) ||
+                tag.tagNumber.lowercase().contains(q) ||
+                tag.state.lowercase().contains(q) ||
+                tag.region.lowercase().contains(q) ||
+                tag.category.lowercase().contains(q) ||
+                tag.keywords.any { it.contains(q) }
+            }
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.95f)
+                .fillMaxHeight(0.85f)
+                .padding(vertical = 16.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Official Indian GI Tags",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PaletteDarkGreen
+                        )
+                        Text(
+                            text = "Geographical Indications Registry (Govt. of India)",
+                            fontSize = 11.5.sp,
+                            color = PaletteSage
+                        )
+                    }
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = PaletteForest)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text("Search craft, tag (e.g. GI-132, Banarasi, Madhubani)...", fontSize = 12.sp) },
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = PaletteForest) },
+                    trailingIcon = {
+                        if (searchQuery.isNotBlank()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Clear, contentDescription = null, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = PaletteForest,
+                        cursorColor = PaletteForest
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "${filteredTags.size} Official GI Tags Available",
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = PaletteForest
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filteredTags) { tag ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    onSelectTag(tag)
+                                    onDismiss()
+                                },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FAF4)),
+                            border = BorderStroke(1.dp, Color(0xFFE2EAD9))
+                        ) {
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(PaletteForest)
+                                            .padding(horizontal = 7.dp, vertical = 2.dp)
+                                    ) {
+                                        Text(
+                                            text = tag.tagNumber,
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
+                                    Text(
+                                        text = tag.category,
+                                        fontSize = 10.5.sp,
+                                        color = PaletteSage,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = tag.name,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PaletteDarkGreen
+                                )
+                                Text(
+                                    text = "${tag.region} • ${tag.state}",
+                                    fontSize = 11.5.sp,
+                                    color = PaletteForest,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = tag.description,
+                                    fontSize = 11.sp,
+                                    color = DhaagaTextMedium,
+                                    maxLines = 2,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

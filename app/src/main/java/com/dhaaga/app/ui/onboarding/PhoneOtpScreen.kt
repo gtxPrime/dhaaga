@@ -81,7 +81,7 @@ fun PhoneOtpScreen(
 
         // Artisan Test Creds: 7668439019 with OTP 123456
         if (otp == "123456") {
-            Log.i(TAG, "🎨 Artisan test login with OTP 123456 for $formattedPhone")
+            Log.i(TAG, "[Auth] Artisan test login with OTP 123456 for $formattedPhone")
             val artisanUser = UserModel(
                 uid = "artisan_$sanitizedPhone",
                 phoneNumber = formattedPhone,
@@ -98,7 +98,7 @@ fun PhoneOtpScreen(
 
         // Buyer Test Creds: 7668439019 with OTP 696969
         if (otp == "696969") {
-            Log.i(TAG, "🛍️ Buyer test login with OTP 696969 for $formattedPhone")
+            Log.i(TAG, "[Auth] Buyer test login with OTP 696969 for $formattedPhone")
             val buyerUser = UserModel(
                 uid = "buyer_$sanitizedPhone",
                 phoneNumber = formattedPhone,
@@ -117,11 +117,11 @@ fun PhoneOtpScreen(
             isLoading = false
             if (existingUser != null) {
                 // Phone number already registered!
-                Log.i(TAG, "🔒 Number $formattedPhone already exists as ${existingUser.role}. Re-login directly!")
+                Log.i(TAG, "[Auth] Number $formattedPhone already exists as ${existingUser.role}. Re-login directly!")
                 onVerified(formattedPhone, uid, existingUser)
             } else {
                 // Brand new user registration -> will ask 'Who are you?'
-                Log.i(TAG, "🆕 Number $formattedPhone is new. Proceeding to Role Selection.")
+                Log.i(TAG, "[Auth] Number $formattedPhone is new. Proceeding to Role Selection.")
                 onVerified(formattedPhone, uid, null)
             }
         }
@@ -141,7 +141,7 @@ fun PhoneOtpScreen(
         if (firebaseAuth != null && activity != null) {
             val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
                 override fun onVerificationCompleted(credential: PhoneAuthCredential) {
-                    Log.i(TAG, "🔥 Phone Auth auto-verification completed")
+                    Log.i(TAG, "[Auth] Phone Auth auto-verification completed")
                     firebaseAuth.signInWithCredential(credential)
                         .addOnSuccessListener { authResult ->
                             val uid = authResult.user?.uid ?: "user_${sanitizedPhone}"
@@ -154,7 +154,7 @@ fun PhoneOtpScreen(
                 }
 
                 override fun onVerificationFailed(e: FirebaseException) {
-                    Log.w(TAG, "🔥 Phone Auth verification failed: ${e.message}")
+                    Log.w(TAG, "[Auth] Phone Auth verification failed: ${e.message}")
                     isLoading = false
                     // When Firebase rejects due to SMS Region policy (Error 17006) on debug builds,
                     // automatically switch to dev testing mode and pre-fill 123456 so testing continues seamlessly.
@@ -170,7 +170,7 @@ fun PhoneOtpScreen(
                     verificationId: String,
                     token: PhoneAuthProvider.ForceResendingToken
                 ) {
-                    Log.i(TAG, "🔥 OTP code sent successfully. ID: $verificationId")
+                    Log.i(TAG, "[Auth] OTP code sent successfully. ID: $verificationId")
                     storedVerificationId = verificationId
                     resendToken = token
                     isLoading = false
@@ -231,11 +231,11 @@ fun PhoneOtpScreen(
             firebaseAuth.signInWithCredential(credential)
                 .addOnSuccessListener { authResult ->
                     val uid = authResult.user?.uid ?: "user_${sanitizedPhone}"
-                    Log.i(TAG, "🔥 Firebase Phone Auth successful! UID: $uid")
+                    Log.i(TAG, "[Auth] Firebase Phone Auth successful! UID: $uid")
                     handleSuccessfulAuth(formattedPhone, uid)
                 }
                 .addOnFailureListener { e ->
-                    Log.w(TAG, "🔥 Phone Auth OTP verification failed: ${e.message}")
+                    Log.w(TAG, "[Auth] Phone Auth OTP verification failed: ${e.message}")
                     if (otp == "123456" || otp == "696969") {
                         val uid = firebaseAuth.currentUser?.uid ?: "user_${sanitizedPhone}"
                         handleSuccessfulAuth(formattedPhone, uid)
@@ -325,8 +325,8 @@ fun PhoneOtpScreen(
             if (!otpSent) {
                 // Audio Onboarding Guide with Hindi / English switch & Audio ON/OFF
                 com.dhaaga.app.ui.components.AudioGuideCard(
-                    englishText = "Please enter your 10-digit mobile number to receive an OTP code. For demonstration, you can tap either Artisan or Buyer test credentials below.",
-                    hindiText = "कृपया अपना 10 अंकों का मोबाइल नंबर दर्ज करें और ओटीपी प्राप्त करें। टेस्टिंग के लिए आप नीचे दिए गए कारीगर या खरीदार टेस्ट क्रेडेंशियल्स पर भी टैप कर सकते हैं।",
+                    englishText = "Please enter your 10-digit mobile number to receive a secure OTP code for account verification.",
+                    hindiText = "कृपया अपना 10 अंकों का मोबाइल नंबर दर्ज करें और सुरक्षित सत्यापन के लिए ओटीपी प्राप्त करें।",
                     initialLanguage = viewModel.selectedLanguage.value,
                     autoPlay = false
                 )

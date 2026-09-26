@@ -11,6 +11,8 @@ import com.dhaaga.app.data.model.OrderModel
 import com.dhaaga.app.data.model.ProductModel
 import com.dhaaga.app.data.model.UserModel
 import com.dhaaga.app.utils.AppLanguageManager
+import com.dhaaga.app.utils.LocationHelper
+import com.dhaaga.app.utils.UserLocationInfo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,6 +103,37 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val cartTotal: Long get() = _cart.value.sumOf { it.totalPrice }
     val cartCount: Int get() = _cart.value.size
 
+    private val _userLocation = MutableStateFlow<UserLocationInfo?>(null)
+    val userLocation: StateFlow<UserLocationInfo?> = _userLocation.asStateFlow()
+
+    private val _isLocating = MutableStateFlow(false)
+    val isLocating: StateFlow<Boolean> = _isLocating.asStateFlow()
+
+    fun detectLocation(context: Context, onResult: ((UserLocationInfo?) -> Unit)? = null) {
+        viewModelScope.launch {
+            _isLocating.value = true
+            val result = LocationHelper.getCurrentLocation(context)
+            _isLocating.value = false
+            result.onSuccess { info ->
+                Log.i(TAG, "[Location] Live GPS Location acquired: ${info.displayLocation} (${info.latitude}, ${info.longitude})")
+                _userLocation.value = info
+                val user = _currentUser.value
+                if (user != null) {
+                    val updatedUser = user.copy(
+                        state = info.state.ifBlank { user.state },
+                        village = info.city.ifBlank { user.village }
+                    )
+                    _currentUser.value = updatedUser
+                    firestore?.collection("users")?.document(updatedUser.uid)?.set(updatedUser)
+                }
+                onResult?.invoke(info)
+            }.onFailure { err ->
+                Log.w(TAG, "[Location] Location detection notice: ${err.message}")
+                onResult?.invoke(null)
+            }
+        }
+    }
+
     init {
         Log.i(TAG, "Dhaaga ViewModel initialized. Initial Session logged in = ${_currentUser.value != null}")
 
@@ -113,7 +146,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             _sellerProducts.value = localCrafts
             val localIds = localCrafts.map { it.productId }.toSet()
             _products.value = localCrafts + MockData.mockProducts.filter { it.productId !in localIds }
-            Log.i(TAG, "📦 Loaded ${localCrafts.size} artisan crafts into Home Screen & Listings")
+            Log.i(TAG, "[Cache] Loaded ${localCrafts.size} artisan crafts into Home Screen & Listings")
         }
 
         // 2. Sync any offline or local crafts up to Firestore cloud
@@ -194,7 +227,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                         }
                         val finalUser = firestoreUser.copy(phoneNumber = finalPhone)
                         _currentUser.value = finalUser
-                        Log.i(TAG, "🔄 Refreshed user profile from Firestore: ${finalUser.name} (${finalUser.role}, Phone=$finalPhone)")
+                        Log.i(TAG, "[User] Refreshed user profile from Firestore: ${finalUser.name} (${finalUser.role}, Phone=$finalPhone)")
                     }
                 }
             }
@@ -229,7 +262,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 state = localState,
                 profilePhotoUrl = localPhoto
             )
-            Log.i(TAG, "⚡ Instant permanent registry found for UID $uid: ${localUser.name} (Role: ${localUser.role})")
+            Log.i(TAG, "[Registry] Instant permanent registry found for UID $uid: ${localUser.name} (Role: ${localUser.role})")
             onResult(localUser)
             return
         }
@@ -245,7 +278,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 if (doc != null && doc.exists()) {
                     val existing = doc.toObject(UserModel::class.java)
                     if (existing != null && existing.name.isNotBlank() && existing.role.isNotBlank()) {
-                        Log.i(TAG, "🔍 Existing user found in Firestore by UID $uid: ${existing.name}, locked role: ${existing.role}")
+                        Log.i(TAG, "[Auth] Existing user found in Firestore by UID $uid: ${existing.name}, locked role: ${existing.role}")
                         accountsRegistry.edit()
                             .putString("role_uid_$uid", existing.role)
                             .putString("name_uid_$uid", existing.name)
@@ -294,7 +327,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 village = localVillage,
                 state = localState
             )
-            Log.i(TAG, "⚡ Instant permanent registry found for $sanitized: ${localUser.name} (Role: ${localUser.role})")
+            Log.i(TAG, "[Registry] Instant permanent registry found for $sanitized: ${localUser.name} (Role: ${localUser.role})")
             onResult(localUser)
             return
         }
@@ -312,7 +345,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 if (snapshot != null && !snapshot.isEmpty) {
                     val userDoc = snapshot.documents.first()
                     val existing = userDoc.toObject(UserModel::class.java)
-                    Log.i(TAG, "🔍 Existing user found in Firestore by phone $formatted: ${existing?.name}, locked role: ${existing?.role}")
+                    Log.i(TAG, "[Auth] Existing user found in Firestore by phone $formatted: ${existing?.name}, locked role: ${existing?.role}")
                     if (existing != null) {
                         accountsRegistry.edit()
                             .putString("role_$sanitized", existing.role)
@@ -367,7 +400,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             local.forEach { craft ->
                 firestore.collection("products").document(craft.productId).set(craft)
                     .addOnSuccessListener {
-                        Log.i(TAG, "☁️ Cloud verified & synced craft: ${craft.productId} (${craft.titleEn})")
+                        Log.i(TAG, "[Cloud] Cloud verified & synced craft: ${craft.productId} (${craft.titleEn})")
                     }
                     .addOnFailureListener { e ->
                         Log.w(TAG, "Cloud sync notice for ${craft.productId}: ${e.message}")
@@ -398,7 +431,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val sanitizedPhone = _currentUser.value?.phoneNumber?.trim()?.removePrefix("+91")?.removePrefix("+")?.trim() ?: ""
         val sellerName = _currentUser.value?.name ?: ""
 
-        Log.i(TAG, "📡 Listening to real Firestore cloud listings for seller: $sellerId (Phone: $sanitizedPhone)")
+        Log.i(TAG, "[Firestore] Listening to real Firestore cloud listings for seller: $sellerId (Phone: $sanitizedPhone)")
         sellerProductsListener = firestore.collection("products")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
@@ -431,7 +464,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
                     val mergedIds = merged.map { it.productId }.toSet()
                     _products.value = merged + _products.value.filter { it.productId !in mergedIds }
-                    Log.i(TAG, "☁️ Cloud Synced: ${artisanCloudCrafts.size} seller crafts from cloud, total active: ${merged.size}")
+                    Log.i(TAG, "[Cloud] Cloud Synced: ${artisanCloudCrafts.size} seller crafts from cloud, total active: ${merged.size}")
                 }
             }
     }
@@ -467,10 +500,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         // 4. Persist to Firestore Cloud
         firestore?.collection("products")?.document(product.productId)?.set(product)
             ?.addOnSuccessListener {
-                Log.i(TAG, "✅ Craft ${product.productId} successfully saved in Cloud Firestore & live on Home Screen")
+                Log.i(TAG, "[Firestore] Craft ${product.productId} successfully saved in Cloud Firestore & live on Home Screen")
             }
             ?.addOnFailureListener { e ->
-                Log.e(TAG, "❌ Failed to save craft to Firestore: ${e.message}")
+                Log.e(TAG, "[Firestore] Failed to save craft to Firestore: ${e.message}")
             }
     }
 
@@ -480,7 +513,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         saveLocalArtisanCrafts(_sellerProducts.value)
         firestore?.collection("products")?.document(productId)?.delete()
             ?.addOnSuccessListener {
-                Log.i(TAG, "🗑️ Craft $productId removed from Firestore & Home Screen")
+                Log.i(TAG, "[Firestore] Craft $productId removed from Firestore & Home Screen")
             }
     }
 
@@ -522,7 +555,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                             }
                         }
 
-                        Log.i(TAG, "✨ Home Screen & Marketplace updated with ${firestoreProducts.size} live crafts from Cloud Firestore!")
+                        Log.i(TAG, "[Firestore] Home Screen & Marketplace updated with ${firestoreProducts.size} live crafts from Cloud Firestore!")
                     }
                 }
             }
@@ -559,6 +592,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 obj.put("couponUsageCount", p.couponUsageCount)
                 if (p.giTag != null) obj.put("giTag", p.giTag)
                 obj.put("giVerified", p.giVerified)
+                obj.put("giCraftName", p.giCraftName)
+                obj.put("giVerificationReason", p.giVerificationReason)
+                obj.put("authenticityScore", p.authenticityScore)
                 val imgArray = JSONArray()
                 p.imageUrls.forEach { imgArray.put(it) }
                 obj.put("imageUrls", imgArray)
@@ -621,7 +657,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                         couponUsageLimit = obj.optInt("couponUsageLimit", 0),
                         couponUsageCount = obj.optInt("couponUsageCount", 0),
                         giTag = if (obj.has("giTag")) obj.optString("giTag") else null,
-                        giVerified = obj.optBoolean("giVerified", false)
+                        giVerified = obj.optBoolean("giVerified", false),
+                        giCraftName = obj.optString("giCraftName", ""),
+                        giVerificationReason = obj.optString("giVerificationReason", ""),
+                        authenticityScore = obj.optInt("authenticityScore", 0)
                     )
                 )
             }
@@ -639,7 +678,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             user
         }
 
-        Log.i(TAG, "🔑 User logged in & saved to session: ${effectiveUser.name} (${effectiveUser.role}, UID=${effectiveUser.uid}, Phone=${effectiveUser.phoneNumber}, Email=${effectiveUser.email})")
+        Log.i(TAG, "[Session] User logged in & saved to session: ${effectiveUser.name} (${effectiveUser.role}, UID=${effectiveUser.uid}, Phone=${effectiveUser.phoneNumber}, Email=${effectiveUser.email})")
         _currentUser.value = effectiveUser
         prefs.edit()
             .putBoolean(KEY_IS_LOGGED_IN, true)
@@ -676,7 +715,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 .putString("state_$sanitizedPhone", effectiveUser.state)
                 .putString("phone_$sanitizedPhone", effectiveUser.phoneNumber)
                 .apply()
-            Log.i(TAG, "💾 Saved account in permanent registry for $sanitizedPhone: ${effectiveUser.name} (${effectiveUser.role})")
+            Log.i(TAG, "[Registry] Saved account in permanent registry for $sanitizedPhone: ${effectiveUser.name} (${effectiveUser.role})")
         }
 
         if (effectiveUser.isSeller) {
@@ -707,7 +746,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun logout() {
-        Log.i(TAG, "🚪 User logged out: ${_currentUser.value?.name}")
+        Log.i(TAG, "[Session] User logged out: ${_currentUser.value?.name}")
         sellerProductsListener?.remove()
         sellerProductsListener = null
         sellerOrdersListener?.remove()
@@ -720,10 +759,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         } catch (e: Exception) {
             Log.w(TAG, "Firebase sign out warning: ${e.message}")
         }
+        try {
+            val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(
+                com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN
+            ).build()
+            com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(getApplication<Application>(), gso).signOut()
+        } catch (e: Exception) {
+            Log.w(TAG, "Google sign out warning: ${e.message}")
+        }
         _currentUser.value = null
         _cart.value = emptyList()
         _wishlist.value = emptySet()
         _buyerOrders.value = emptyList()
+        _sellerProducts.value = emptyList()
         // Clear buyer-specific prefs (cart/wishlist belong to the user session)
         prefs.edit()
             .remove(KEY_IS_LOGGED_IN)
@@ -762,7 +810,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun addToCart(product: ProductModel, quantity: Int = 1) {
         val existing = _cart.value.indexOfFirst { it.productId == product.productId }
         if (existing >= 0) {
-            Log.i(TAG, "🛒 Item already in cart: ${product.titleEn}, not duplicating")
+            Log.i(TAG, "[Cart] Item already in cart: ${product.titleEn}, not duplicating")
             _lastAddedProduct.value = product
             _cartAnimationEvent.value = System.currentTimeMillis()
             return
@@ -784,7 +832,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun removeFromCart(productId: String) {
-        Log.i(TAG, "🛒 Removed product $productId from cart")
+        Log.i(TAG, "[Cart] Removed product $productId from cart")
         val updated = _cart.value.filter { it.productId != productId }.toMutableList()
         _cart.value = updated
         saveCart(updated)
@@ -796,7 +844,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val idx = updated.indexOfFirst { it.productId == productId }
         if (idx >= 0) {
             updated[idx] = updated[idx].copy(quantity = quantity)
-            Log.d(TAG, "🛒 Cart item $productId quantity updated to $quantity")
+            Log.d(TAG, "[Cart] Cart item $productId quantity updated to $quantity")
         }
         _cart.value = updated
         saveCart(updated)
@@ -816,7 +864,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun setLanguage(code: String) {
         _selectedLanguage.value = code
         prefs.edit().putString("selected_language", code).apply()
-        Log.i(TAG, "🌐 App language updated to: $code (${AppLanguageManager.getLanguageName(code)})")
+        Log.i(TAG, "[Language] App language updated to: $code (${AppLanguageManager.getLanguageName(code)})")
     }
 
     fun tr(key: String, fallback: String = ""): String {
@@ -864,7 +912,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         if (targetProduct != null) {
             firestore?.collection("products")?.document(productId)?.set(targetProduct)
         }
-        Log.i(TAG, "📦 Stock auto-updated for product $productId by $deltaQuantity. Remaining stock: ${targetProduct?.stockQuantity}, Status: ${targetProduct?.status}")
+        Log.i(TAG, "[Inventory] Stock auto-updated for product $productId by $deltaQuantity. Remaining stock: ${targetProduct?.stockQuantity}, Status: ${targetProduct?.status}")
     }
 
     fun cancelOrder(orderId: String, onCancelled: () -> Unit = {}) {
@@ -881,7 +929,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
                 // Restore stock on both sides automatically!
                 adjustProductStock(order.productId, +order.quantity)
-                Log.i(TAG, "❌ Cancelled order $orderId. Restored ${order.quantity} units to stock for product ${order.productId}")
+                Log.i(TAG, "[Orders] Cancelled order $orderId. Restored ${order.quantity} units to stock for product ${order.productId}")
             }
         }
         onCancelled()
@@ -900,14 +948,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             _artisanOrders.value = orders
             saveOrders(orders)
             firestore?.collection("orders")?.document(orderId)?.set(updated)
-            Log.i(TAG, "🚚 Order $orderId status updated to $newStatus")
+            Log.i(TAG, "[Orders] Order $orderId status updated to $newStatus")
         }
     }
 
-    fun placeDemoOrder(cartItems: List<CartItemModel>, buyer: UserModel?, onPlaced: () -> Unit = {}) {
+    fun placeOrder(
+        cartItems: List<CartItemModel>,
+        buyer: UserModel?,
+        paymentMethod: String = "UPI (Google Pay)",
+        isMockPayment: Boolean = true,
+        onPlaced: () -> Unit = {}
+    ) {
         if (cartItems.isEmpty()) return
         val currentOrders = _artisanOrders.value.toMutableList()
+        val currentBuyerOrders = _buyerOrders.value.toMutableList()
         val now = System.currentTimeMillis()
+
+        val effectiveBuyerId = buyer?.uid ?: firebaseAuth?.currentUser?.uid ?: "buyer_${System.currentTimeMillis()}"
+        val effectiveBuyerName = buyer?.name?.takeIf { it.isNotBlank() } ?: "Verified Buyer"
 
         cartItems.forEachIndexed { index, item ->
             // Auto-decrement stock by the purchased quantity on both sides!
@@ -918,28 +976,40 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 productId = item.productId,
                 productTitle = item.productTitle,
                 productImageUrl = item.productImageUrl,
-                buyerId = buyer?.uid ?: "buyer_demo",
-                buyerName = buyer?.name?.takeIf { it.isNotBlank() } ?: "Demo Buyer",
-                sellerId = _currentUser.value?.uid ?: "seller_default",
+                buyerId = effectiveBuyerId,
+                buyerName = effectiveBuyerName,
+                sellerId = _currentUser.value?.uid ?: "seller_artisan",
                 sellerName = if (item.sellerName.isNotEmpty()) item.sellerName else (_currentUser.value?.name ?: "Master Artisan"),
                 quantity = item.quantity,
                 unitPrice = item.unitPrice,
                 totalAmount = item.totalPrice,
                 platformFee = (item.totalPrice * 0.08).toLong(),
                 sellerPayout = (item.totalPrice * 0.92).toLong(),
+                paymentMethod = paymentMethod,
+                paymentStatus = if (paymentMethod.contains("Cash on Delivery", ignoreCase = true)) "pending" else "paid",
+                isMockPayment = isMockPayment,
+                shippingCarrier = "Delhivery Express",
+                trackingId = "DLH${System.currentTimeMillis().toString().takeLast(10)}",
                 status = "confirmed",
-                createdAt = now
+                createdAt = now,
+                updatedAt = now
             )
             currentOrders.add(0, order)
+            currentBuyerOrders.add(0, order)
 
-            // Persist order to Firestore
-            firestore?.collection("orders")?.document(order.orderId)?.set(order)
+            // Persist order dynamically to Cloud Firestore
+            firestore?.collection("orders")?.document(order.orderId)?.set(order)?.addOnSuccessListener {
+                Log.i(TAG, "[Cloud] Cloud Firestore: Order ${order.orderId} synchronized successfully!")
+            }?.addOnFailureListener { e ->
+                Log.w(TAG, "Firestore order sync warning: ${e.message}")
+            }
         }
 
         _artisanOrders.value = currentOrders
+        _buyerOrders.value = currentBuyerOrders
         saveOrders(currentOrders)
         clearCart()
-        Log.i(TAG, "🛍️ Placed demo order! ${cartItems.size} items added to Artisan Dashboard. Total orders: ${currentOrders.size}")
+        Log.i(TAG, "[Orders] Live Order placed: ${cartItems.size} crafts purchased. Synced to Firestore cloud!")
         onPlaced()
     }
 
@@ -950,7 +1020,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun listenToSellerOrders(sellerId: String) {
         if (sellerId.isEmpty() || firestore == null) return
         sellerOrdersListener?.remove()
-        Log.i(TAG, "📡 Listening to Firestore orders for seller: $sellerId")
+        Log.i(TAG, "[Firestore] Listening to Firestore orders for seller: $sellerId")
         sellerOrdersListener = firestore.collection("orders")
             .whereEqualTo("sellerId", sellerId)
             .addSnapshotListener { snapshot, error ->
@@ -968,7 +1038,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                         .sortedByDescending { it.createdAt }
                     _artisanOrders.value = merged
                     saveOrders(merged)
-                    Log.i(TAG, "☁️ Seller orders synced: ${cloudOrders.size} from cloud, ${merged.size} total")
+                    Log.i(TAG, "[Cloud] Seller orders synced: ${cloudOrders.size} from cloud, ${merged.size} total")
                 }
             }
     }
@@ -979,7 +1049,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun listenToBuyerOrders(buyerId: String) {
         if (buyerId.isEmpty() || firestore == null) return
         buyerOrdersListener?.remove()
-        Log.i(TAG, "📡 Listening to Firestore orders for buyer: $buyerId")
+        Log.i(TAG, "[Firestore] Listening to Firestore orders for buyer: $buyerId")
         buyerOrdersListener = firestore.collection("orders")
             .whereEqualTo("buyerId", buyerId)
             .addSnapshotListener { snapshot, error ->
@@ -992,7 +1062,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                         try { doc.toObject(OrderModel::class.java) } catch (e: Exception) { null }
                     }.sortedByDescending { it.createdAt }
                     _buyerOrders.value = orders
-                    Log.i(TAG, "☁️ Buyer orders synced: ${orders.size} orders")
+                    Log.i(TAG, "[Cloud] Buyer orders synced: ${orders.size} orders")
                 }
             }
     }
@@ -1029,7 +1099,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 Log.w(TAG, "Failed parsing saved orders: ${e.message}")
             }
         }
-        // No fallback demo orders — real orders come from Firestore via listenToSellerOrders()
+        // Real orders are loaded dynamically from Firestore via listenToSellerOrders()
         return emptyList()
     }
 

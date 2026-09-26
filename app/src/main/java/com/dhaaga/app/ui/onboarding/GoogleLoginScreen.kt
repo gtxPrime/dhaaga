@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -110,7 +111,7 @@ fun GoogleLoginScreen(
             isLoading = false
             if (existingUser != null && existingUser.name.isNotBlank() && existingUser.role.isNotBlank()) {
                 // Returning registered user: Account type is locked, bypass role selection & profile
-                Log.i(TAG, "🔒 Returning user found ($uid, ${existingUser.name}, Role=${existingUser.role}). Direct login!")
+                Log.i(TAG, "[Auth] Returning user found ($uid, ${existingUser.name}, Role=${existingUser.role}). Direct login!")
                 val userToLogin = if (photoUrl.isNotBlank() && (existingUser.profilePhotoUrl.isBlank() || !existingUser.profilePhotoUrl.contains("=s800"))) {
                     existingUser.copy(profilePhotoUrl = photoUrl)
                 } else {
@@ -120,7 +121,7 @@ fun GoogleLoginScreen(
                 onReturningUser(userToLogin)
             } else {
                 // Brand new user: Proceed to Role Selection (Artisan or Buyer)
-                Log.i(TAG, "🆕 New Google user ($uid, email=$email, name=$displayName, photo=$photoUrl). Navigating to Role Selection.")
+                Log.i(TAG, "[Auth] New Google user ($uid, email=$email, name=$displayName, photo=$photoUrl). Navigating to Role Selection.")
                 onNewUser(uid, email, displayName, photoUrl)
             }
         }
@@ -168,7 +169,7 @@ fun GoogleLoginScreen(
                     // User explicitly cancelled the dialog
                     errorMessage = null
                 } else {
-                    errorMessage = "Google sign-in error (${e.statusCode}). You can use Demo Login below for instant access."
+                    errorMessage = "Google sign-in error (${e.statusCode}). Please check your connection and try again."
                 }
             }
         } else {
@@ -201,7 +202,7 @@ fun GoogleLoginScreen(
                 ) {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             tint = DhaagaTextDark
                         )
@@ -315,7 +316,7 @@ fun GoogleLoginScreen(
                             }
                         } else {
                             isLoading = false
-                            errorMessage = "Google Play Services is not available on this device. Use Demo Login below."
+                            errorMessage = "Google Play Services is not available on this device. Please check Google Play Services."
                         }
                     },
                 contentAlignment = Alignment.Center
@@ -381,104 +382,6 @@ fun GoogleLoginScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(36.dp))
-
-            // Divider for Quick Testing
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = DhaagaDivider.copy(alpha = 0.5f))
-                Text(
-                    text = " Quick Demo / Offline Access ",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = DhaagaTextLight
-                )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = DhaagaDivider.copy(alpha = 0.5f))
-            }
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            // Quick Demo Buttons for Artisan and Buyer (ensures zero blockers on emulators without Play Services)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Quick Artisan
-                OutlinedButton(
-                    onClick = {
-                        val artisan = UserModel(
-                            uid = "artisan_google_demo",
-                            email = "savita.artisan@gmail.com",
-                            phoneNumber = "+91 9876543210",
-                            name = "Savita Dhodi",
-                            role = "seller",
-                            village = "Mokhada",
-                            state = "Maharashtra",
-                            craftTypes = listOf("Warli Art")
-                        )
-                        viewModel.loginAs(artisan)
-                        onReturningUser(artisan)
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = DhaagaPrimary)
-                ) {
-                    Icon(imageVector = Icons.Default.Storefront, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "Demo Artisan", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                }
-
-                // Quick Buyer
-                OutlinedButton(
-                    onClick = {
-                        val buyer = UserModel(
-                            uid = "buyer_google_demo",
-                            email = "rahul.buyer@gmail.com",
-                            phoneNumber = "+91 9123456780",
-                            name = "Rahul Sharma",
-                            role = "buyer",
-                            village = "Bengaluru",
-                            state = "Karnataka"
-                        )
-                        viewModel.loginAs(buyer)
-                        onReturningUser(buyer)
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = DhaagaPrimary)
-                ) {
-                    Icon(imageVector = Icons.Default.ShoppingBag, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "Demo Buyer", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Test New User Onboarding Button
-            TextButton(
-                onClick = {
-                    val randomId = (1000..9999).random()
-                    onNewUser(
-                        "new_google_user_$randomId",
-                        "user$randomId@gmail.com",
-                        "Priya Verma",
-                        ""
-                    )
-                }
-            ) {
-                Text(
-                    text = "Test New User Flow (Choose Artisan / Buyer)",
-                    fontSize = 12.sp,
-                    color = DhaagaTextMedium
-                )
-            }
         }
     }
 }

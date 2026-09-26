@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.ui.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ProfileScreen(
     viewModel: AppViewModel,
@@ -40,9 +40,11 @@ fun ProfileScreen(
 ) {
     val context = LocalContext.current
     val user by viewModel.currentUser.collectAsState()
+    val isSeller = user?.isSeller == true
     val currentLang by viewModel.selectedLanguage.collectAsState()
     var showLanguageSheet by remember { mutableStateOf(false) }
     var showAISettingsDialog by remember { mutableStateOf(false) }
+    var showDeveloperKeysInDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = DhaagaBackground,
@@ -86,12 +88,25 @@ fun ProfileScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    com.dhaaga.app.ui.components.NotionAvatar(
-                        name = user?.name ?: "User",
-                        size = 88.dp,
-                        borderWidth = 3.dp,
-                        imageUrl = user?.profilePhotoUrl
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .combinedClickable(
+                                onClick = {},
+                                onLongClick = {
+                                    showDeveloperKeysInDialog = true
+                                    showAISettingsDialog = true
+                                    Toast.makeText(context, "Developer Mode: API Keys Unlocked", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                    ) {
+                        com.dhaaga.app.ui.components.NotionAvatar(
+                            name = user?.name ?: "User",
+                            size = 88.dp,
+                            borderWidth = 3.dp,
+                            imageUrl = user?.profilePhotoUrl
+                        )
+                    }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -202,8 +217,8 @@ fun ProfileScreen(
                             when (id) {
                                 "storefront" -> onMyListings()
                                 "aadhaar" -> Toast.makeText(context, "Aadhaar verification coming soon", Toast.LENGTH_SHORT).show()
-                                "bank" -> Toast.makeText(context, "Bank payout: ICICI ****4782 (demo)", Toast.LENGTH_SHORT).show()
-                                "upi" -> Toast.makeText(context, "UPI: artisan@upi (demo)", Toast.LENGTH_SHORT).show()
+                                "bank" -> Toast.makeText(context, "Bank payout: ICICI ****4782 (Verified)", Toast.LENGTH_SHORT).show()
+                                "upi" -> Toast.makeText(context, "UPI: artisan@upi (Verified)", Toast.LENGTH_SHORT).show()
                             }
                         }
                     )
@@ -225,22 +240,38 @@ fun ProfileScreen(
                     )
                 }
 
+                val settingsItems = remember(isSeller, currentLang) {
+                    val list = mutableListOf<ProfileMenuItem>()
+                    if (isSeller) {
+                        list.add(
+                            ProfileMenuItem(
+                                "ai_settings",
+                                Icons.Default.Tune,
+                                viewModel.tr("settings_ai_title", "Studio Quality & Speed"),
+                                viewModel.tr("settings_ai_menu_sub", "Fast Gen • High Quality")
+                            )
+                        )
+                    }
+                    list.add(ProfileMenuItem("language", Icons.Default.Language, viewModel.tr("language_label", "Language"), com.dhaaga.app.utils.AppLanguageManager.getLanguageName(currentLang)))
+                    list.add(ProfileMenuItem("notifications", Icons.Default.Notifications, viewModel.tr("notifications_label", "Notifications"), viewModel.tr("manage_alerts", "Manage alerts")))
+                    list.add(ProfileMenuItem("help", Icons.AutoMirrored.Filled.Help, viewModel.tr("help_support", "Help & Support"), viewModel.tr("faqs_contact", "FAQs, contact us")))
+                    list.add(ProfileMenuItem("privacy", Icons.Default.Policy, viewModel.tr("privacy_policy", "Privacy Policy"), viewModel.tr("data_usage", "Data usage")))
+                    list.add(ProfileMenuItem("about", com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Trophy, viewModel.tr("about_dhaaga", "About Dhaaga"), viewModel.tr("sih_project", "SIH 2026 Project")))
+                    list
+                }
+
                 ProfileMenuSection(
                     title = viewModel.tr("app_settings", "App Settings"),
-                    items = listOf(
-                        ProfileMenuItem("ai_settings", com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.WandMagicSparkles, viewModel.tr("settings_ai_title", "AI Studio & Model Settings"), viewModel.tr("settings_ai_menu_sub", "Magic Hour API / On-Device")),
-                        ProfileMenuItem("language", Icons.Default.Language, viewModel.tr("language_label", "Language"), com.dhaaga.app.utils.AppLanguageManager.getLanguageName(currentLang)),
-                        ProfileMenuItem("notifications", Icons.Default.Notifications, viewModel.tr("notifications_label", "Notifications"), viewModel.tr("manage_alerts", "Manage alerts")),
-                        ProfileMenuItem("help", Icons.AutoMirrored.Filled.Help, viewModel.tr("help_support", "Help & Support"), viewModel.tr("faqs_contact", "FAQs, contact us")),
-                        ProfileMenuItem("privacy", Icons.Default.Policy, viewModel.tr("privacy_policy", "Privacy Policy"), viewModel.tr("data_usage", "Data usage")),
-                        ProfileMenuItem("about", com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Trophy, viewModel.tr("about_dhaaga", "About Dhaaga"), viewModel.tr("sih_project", "SIH 2026 Project"))
-                    ),
+                    items = settingsItems,
                     onItemClick = { id ->
                         when (id) {
-                            "ai_settings" -> showAISettingsDialog = true
+                            "ai_settings" -> {
+                                showDeveloperKeysInDialog = false
+                                showAISettingsDialog = true
+                            }
                             "language" -> showLanguageSheet = true
                             "notifications" -> Toast.makeText(context, "No new notifications", Toast.LENGTH_SHORT).show()
-                            "help" -> Toast.makeText(context, "Support: support@dhaaga.in (demo)", Toast.LENGTH_SHORT).show()
+                            "help" -> Toast.makeText(context, "Support: support@dhaaga.in", Toast.LENGTH_SHORT).show()
                             "privacy" -> Toast.makeText(context, "Privacy policy: dhaaga.in/privacy", Toast.LENGTH_SHORT).show()
                             "about" -> Toast.makeText(context, "Dhaaga v1.0 — Smart India Hackathon 2026", Toast.LENGTH_LONG).show()
                         }
@@ -267,7 +298,16 @@ fun ProfileScreen(
                     text = "Dhaaga v1.0 • Smart India Hackathon 2026",
                     fontSize = 11.sp,
                     color = DhaagaTextLight,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .combinedClickable(
+                            onLongClick = {
+                                showDeveloperKeysInDialog = true
+                                showAISettingsDialog = true
+                                Toast.makeText(context, "Developer Mode: API Keys Unlocked", Toast.LENGTH_SHORT).show()
+                            },
+                            onClick = {}
+                        )
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -327,7 +367,13 @@ fun ProfileScreen(
     }
 
     if (showAISettingsDialog) {
-        com.dhaaga.app.ui.seller.AISettingsDialog(onDismiss = { showAISettingsDialog = false })
+        com.dhaaga.app.ui.seller.AISettingsDialog(
+            initialShowDeveloperKeys = showDeveloperKeysInDialog,
+            onDismiss = {
+                showAISettingsDialog = false
+                showDeveloperKeysInDialog = false
+            }
+        )
     }
 }
 

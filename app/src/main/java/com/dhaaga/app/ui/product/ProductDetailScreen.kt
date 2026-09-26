@@ -13,9 +13,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -103,6 +102,7 @@ fun ProductDetailScreen(
     var showStory by remember { mutableStateOf(true) }
     var isAudioPlaying by remember { mutableStateOf(false) }
     var isFullscreenImageOpen by remember { mutableStateOf(false) }
+    var showGiDetailsDialog by remember { mutableStateOf(false) }
 
     val images = remember(product) {
         if (product.imageUrls.isNotEmpty()) product.imageUrls else listOf(product.primaryImageUrl)
@@ -246,14 +246,15 @@ fun ProductDetailScreen(
                             )
                     )
 
-                    // GI Certified Badge (Top Left)
-                    if (product.hasGITag) {
+                    // GI Certified Badge (Top Left - Clickable)
+                    if (product.hasGITag || product.giVerified || !product.giTag.isNullOrBlank()) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopStart)
                                 .padding(12.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(PaletteForest)
+                                .clickable { showGiDetailsDialog = true }
                                 .padding(horizontal = 10.dp, vertical = 6.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -265,10 +266,17 @@ fun ProductDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "GI Certified — ${product.giTag}",
+                                    text = "GI Certified — ${product.giTag ?: "Heritage"}",
                                     fontSize = 11.sp,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.8f),
+                                    modifier = Modifier.size(12.dp)
                                 )
                             }
                         }
@@ -491,6 +499,79 @@ fun ProductDetailScreen(
                         }
                     }
 
+                    // GI Certified Heritage Banner
+                    if (product.hasGITag || product.giVerified || !product.giTag.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { showGiDetailsDialog = true },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF2F7EF)),
+                            border = BorderStroke(1.dp, PaletteForest.copy(alpha = 0.35f))
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(12.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(CircleShape)
+                                        .background(PaletteForest),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Verified,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = "GI CERTIFIED HERITAGE",
+                                            fontSize = 10.5.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = PaletteForest,
+                                            letterSpacing = 0.8.sp
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(PaletteForest.copy(alpha = 0.15f))
+                                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                        ) {
+                                            Text(
+                                                text = product.giTag ?: "GI-Certified",
+                                                fontSize = 9.5.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = PaletteForest
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = if (product.giCraftName.isNotBlank()) product.giCraftName else "${product.craftType} (${product.region})",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PaletteDarkGreen
+                                    )
+                                }
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                    contentDescription = "Details",
+                                    tint = PaletteForest,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    }
+
                     // Available Discount Coupon Card with Copy/Apply
                     if (product.isCouponValid) {
                         Spacer(modifier = Modifier.height(12.dp))
@@ -648,7 +729,7 @@ fun ProductDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.MenuBook,
+                                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
                                     contentDescription = null,
                                     tint = PaletteForest,
                                     modifier = Modifier.size(18.dp)
@@ -1071,6 +1152,140 @@ fun ProductDetailScreen(
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold
                         )
+                    }
+                }
+            }
+        }
+    }
+
+    if (showGiDetailsDialog) {
+        Dialog(
+            onDismissRequest = { showGiDetailsDialog = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth(0.92f)
+                    .clip(RoundedCornerShape(24.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(PaletteForest),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.Verified, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text("GI Heritage Verified", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PaletteDarkGreen)
+                                Text("Govt. of India Statutory Protection", fontSize = 11.sp, color = PaletteSage)
+                            }
+                        }
+                        IconButton(onClick = { showGiDetailsDialog = false }) {
+                            Icon(Icons.Default.Close, contentDescription = "Close", tint = PaletteForest)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FAF4)),
+                        border = BorderStroke(1.dp, Color(0xFFE2EAD9))
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(PaletteForest)
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = product.giTag ?: "GI Verified",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                                Text(
+                                    text = "${product.authenticityScore}% Shilpi Score",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PaletteForest
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = if (product.giCraftName.isNotBlank()) product.giCraftName else product.craftType,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PaletteDarkGreen
+                            )
+                            Text(
+                                text = "Cluster: ${product.region} • ${product.sellerVillage}",
+                                fontSize = 12.sp,
+                                color = PaletteForest,
+                                fontWeight = FontWeight.Medium
+                            )
+                            if (product.giVerificationReason.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = product.giVerificationReason,
+                                    fontSize = 12.sp,
+                                    color = DhaagaTextMedium,
+                                    lineHeight = 17.sp
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(PaletteForest.copy(alpha = 0.06f))
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = "Geographical Indications (GI) protect traditional community handlooms and crafts under the Indian GI Act of 1999. Artisans in this verified cluster preserve generational weaving, carving, and natural dye techniques with zero middleman dilution.",
+                            fontSize = 11.sp,
+                            color = PaletteDarkGreen,
+                            lineHeight = 16.sp
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { showGiDetailsDialog = false },
+                        modifier = Modifier.fillMaxWidth().height(46.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = PaletteForest)
+                    ) {
+                        Text("Understood", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }

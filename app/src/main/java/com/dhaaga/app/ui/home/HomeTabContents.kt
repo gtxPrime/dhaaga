@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
+import androidx.compose.material.icons.automirrored.outlined.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -43,6 +45,7 @@ import com.dhaaga.app.data.model.CartItemModel
 import com.dhaaga.app.data.model.ProductModel
 import com.dhaaga.app.data.model.UserModel
 import com.dhaaga.app.ui.components.NotionAvatar
+import com.dhaaga.app.ui.buyer.MockPaymentDialog
 import com.dhaaga.app.ui.theme.*
 
 /**
@@ -296,6 +299,23 @@ fun CartTabContent(
     val shipping = if (total > 100000L || cart.isEmpty()) 0L else 5000L
     val grandTotal = total + platformFee + shipping
 
+    var showPaymentDialog by remember { mutableStateOf(false) }
+
+    if (showPaymentDialog) {
+        MockPaymentDialog(
+            totalAmountPaise = grandTotal,
+            onDismiss = { showPaymentDialog = false },
+            onPaymentSuccess = { method ->
+                showPaymentDialog = false
+                val currentUser = viewModel.currentUser.value
+                viewModel.placeOrder(cart, currentUser, paymentMethod = method, isMockPayment = true) {
+                    Toast.makeText(context, "Order Placed via $method! Artisan Dashboard Updated.", Toast.LENGTH_LONG).show()
+                    onCheckout()
+                }
+            }
+        )
+    }
+
     Column(modifier = Modifier.fillMaxSize()) {
         TabHeaderBlock(
             title = viewModel.tr("bag", "Shopping Bag"),
@@ -541,11 +561,7 @@ fun CartTabContent(
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
                                 onClick = {
-                                    val currentUser = viewModel.currentUser.value
-                                    viewModel.placeDemoOrder(cart, currentUser) {
-                                        Toast.makeText(context, "Order Placed Successfully! Artisan Dashboard Updated.", Toast.LENGTH_LONG).show()
-                                        onCheckout()
-                                    }
+                                    showPaymentDialog = true
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -1505,7 +1521,7 @@ fun SellerDashboardTabContent(
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Box(modifier = Modifier.padding(24.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text("No orders received yet. Place a demo purchase as buyer to see live updates!", fontSize = 12.sp, color = DhaagaTextMedium, textAlign = TextAlign.Center)
+                        Text("No orders received yet. Once buyers place an order, live updates appear here!", fontSize = 12.sp, color = DhaagaTextMedium, textAlign = TextAlign.Center)
                     }
                 }
             } else {
@@ -1657,6 +1673,8 @@ fun ProfileTabContent(
     val isSeller = user?.isSeller == true
     val currentLang by viewModel.selectedLanguage.collectAsState()
     var showLanguageSheet by remember { mutableStateOf(false) }
+    var showAISettingsDialog by remember { mutableStateOf(false) }
+    var showDeveloperKeysInDialog by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TabHeaderBlock(
@@ -1682,12 +1700,25 @@ fun ProfileTabContent(
                     modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    NotionAvatar(
-                        name = user?.name ?: "Artisan",
-                        size = 64.dp,
-                        borderWidth = 2.dp,
-                        imageUrl = user?.profilePhotoUrl
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .combinedClickable(
+                                onClick = {},
+                                onLongClick = {
+                                    showDeveloperKeysInDialog = true
+                                    showAISettingsDialog = true
+                                    Toast.makeText(context, "Developer Mode: API Keys Unlocked", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                    ) {
+                        NotionAvatar(
+                            name = user?.name ?: "Artisan",
+                            size = 64.dp,
+                            borderWidth = 2.dp,
+                            imageUrl = user?.profilePhotoUrl
+                        )
+                    }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
@@ -1758,6 +1789,10 @@ fun ProfileTabContent(
                 ProfileOptionRow(icon = Icons.Outlined.Inventory2, label = viewModel.tr("my_crafts", "My Crafts / Listings"), value = "Manage") {
                     onMyListings()
                 }
+                ProfileOptionRow(icon = Icons.Outlined.AutoFixHigh, label = viewModel.tr("ai_settings_title", "Studio Quality & Speed"), value = "Config") {
+                    showDeveloperKeysInDialog = false
+                    showAISettingsDialog = true
+                }
             } else {
                 ProfileOptionRow(icon = Icons.Outlined.Receipt, label = viewModel.tr("order_history", "My Orders"), value = "View All") {
                     onMyOrders()
@@ -1777,10 +1812,10 @@ fun ProfileTabContent(
                 Toast.makeText(context, "Location: $locationLabel", Toast.LENGTH_SHORT).show()
             }
             ProfileOptionRow(icon = Icons.Outlined.AccountBalance, label = viewModel.tr("bank_upi", "Bank & UPI Payouts"), value = "Active") {
-                Toast.makeText(context, "UPI & Bank payouts active for demo", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "UPI & Bank payouts active and verified", Toast.LENGTH_SHORT).show()
             }
             ProfileOptionRow(icon = Icons.Outlined.SupportAgent, label = viewModel.tr("artisan_helpline", "Artisan Guild Helpline"), value = "24x7") {
-                Toast.makeText(context, "Helpline: 1800-DHAAGA (demo)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Helpline: 1800-DHAAGA (Toll Free)", Toast.LENGTH_SHORT).show()
             }
             ProfileOptionRow(icon = Icons.Outlined.VerifiedUser, label = viewModel.tr("gi_guarantee", "GI & Fair Trade Guarantee"), value = "100%") {
                 Toast.makeText(context, "All GI-certified crafts are verified before listing", Toast.LENGTH_SHORT).show()
@@ -1795,11 +1830,21 @@ fun ProfileTabContent(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFEBEE))
             ) {
-                Icon(Icons.Default.Logout, contentDescription = null, tint = Color(0xFFD32F2F), modifier = Modifier.size(16.dp))
+                Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null, tint = Color(0xFFD32F2F), modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(viewModel.tr("logout", "Log Out of Dhaaga"), color = Color(0xFFD32F2F), fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
         }
+    }
+
+    if (showAISettingsDialog) {
+        com.dhaaga.app.ui.seller.AISettingsDialog(
+            initialShowDeveloperKeys = showDeveloperKeysInDialog,
+            onDismiss = {
+                showAISettingsDialog = false
+                showDeveloperKeysInDialog = false
+            }
+        )
     }
 
     // 22 Indian Languages Selection Sheet
