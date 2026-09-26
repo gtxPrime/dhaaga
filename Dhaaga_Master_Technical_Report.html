@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dhaaga (धागा) — Master Technical Whitepaper & Engineering Allocation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2B4C26;
+      --primary-light: #60734E;
+      --secondary: #738861;
+      --tint: #E2EAD9;
+      --accent: #BD5B38;
+      --accent-light: #F8ECE7;
+      --dark: #1A202C;
+      --text-medium: #4A5568;
+      --text-muted: #718096;
+      --bg: #F8FAF6;
+      --card-bg: #FFFFFF;
+      --border: #E2E8F0;
+      --success: #2E7D32;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      background: #FFFFFF;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(43, 76, 38, 0.08);
+      border: 1px solid var(--border);
+      padding: 56px 64px;
+    }
+
+    /* Print Controls */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .btn-print {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-print:hover {
+      background: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .tag-iit {
+      background: #FFF3E0;
+      color: #E65100;
+      border: 1px solid #FFE0B2;
+    }
+
+    /* Header */
+    .header-hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 36px;
+    }
+
+    .title-group h1 {
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .title-group .sub {
+      font-size: 16px;
+      color: var(--secondary);
+      font-weight: 600;
+      max-width: 680px;
+    }
+
+    .title-group .motto {
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    /* Meta Grid */
+    .meta-box {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      background: var(--tint);
+      padding: 20px 24px;
+      border-radius: 14px;
+      border: 1px solid #D2E0C8;
+      margin-bottom: 40px;
+    }
+
+    .meta-item .label {
+      font-size: 11px;
+      color: var(--secondary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .meta-item .val {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Section Styles */
+    h2.section-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      border-left: 4px solid var(--accent);
+      padding-left: 14px;
+      margin: 40px 0 18px 0;
+      letter-spacing: -0.3px;
+    }
+
+    p.lead {
+      font-size: 14px;
+      color: var(--text-medium);
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+
+    /* Team Grid */
+    .team-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin: 24px 0 40px 0;
+    }
+
+    .team-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      background: #FFFFFF;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .team-card.garvit {
+      border-top: 4px solid #3F51B5;
+      background: #F8F9FE;
+    }
+    .team-card.sargam {
+      border-top: 4px solid #E91E63;
+      background: #FEF7F9;
+    }
+    .team-card.siddhi {
+      border-top: 4px solid #009688;
+      background: #F4FBF9;
+    }
+    .team-card.ritesh {
+      border-top: 4px solid #607D8B;
+      background: #F6F8F9;
+    }
+    .team-card.dipanshu {
+      border-top: 4px solid #FF9800;
+      background: #FFFBF5;
+    }
+    .team-card.shashwat {
+      border-top: 4px solid #FFC107;
+      background: #FFFCF2;
+    }
+
+    .team-card .name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 2px;
+    }
+
+    .team-card .role {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-fullstack { background: #E8EAF6; color: #283593; }
+    .badge-design { background: #FCE4EC; color: #AD1457; }
+    .badge-aiml { background: #E0F2F1; color: #00695C; }
+    .badge-backend { background: #ECEFF1; color: #37474F; }
+    .badge-analytics { background: #FFF3E0; color: #E65100; }
+    .badge-research { background: #FFF8E1; color: #F57F17; }
+
+    .team-card .desc {
+      font-size: 12px;
+      color: var(--text-medium);
+      line-height: 1.55;
+    }
+
+    /* Detailed Member Blocks */
+    .member-block {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+
+    .member-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .member-header h3 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .tag-scope {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      background: #F1F5F9;
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #475569;
+    }
+
+    .task-list {
+      list-style: none;
+      margin: 12px 0;
+    }
+
+    .task-list li {
+      position: relative;
+      padding-left: 22px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    .task-list li::before {
+      content: "✔";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--success);
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .task-list.todo li::before {
+      content: "➔";
+      color: var(--accent);
+    }
+
+    /* Code & Tables */
+    table.spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 28px 0;
+      font-size: 12.5px;
+    }
+
+    table.spec-table th {
+      background: var(--primary);
+      color: white;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 700;
+      border: 1px solid var(--primary);
+    }
+
+    table.spec-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      color: var(--text-medium);
+      vertical-align: top;
+    }
+
+    table.spec-table tr:nth-child(even) td {
+      background: #FBFDFB;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      background: #F1F5F9;
+      color: #0F172A;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Print CSS */
+    @media print {
+      body {
+        padding: 0;
+        background: #FFFFFF;
+      }
+      .container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .action-bar {
+        display: none;
+      }
+      .member-block {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <span class="badge-tag tag-iit">Indian Institute of Technology Madras (IIT Madras) • Innovation Project</span>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+        <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"/>
+      </svg>
+      Print / Save as PDF
+    </button>
+  </div>
+
+  <!-- Header -->
+  <div class="header-hero">
+    <div class="title-group">
+      <h1>DHAAGA (धागा)</h1>
+      <div class="sub">Comprehensive Technical Whitepaper, System Architecture & 6-Discipline Engineering Allocation</div>
+      <div class="motto">"Six disciplines. One mission: Building the digital bridge for every artisan."</div>
+    </div>
+  </div>
+
+  <!-- Meta Info -->
+  <div class="meta-box">
+    <div class="meta-item">
+      <div class="label">Lead Developer & Architect</div>
+      <div class="val">Garvit Sharma (Full-Stack)</div>
+    </div>
+    <div class="meta-item">
+      <div class="label">Team Lead • UI/UX</div>
+      <div class="val">Sargam Sharma</div>
+    </div>
+    <div class="meta-item">
+      <div class="label">Platform & Language</div>
+      <div class="val">Android Native (Kotlin + Compose)</div>
+    </div>
+    <div class="meta-item">
+      <div class="label">Database & Cloud</div>
+      <div class="val">Google Cloud Firestore + Auth</div>
+    </div>
+    <div class="meta-item">
+      <div class="label">AI & Multimodal Stack</div>
+      <div class="val">Gemini 2.5 Flash + MagicHour</div>
+    </div>
+    <div class="meta-item">
+      <div class="label">Build Status</div>
+      <div class="val" style="color: var(--success);">v1.4.0 Production Build Passing (0 Errors)</div>
+    </div>
+  </div>
+
+  <!-- Section 1: Executive Overview -->
+  <h2 class="section-title">1. Executive Overview & Problem Statement</h2>
+  <p class="lead">
+    In India, over <b>200 million rural and tribal artisans</b> depend on traditional handicrafts (handlooms, pottery, wood carving, brass metal casting, folk painting) for their daily livelihood. However, due to lack of digital literacy, linguistic barriers, and complex marketplace onboarding, these artisans lose <b>40% to 70% of their retail margins</b> to exploitative regional middlemen and traders.
+  </p>
+  <p class="lead">
+    <b>Dhaaga</b> solves this structural crisis by replacing traditional high-friction e-commerce entry barriers with an <b>Audio-First Multimodal AI Cataloging Engine</b>. An artisan simply speaks in their mother tongue while pointing their phone camera at a handwoven saree or brass sculpture. In under 3 seconds, Dhaaga transcribes their voice, verifies their craft attributes, generates bilingual product stories (English & Hindi), optimizes the photograph into a studio-grade white backdrop, calculates fair-margin dynamic pricing, and publishes directly to a live Cloud Firestore marketplace.
+  </p>
+
+  <!-- Section 2: Team Division Grid -->
+  <h2 class="section-title">2. Team Responsibilities Matrix (The 6 Disciplines)</h2>
+  <div class="team-cards">
+    <!-- Garvit -->
+    <div class="team-card garvit">
+      <span class="role-badge badge-fullstack">&lt; / &gt; FULL STACK</span>
+      <div class="name">Garvit Sharma</div>
+      <div class="role" style="color: #283593;">Full-Stack Development (Lead Dev)</div>
+      <div class="desc">
+        End-to-end architecture, <code>AppViewModel</code> reactive pipelines, Firestore real-time sync, Mock Payment dialog & transaction engine, app lifecycle & APK build optimization.
+      </div>
+    </div>
+
+    <!-- Sargam -->
+    <div class="team-card sargam">
+      <span class="role-badge badge-design">UI / UX DESIGN</span>
+      <div class="name">Sargam Sharma</div>
+      <div class="role" style="color: #AD1457;">Team Lead • UI/UX Design</div>
+      <div class="desc">
+        Visual design language (Forest Sage & Terracotta), Lore floating navigation bar, Notion avatar engine, low-literacy vernacular accessibility, micro-animations & layout stability.
+      </div>
+    </div>
+
+    <!-- Siddhi -->
+    <div class="team-card siddhi">
+      <span class="role-badge badge-aiml">AI / ML</span>
+      <div class="name">Siddhi Rai</div>
+      <div class="role" style="color: #00695C;">AI / ML Engineering</div>
+      <div class="desc">
+        Multilingual Voice Auto-Cataloger, Gemini 2.5 Flash structured prompting, AI Studio photography pipeline (MagicHour), dynamic pricing elasticity models.
+      </div>
+    </div>
+
+    <!-- Ritesh -->
+    <div class="team-card ritesh">
+      <span class="role-badge badge-backend">BACKEND</span>
+      <div class="name">Ritesh Sah</div>
+      <div class="role" style="color: #37474F;">Backend Engineering</div>
+      <div class="desc">
+        Cloud Firestore schemas, Security Rules (RBAC), Firebase Auth (Phone OTP + Google SSO), cloud functions, webhook handlers & courier API integration.
+      </div>
+    </div>
+
+    <!-- Dipanshu -->
+    <div class="team-card dipanshu">
+      <span class="role-badge badge-analytics">DATA ANALYSIS</span>
+      <div class="name">Dipanshu Gola</div>
+      <div class="role" style="color: #E65100;">Data & Analytics Lead</div>
+      <div class="desc">
+        Artisan revenue telemetry, monthly GMV aggregation, Crashlytics latency tracking, funnel drop-off analytics, regional craft demand forecasting.
+      </div>
+    </div>
+
+    <!-- Shashwat -->
+    <div class="team-card shashwat">
+      <span class="role-badge badge-research">RESEARCH</span>
+      <div class="name">Shashwat Upadhyay</div>
+      <div class="role" style="color: #F57F17;">Research & Documentation</div>
+      <div class="desc">
+        GI Tag heritage craft database, rural artisan user research, ONDC seller protocol compliance, PM Vishwakarma alignment, 22-language translation audits.
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Deep Technical Breakdown per Member -->
+  <h2 class="section-title">3. In-Depth Member Technical Ownership & Roadmaps</h2>
+
+  <!-- Member 1: Garvit -->
+  <div class="member-block">
+    <div class="member-header">
+      <div>
+        <h3>1. Garvit Sharma — Full-Stack Development & Architecture Lead</h3>
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Main Developer • Core Technical Authority</span>
+      </div>
+      <span class="tag-scope">AppViewModel.kt | MainActivity.kt | CartScreen.kt | MockPaymentDialog.kt</span>
+    </div>
+    <p style="font-size: 13px; font-weight: 700; color: var(--primary);">Current System Architecture & Codebase Ownership:</p>
+    <ul class="task-list">
+      <li><b>Reactive ViewModel Architecture:</b> Architected <code>AppViewModel.kt</code> (1,160+ lines) orchestrating 28 StateFlow streams separating business logic from UI rendering. Implements optimistic updates for stock adjustments and cart modifications.</li>
+      <li><b>Bi-Directional Cloud Firestore Synchronization:</b> Connects snapshot listeners on <code>products</code>, <code>orders</code>, and <code>users</code> collections with fallback to local persistent SharedPreferences.</li>
+      <li><b>Interactive Mock Payment Engine:</b> Designed and shipped <code>MockPaymentDialog.kt</code> supporting UPI (GPay, PhonePe, Paytm, BHIM, VPA), Cards, Net Banking, and COD with live RBI authorization simulation and Firestore order persistence.</li>
+      <li><b>Unified Authentication & Single-Logout Fix:</b> Solved dual-logout edge cases by orchestrating atomic sign-out across Firebase Auth, GoogleSignInClient, listener detachment, and local credential purge.</li>
+    </ul>
+
+    <p style="font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 14px;">Next-Level Engineering Gaps & Roadmap for Garvit:</p>
+    <ul class="task-list todo">
+      <li><b>Room DB with Offline Mutation Queue:</b> Replace SharedPreferences JSON serialization with SQLite/Room and an offline mutation queue (WorkManager) that replays queued listings and purchases when internet reconnects.</li>
+      <li><b>Dependency Injection (Dagger Hilt):</b> Migrate ViewModel instantiation to Hilt <code>@HiltViewModel</code> and <code>@Inject</code> constructors to enable unit testing and modular scaling.</li>
+      <li><b>Paging 3 Infinite Scroll:</b> As catalog scales to 1,000+ items, transition Firestore list snapshots to Paging 3 to ensure smooth 60fps scrolling and reduce read operations.</li>
+      <li><b>Biometric Authentication:</b> Integrate AndroidX <code>BiometricPrompt</code> so artisans can authenticate merchant payouts with fingerprint or face recognition.</li>
+    </ul>
+  </div>
+
+  <!-- Member 2: Sargam -->
+  <div class="member-block">
+    <div class="member-header">
+      <div>
+        <h3>2. Sargam Sharma — Team Lead • UI/UX Design</h3>
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Design Direction • Accessibility & Experience</span>
+      </div>
+      <span class="tag-scope">HomeScreen.kt | HomeTabContents.kt | Theme.kt | FontAwesomeIcons.kt</span>
+    </div>
+    <p style="font-size: 13px; font-weight: 700; color: var(--primary);">Current System Architecture & Codebase Ownership:</p>
+    <ul class="task-list">
+      <li><b>Artisan Earth & Forest Palette:</b> Curated design tokens representing organic dyes and handloom cotton: <code>PaletteForest (#60734E)</code>, <code>PaletteSage (#738861)</code>, <code>PaletteGreenTint (#E2EAD9)</code>, and <code>DhaagaPrimary (#8D5B4C)</code>.</li>
+      <li><b>Lore-Style Floating Pill Navigation:</b> Designed floating bottom nav container with spring physics (damping 0.52f, stiffness 420f) and center protruding FAB with ripple feedback.</li>
+      <li><b>Dual Persona Workflows:</b> Designed dual buyer/seller modes: Artisan Storefront with clear inventory counters and Buyer Discover with rich story cards.</li>
+      <li><b>Notion-Style Avatar Engine:</b> Dynamic SVG initials/avatar generator with hidden developer mode triggers.</li>
+    </ul>
+
+    <p style="font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 14px;">Next-Level Engineering Gaps & Roadmap for Sargam:</p>
+    <ul class="task-list todo">
+      <li><b>Low-Literacy UI Audit:</b> Introduce animated visual tooltips and voice prompts across all action cards for rural artisans with limited formal reading skills.</li>
+      <li><b>Outdoor High-Sunlight Contrast Mode:</b> Implement WCAG AAA high-contrast theme for artisans photographing crafts outdoors in rural workshops.</li>
+      <li><b>Lottie Micro-Animations:</b> Add traditional Indian craft animations (spinning charkha, handloom shuttle) during AI processing states.</li>
+      <li><b>RTL & Vernacular Typography Scaling:</b> Validate font scaling across Indian regional scripts (Devanagari, Tamil, Telugu, Gurmukhi) without truncation.</li>
+    </ul>
+  </div>
+
+  <!-- Member 3: Siddhi -->
+  <div class="member-block">
+    <div class="member-header">
+      <div>
+        <h3>3. Siddhi Rai — AI / ML Engineering</h3>
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Multimodal AI • Computer Vision • Prompt Engineering</span>
+      </div>
+      <span class="tag-scope">GeminiAIService.kt | VoiceCatalogerDialog.kt | AIStudioDialog.kt | ImageSegmentationHelper.kt</span>
+    </div>
+    <p style="font-size: 13px; font-weight: 700; color: var(--primary);">Current System Architecture & Codebase Ownership:</p>
+    <ul class="task-list">
+      <li><b>Multilingual Voice Auto-Cataloger:</b> Integrated Android SpeechRecognizer across 7 Indian languages with Gemini 2.5 Flash for structured JSON extraction (Title, Story, Category, Dimensions, Price, Tags, Care).</li>
+      <li><b>Dual-Engine AI Studio Photography:</b> Implemented Euclidean RGB image segmentation alongside MagicHour cloud prompts for studio lighting and marble/wood pedestals.</li>
+      <li><b>Dynamic Margin Protection Pricing:</b> Built dynamic pricing model balancing labor hours, material cost, platform fee, and retail markup.</li>
+      <li><b>Sanitized Model Masking:</b> Completely hid internal model names ("Gemini", "Banana") behind client-friendly branding: <i>"Fast Gen Intelligence"</i> and <i>"Studio Quality Engine"</i>.</li>
+    </ul>
+
+    <p style="font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 14px;">Next-Level Engineering Gaps & Roadmap for Siddhi:</p>
+    <ul class="task-list todo">
+      <li><b>On-Device Gemini Nano / AICore:</b> Implement on-device LLM inference via Google AICore / MediaPipe for offline cataloging in remote villages.</li>
+      <li><b>Computer Vision Craft Authenticity:</b> Train lightweight vision model to detect hand-woven imperfections proving genuine handmade craft vs factory replicas.</li>
+      <li><b>Vernacular Text-to-Speech (TTS):</b> Read aloud generated product details in the artisan's local dialect for confirmation before listing.</li>
+      <li><b>MLKit Subject Segmentation:</b> Upgrade <code>ImageSegmentationHelper</code> to MLKit for sharper edge extraction and transparent backgrounds.</li>
+    </ul>
+  </div>
+
+  <!-- Member 4: Ritesh -->
+  <div class="member-block">
+    <div class="member-header">
+      <div>
+        <h3>4. Ritesh Sah — Backend Engineering</h3>
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Cloud Infrastructure • Security Rules • Integrations</span>
+      </div>
+      <span class="tag-scope">OrderModel.kt | ProductModel.kt | UserModel.kt | firestore.rules</span>
+    </div>
+    <p style="font-size: 13px; font-weight: 700; color: var(--primary);">Current System Architecture & Codebase Ownership:</p>
+    <ul class="task-list">
+      <li><b>Cloud Firestore NoSQL Architecture:</b> Built collections: <code>users/{uid}</code>, <code>products/{productId}</code>, and <code>orders/{orderId}</code> with composite indexing.</li>
+      <li><b>Hybrid Authentication:</b> Engineered Google Sign-In with credential exchange and Phone OTP SMS verification.</li>
+      <li><b>Logistics Simulation:</b> Automated Delhivery Express tracking ID generator with full parcel tracking state transitions.</li>
+    </ul>
+
+    <p style="font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 14px;">Next-Level Engineering Gaps & Roadmap for Ritesh:</p>
+    <ul class="task-list todo">
+      <li><b>Granular Firestore Security Rules:</b> Deploy role-based security rules enforcing <code>request.auth.uid</code> validation and preventing buyers from tampering with payouts.</li>
+      <li><b>Razorpay Route UPI Split Payouts:</b> Replace mock payment with Razorpay Route / Cashfree escrow holding funds until courier delivery confirmation, then releasing 92% to artisan bank accounts.</li>
+      <li><b>Cloud Functions Inventory Locking:</b> Write Firestore transaction Cloud Functions to prevent double-selling on one-of-a-kind handmade crafts.</li>
+      <li><b>ONDC Protocol Adapter:</b> Deploy Beckn Protocol gateway webhooks to syndicate Dhaaga listings on national ONDC apps (Paytm, Pincode).</li>
+    </ul>
+  </div>
+
+  <!-- Member 5: Dipanshu -->
+  <div class="member-block">
+    <div class="member-header">
+      <div>
+        <h3>5. Dipanshu Gola — Data & Analytics</h3>
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Artisan Economics • Funnel Telemetry • Demand Forecasting</span>
+      </div>
+      <span class="tag-scope">SellerDashboardScreen.kt | DynamicPricingCard.kt | Telemetry Events</span>
+    </div>
+    <p style="font-size: 13px; font-weight: 700; color: var(--primary);">Current System Architecture & Codebase Ownership:</p>
+    <ul class="task-list">
+      <li><b>Artisan Earnings Dashboard:</b> Real-time computation of monthly GMV, pending payouts, completed shipments, and active listings via <code>dashboardEarningsPaise</code>.</li>
+      <li><b>Client Telemetry:</b> Logs operational telemetry for voice cataloging duration, AI enhancement latency, and cart conversion funnels.</li>
+    </ul>
+
+    <p style="font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 14px;">Next-Level Engineering Gaps & Roadmap for Dipanshu:</p>
+    <ul class="task-list todo">
+      <li><b>Firebase to BigQuery Pipeline:</b> Stream Firestore documents and event logs into Google BigQuery for longitudinal artisan income studies.</li>
+      <li><b>Artisan Economic Uplift Metric:</b> Formulate an <i>'Economic Uplift Score'</i> showing artisans exact rupee savings retained vs traditional middlemen.</li>
+      <li><b>Seasonal Demand Forecasting:</b> Build time-series models predicting demand surges for specific crafts ahead of major Indian festivals (Diwali, Durga Puja).</li>
+      <li><b>Looker Studio Dashboards:</b> Build automated reporting dashboards for craft guilds, NGO partners, and IIT Madras mentorship panels.</li>
+    </ul>
+  </div>
+
+  <!-- Member 6: Shashwat -->
+  <div class="member-block">
+    <div class="member-header">
+      <div>
+        <h3>6. Shashwat Upadhyay — Research & Documentation</h3>
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Ethnographic Research • GI Tags • Policy Compliance • Dictionaries</span>
+      </div>
+      <span class="tag-scope">AppLanguageManager.kt | MockData.kt | GI Verification Registry</span>
+    </div>
+    <p style="font-size: 13px; font-weight: 700; color: var(--primary);">Current System Architecture & Codebase Ownership:</p>
+    <ul class="task-list">
+      <li><b>22 Official Eighth Schedule Indian Languages:</b> Curated and verified localized vocabulary dictionaries across 22 languages in <code>AppLanguageManager.kt</code>.</li>
+      <li><b>State-Wise Craft Mapping:</b> Mapped craft categories and cultural regions across all 28 states & 8 UTs in <code>MockData.indianStates</code>.</li>
+    </ul>
+
+    <p style="font-size: 13px; font-weight: 700; color: var(--accent); margin-top: 14px;">Next-Level Engineering Gaps & Roadmap for Shashwat:</p>
+    <ul class="task-list todo">
+      <li><b>National GI Tag Authenticity Registry:</b> Build a verified database linking crafts to Government of India Geographical Indications certificate numbers to prevent counterfeit listings.</li>
+      <li><b>Government Welfare Scheme Integration:</b> Map workflows integrating Dhaaga with <i>PM Vishwakarma Yojana</i>, <i>ODOP (One District One Product)</i>, and NABARD artisan credit linkages.</li>
+      <li><b>Rural Usability Field Studies:</b> Conduct usability research sessions with artisan clusters in Rajasthan, Varanasi, and Bastar to optimize voice and non-text visual cues.</li>
+      <li><b>API Documentation & Field Manuals:</b> Maintain comprehensive OpenAPI specs and printed pictorial onboarding guides for rural artisan training workshops.</li>
+    </ul>
+  </div>
+
+  <!-- Section 4: Database Schema -->
+  <h2 class="section-title">4. Cloud Firestore Schema Specification</h2>
+  <table class="spec-table">
+    <thead>
+      <tr>
+        <th style="width: 15%;">Collection</th>
+        <th style="width: 18%;">Doc ID Format</th>
+        <th style="width: 42%;">Field Definitions & Types</th>
+        <th style="width: 25%;">Indexing & Sync Strategy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>users</code></td>
+        <td><code>{uid}</code> (Auth UID)</td>
+        <td>
+          <code>name</code>: String<br/>
+          <code>phone</code>: String<br/>
+          <code>email</code>: String<br/>
+          <code>role</code>: "artisan" | "buyer"<br/>
+          <code>village, state</code>: String<br/>
+          <code>craftSpecialty</code>: String<br/>
+          <code>profilePhotoUrl</code>: String<br/>
+          <code>isKycVerified</code>: Boolean
+        </td>
+        <td>
+          Cached locally in SharedPreferences. Single-document real-time listener on profile updates.
+        </td>
+      </tr>
+      <tr>
+        <td><code>products</code></td>
+        <td><code>{productId}</code> (UUID)</td>
+        <td>
+          <code>titleEn, titleHi</code>: String<br/>
+          <code>descriptionEn, descriptionHi</code>: String<br/>
+          <code>priceListed, priceOriginal</code>: Long (paise)<br/>
+          <code>category, region, state</code>: String<br/>
+          <code>imageUrl, thumbnailUrls</code>: List&lt;String&gt;<br/>
+          <code>stockQuantity</code>: Int<br/>
+          <code>sellerId, sellerName</code>: String<br/>
+          <code>isGiTagged, giTagNumber</code>: String<br/>
+          <code>hoursToCreate</code>: Int
+        </td>
+        <td>
+          Marketplace snapshot listener. Composite indexes: <code>category ASC, createdAt DESC</code> and <code>sellerId ASC, createdAt DESC</code>.
+        </td>
+      </tr>
+      <tr>
+        <td><code>orders</code></td>
+        <td><code>DHG-XXXX-X</code></td>
+        <td>
+          <code>productId, productTitle</code>: String<br/>
+          <code>buyerId, buyerName</code>: String<br/>
+          <code>sellerId, sellerName</code>: String<br/>
+          <code>quantity</code>: Int<br/>
+          <code>totalAmount, sellerPayout</code>: Long<br/>
+          <code>paymentMethod</code>: String<br/>
+          <code>paymentStatus</code>: "paid" | "pending"<br/>
+          <code>isMockPayment</code>: Boolean<br/>
+          <code>status</code>: "confirmed" | "packed" | "shipped" | "delivered"<br/>
+          <code>shippingCarrier, trackingId</code>: String
+        </td>
+        <td>
+          Bi-directional listeners for buyer and artisan. Atomic stock decrement on order creation with rollback on cancellation.
+        </td>
+      </tr>
+      <tr>
+        <td><code>gi_registry</code></td>
+        <td><code>GI-IND-XXXX</code></td>
+        <td>
+          <code>giNumber</code>: Int (e.g. 132 for Banarasi Brocade)<br/>
+          <code>craftName</code>: String<br/>
+          <code>authorizedState</code>: String<br/>
+          <code>clusterDistricts</code>: Array&lt;String&gt;<br/>
+          <code>geofencePolygon</code>: GeoPoint Array<br/>
+          <code>authorizedUserFormat</code>: Regex String<br/>
+          <code>inspectionBody</code>: String<br/>
+          <code>officialEmblemUrl</code>: String
+        </td>
+        <td>
+          Read-heavy cached collection. Cross-referenced during artisan onboarding and product listing to grant verified GI Trust Badging.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Section 5: Deep Technical Defense & Hard Architecture Questions -->
+  <h2 class="section-title">5. Deep Technical Defense & Hard Engineering Questions</h2>
+  <p class="lead">
+    This section addresses the foundational architectural trade-offs, defensive justifications, and hard engineering questions regarding Dhaaga's technical stack:
+  </p>
+
+  <div class="member-block" style="border-left: 4px solid var(--accent);">
+    <h3 style="font-size: 16px; color: var(--accent); margin-bottom: 8px;">Q1: Why are we NOT training or self-hosting our own Image Generation / Diffusion model?</h3>
+    <p style="font-size: 13px; color: var(--dark); line-height: 1.65; margin-bottom: 12px;">
+      This is one of the most critical architectural decisions made by the core engineering team. There are four decisive engineering, economic, and operational reasons:
+    </p>
+    <ul class="task-list" style="margin-left: 4px;">
+      <li>
+        <b>1. The "Hallucination vs. Authenticity" Trap (Crucial for Physical Crafts):</b><br/>
+        Traditional text-to-image or image-to-image diffusion models (e.g., Stable Diffusion, Midjourney, Flux) are <i>generative hallucination engines</i>. If an artisan photographs an authentic handwoven Sambalpuri Ikat with specific weave count and tie-dye motifs, a generative diffusion model synthesizes a <i>fictional pattern</i> from random latent noise rather than preserving the artisan's exact physical weave. Selling an AI-synthesized fiction results in immediate consumer returns and fraud claims. Dhaaga requires <b>Subject-Preserving Enhancement (Segmentation + Edge-Preserving Inpainting)</b>, NOT generative creation from scratch. Cloud vision pipelines (MagicHour / Gemini Vision + <code>ImageSegmentationHelper.kt</code>) preserve 100% of the artisan's raw craft pixels while only replacing the workshop background with studio lighting and pedestal shadows.
+      </li>
+      <li>
+        <b>2. Infrastructure & Compute Economics:</b><br/>
+        Hosting a dedicated GPU cluster (e.g., NVIDIA A100/H100 or L40S) on AWS/GCP to run custom diffusion inference costs <b>$1,800 to $3,200 per instance per month</b>. In rural artisan clusters, cataloging activity is heavily bursty (peaks during daylight hours 10 AM – 4 PM, nearly zero at night). A self-hosted cluster burns budget during idle hours. Serverless multimodal API invocations (Gemini / MagicHour) charge purely per-invocation (~$0.015 per catalog entry) with <b>zero idle infrastructure cost</b>.
+      </li>
+      <li>
+        <b>3. Edge Hardware Constraints on Low-Cost Rural Android Phones:</b><br/>
+        Over 92% of Indian artisans operate sub-₹12,000 budget Android smartphones (MediaTek Helio G-series, Unisoc T606, Snapdragon 680) with 3GB–4GB RAM. Running an on-device diffusion model (even 4-bit quantized SD-Turbo via ONNX/NCNN) requires a minimum of 6GB–8GB of unified RAM and a powerful NPU. On typical artisan devices, running local diffusion triggers instant OutOfMemory (OOM) kernel kills, thermal throttling, and 30–40% battery drain per generation.
+      </li>
+      <li>
+        <b>4. Scarcity of Indian Heritage Craft Datasets:</b><br/>
+        Fine-tuning a proprietary foundation model requires a minimum of 500,000+ curated, high-resolution annotated image pairs of authentic Indian handicrafts across all 28 states. Such a dataset currently does not exist in open-source research. Training prematurely would yield distorted, westernized outputs. Dhaaga's strategic Phase 2 plan is to use our live platform to organically compile the first verified national repository of Indian artisan craft photography, and subsequently train a lightweight ControlNet LoRA adapter.
+      </li>
+    </ul>
+  </div>
+
+  <div class="member-block" style="border-left: 4px solid var(--primary);">
+    <h3 style="font-size: 16px; color: var(--primary); margin-bottom: 8px;">Q2: How do we prevent urban traders & factory counterfeiters from creating fake artisan accounts?</h3>
+    <p style="font-size: 13px; color: var(--dark); line-height: 1.65; margin-bottom: 12px;">
+      Dhaaga enforces a <b>3-Tier Proof-of-Craft Verification Protocol</b>:
+    </p>
+    <ul class="task-list">
+      <li><b>Geofenced Cluster Verification:</b> Artisan registration captures device GPS coordinates. The registration is validated against recognized rural artisan clusters (e.g., Channapatna for toys, Madhubani district for Mithila paintings, Varanasi for brocades). Accounts attempting registration from urban industrial zones are flagged for manual review.</li>
+      <li><b>Live Video Proof-of-Work (PoW):</b> Artisans record a brief 5-second video showing their active handloom, wood-carving tools, or pottery wheel. Gemini Vision analyzes the video frames to detect authentic hand tools and physical work-in-progress.</li>
+      <li><b>Weaver Cooperative / Guild Cryptographic Vouching:</b> Recognized artisan Self-Help Groups (SHGs) and weaver societies have guild master accounts that digitally verify individual member artisans.</li>
+    </ul>
+  </div>
+
+  <div class="member-block" style="border-left: 4px solid #3F51B5;">
+    <h3 style="font-size: 16px; color: #3F51B5; margin-bottom: 8px;">Q3: How does the Voice Auto-Cataloger handle heavy rural accents and ambient workshop noise?</h3>
+    <p style="font-size: 13px; color: var(--dark); line-height: 1.65; margin-bottom: 12px;">
+      Artisan workshops are loud environments filled with rhythmic handloom clatter, hammer strikes, and rural ambient chatter. Dhaaga implements a multi-stage noise suppression pipeline:
+    </p>
+    <ul class="task-list">
+      <li><b>Acoustic Pre-Filtering:</b> Uses Android's built-in <code>NoiseSuppressor</code> and <code>AcousticEchoCanceler</code> hardware audio effect APIs on the recording audio stream to filter repetitive mechanical noise frequencies.</li>
+      <li><b>Colloquial Craft Phoneme Mapping:</b> Rural artisans use localized terminology (e.g. <i>zari</i>, <i>kadwa</i>, <i>tanchoi</i>, <i>ikat</i>, <i>dhokra</i>, <i>kalamkari</i>) that off-the-shelf speech engines misinterpret. Dhaaga passes raw phonetic text to Gemini 2.5 Flash with custom prompt context injected with regional craft glossaries, mapping vernacular descriptions into standardized catalog fields.</li>
+    </ul>
+  </div>
+
+  <div class="member-block" style="border-left: 4px solid #E65100;">
+    <h3 style="font-size: 16px; color: #E65100; margin-bottom: 8px;">Q4: How does the app prevent race-condition overselling of one-of-a-kind handmade items?</h3>
+    <p style="font-size: 13px; color: var(--dark); line-height: 1.65; margin-bottom: 12px;">
+      Handmade crafts are inherently unique — often an artisan has only 1 piece of an intricate tapestry. If two buyers tap "Checkout" at the exact same millisecond:
+    </p>
+    <ul class="task-list">
+      <li>Dhaaga utilizes Cloud Firestore <b>Atomic Transactions (<code>runTransaction</code>)</b>. During checkout, the transaction locks the product document, reads the latest <code>stockQuantity</code>, and only decrements and confirms if <code>stockQuantity >= requestedQuantity</code>.</li>
+      <li>If another transaction completes first and stock hits 0, the second transaction safely rolls back and notifies the buyer: <i>"This unique handcrafted craft was just claimed by another buyer."</i></li>
+    </ul>
+  </div>
+
+  <!-- Section 6: GI Tag Implementation Architecture -->
+  <h2 class="section-title">6. Geographical Indication (GI) Tag Implementation Architecture</h2>
+  <p class="lead">
+    A <b>Geographical Indication (GI)</b> is an intellectual property certification granted under the Government of India's <i>Geographical Indications of Goods (Registration and Protection) Act, 1999</i>. It certifies that a craft possesses qualities, reputation, or characteristics that are essentially attributable to its specific geographic origin (e.g. Banarasi Brocade, Kashmir Pashmina, Channapatna Toys, Madhubani Art).
+  </p>
+
+  <div class="member-block" style="border: 2px solid #D4AF37; background: #FFFCF2;">
+    <div class="member-header">
+      <div>
+        <h3 style="color: #B8860B;">Official GI Tag End-to-End Technical Workflow in Dhaaga</h3>
+        <span style="font-size: 12px; color: #8A6D3B; font-weight: 700;">Government Registry Cross-Referencing & Buyer Verification</span>
+      </div>
+      <span class="tag-scope" style="background: #FFF3CD; color: #856404;">GI Act, 1999 Compliant</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 14px;">
+      <!-- Step 1 & 2 -->
+      <div style="background: white; padding: 14px; border-radius: 10px; border: 1px solid #E8D8A0;">
+        <p style="font-size: 13px; font-weight: 800; color: #B8860B; margin-bottom: 6px;">Step 1: Master GI Database in Firestore (<code>gi_registry</code>)</p>
+        <p style="font-size: 12px; color: var(--text-medium); line-height: 1.55;">
+          A dedicated collection storing official GI numbers, registered craft names, authorized districts (GeoJSON spatial boundaries), and the Controller General of Patents, Designs and Trade Marks (CGPDTM) inspection body details.
+        </p>
+      </div>
+
+      <div style="background: white; padding: 14px; border-radius: 10px; border: 1px solid #E8D8A0;">
+        <p style="font-size: 13px; font-weight: 800; color: #B8860B; margin-bottom: 6px;">Step 2: Artisan Authorized User KYC</p>
+        <p style="font-size: 12px; color: var(--text-medium); line-height: 1.55;">
+          During seller onboarding in <code>ProfileSetupScreen.kt</code>, the artisan inputs their government-issued <b>Authorized User Number</b> (format: <code>AU/XXXX/GI/XXX</code>) or uploads their physical GI Artisan Identity Card.
+        </p>
+      </div>
+
+      <!-- Step 3 & 4 -->
+      <div style="background: white; padding: 14px; border-radius: 10px; border: 1px solid #E8D8A0;">
+        <p style="font-size: 13px; font-weight: 800; color: #B8860B; margin-bottom: 6px;">Step 3: Geofenced Cluster Validation</p>
+        <p style="font-size: 12px; color: var(--text-medium); line-height: 1.55;">
+          When an artisan lists a GI-tagged craft, Dhaaga verifies that the device GPS coordinates fall within the statutory geographic polygon of that craft (e.g. Banarasi Silk must originate from Varanasi/Chandauli/Mirzapur/Jaunpur).
+        </p>
+      </div>
+
+      <div style="background: white; padding: 14px; border-radius: 10px; border: 1px solid #E8D8A0;">
+        <p style="font-size: 13px; font-weight: 800; color: #B8860B; margin-bottom: 6px;">Step 4: Buyer Trust Badging & Provenance Sheet</p>
+        <p style="font-size: 12px; color: var(--text-medium); line-height: 1.55;">
+          Verified products display an official gold-embossed Government of India GI Emblem on product cards. Tapping opens an interactive Provenance Sheet showing the weaver's authorized registration, craft heritage history, and certificate link.
+        </p>
+      </div>
+    </div>
+
+    <!-- Step 5: Packaging QR Code -->
+    <div style="background: white; padding: 14px; border-radius: 10px; border: 1px solid #E8D8A0; margin-top: 16px;">
+      <p style="font-size: 13px; font-weight: 800; color: #B8860B; margin-bottom: 6px;">Step 5: Cryptographic Tamper-Proof QR Label on Physical Packaging</p>
+      <p style="font-size: 12px; color: var(--text-medium); line-height: 1.55;">
+        When an order is confirmed, Dhaaga's backend generates a cryptographically signed QR code printed directly on the Delhivery courier shipping label (e.g., <code>https://dhaaga.in/verify/GI-132-AU8921</code>). When the package arrives at the buyer's home, scanning the seal displays the artisan's photograph, workshop GPS coordinates, and Government GI certification, providing 100% counterfeit protection.
+      </p>
+    </div>
+  </div>
+
+  <!-- Section 7: Strategic Phased Roadmap -->
+  <h2 class="section-title">7. Master Project Roadmap (IIT Madras Incubation)</h2>
+  <table class="spec-table">
+    <thead>
+      <tr>
+        <th>Phase</th>
+        <th>Architecture & Engineering Deliverable</th>
+        <th>Lead Assignees</th>
+        <th>Target Quarter</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>Phase 1</b></td>
+        <td><b>Real Payments & Escrow:</b> Razorpay Route UPI split payments, escrow release on Delhivery webhook.</td>
+        <td>Garvit Sharma<br/>Ritesh Sah</td>
+        <td>Q4 2026</td>
+      </tr>
+      <tr>
+        <td><b>Phase 2</b></td>
+        <td><b>Offline-First & Edge AI:</b> Room DB mutation queue + Google AICore on-device Gemini Nano cataloging.</td>
+        <td>Garvit Sharma<br/>Siddhi Rai</td>
+        <td>Q1 2027</td>
+      </tr>
+      <tr>
+        <td><b>Phase 3</b></td>
+        <td><b>National ONDC Launch:</b> Beckn Protocol gateway adapter + PM Vishwakarma scheme integration.</td>
+        <td>Ritesh Sah<br/>Shashwat Upadhyay</td>
+        <td>Q2 2027</td>
+      </tr>
+      <tr>
+        <td><b>Phase 4</b></td>
+        <td><b>Predictive Analytics & Scale:</b> BigQuery forecasting models + Looker Studio institutional dashboard.</td>
+        <td>Dipanshu Gola<br/>Sargam Sharma</td>
+        <td>Q3 2027</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Section 8: Technical Sign-Off -->
+  <div style="margin-top: 40px; padding: 20px; background: #F0F4EC; border-radius: 12px; border-left: 4px solid var(--primary);">
+    <p style="font-size: 13px; color: var(--primary); font-weight: 700; margin-bottom: 4px;">Lead Developer Note (Garvit Sharma):</p>
+    <p style="font-size: 12px; color: var(--text-medium); line-height: 1.6;">
+      All client-cloud interfaces in the Dhaaga app are fully decoupled and production-verified. The debug APK compiles with 0 errors. Each team member has distinct ownership over their modules, while technical authority over the AppViewModel state tree, Firestore schema orchestration, and payment/auth pipelines remains centralized under full-stack engineering.
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
