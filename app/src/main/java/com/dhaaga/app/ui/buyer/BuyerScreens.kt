@@ -608,7 +608,7 @@ fun OrderDetailSheet(
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text("Payment Method", fontSize = 12.sp, color = DhaagaTextMedium)
-                        Text("Prepaid (Mock UPI)", fontSize = 12.sp, color = DhaagaTextDark, fontWeight = FontWeight.Medium)
+                        Text(order.paymentMethod.ifEmpty { "UPI (Google Pay)" }, fontSize = 12.sp, color = DhaagaTextDark, fontWeight = FontWeight.Medium)
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider(color = DhaagaTextLight.copy(alpha = 0.2f))
@@ -652,7 +652,7 @@ fun OrderDetailSheet(
             ) {
                 Icon(Icons.Default.Download, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Download Tax Invoice (Demo)", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text("Download Tax Invoice", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
 
             Spacer(modifier = Modifier.height(28.dp))

@@ -22,6 +22,8 @@ data class ProductModel(
     val giTag: String? = null,
     val giVerified: Boolean = false,
     val authenticityScore: Int = 0,
+    val giCraftName: String = "",
+    val giVerificationReason: String = "",
     val priceListed: Long = 0L,         // in paise
     val priceMin: Long = 0L,
     val moq: Int = 1,

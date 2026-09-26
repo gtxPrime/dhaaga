@@ -41,6 +41,22 @@ fun CartScreen(
     val shipping = if (total > 100000L) 0L else 5000L
     val grandTotal = total + platformFee + shipping
 
+    var showPaymentDialog by remember { mutableStateOf(false) }
+
+    if (showPaymentDialog) {
+        MockPaymentDialog(
+            totalAmountPaise = grandTotal,
+            onDismiss = { showPaymentDialog = false },
+            onPaymentSuccess = { method ->
+                showPaymentDialog = false
+                val user = viewModel.currentUser.value
+                viewModel.placeOrder(cart, user, paymentMethod = method, isMockPayment = true) {
+                    onCheckout()
+                }
+            }
+        )
+    }
+
     Scaffold(
         containerColor = DhaagaBackground,
         topBar = {
@@ -102,7 +118,7 @@ fun CartScreen(
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                         Button(
-                            onClick = onCheckout,
+                            onClick = { showPaymentDialog = true },
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                             shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = DhaagaPrimary)

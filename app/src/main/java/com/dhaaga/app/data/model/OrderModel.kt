@@ -17,11 +17,11 @@ data class OrderModel(
     val totalAmount: Long = 0L,
     val platformFee: Long = 0L,
     val sellerPayout: Long = 0L,
-    val paymentMethod: String = "mock_upi",
+    val paymentMethod: String = "upi",
     val paymentStatus: String = "paid",
     val isMockPayment: Boolean = true,
     val deliveryAddress: AddressModel = AddressModel(),
-    val shippingCarrier: String = "Delhivery (Demo)",
+    val shippingCarrier: String = "Delhivery Express",
     val trackingId: String = "",
     val status: String = "confirmed",    // pending|confirmed|packed|shipped|delivered|cancelled
     val isB2b: Boolean = false,
