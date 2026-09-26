@@ -39,6 +39,12 @@ class MainActivity : FragmentActivity() {
 
     private val viewModel: AppViewModel by viewModels()
 
+    private val notificationPermissionLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        android.util.Log.i("MainActivity", "[Permissions] Notification permission granted: $isGranted")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -49,6 +55,17 @@ class MainActivity : FragmentActivity() {
 
         // Pre-warm TTS engine for instant voice responses
         com.dhaaga.app.utils.AppTtsManager.init(this)
+
+        // Request POST_NOTIFICATIONS permission smoothly on Android 13+ (API 33+)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
 
         setContent {
             DhaagaTheme {
@@ -292,6 +309,12 @@ fun DhaagaApp(viewModel: AppViewModel) {
                     onMyListings = {
                         navController.navigate(Routes.MY_LISTINGS)
                     },
+                    onLogout = {
+                        viewModel.logout()
+                        navController.navigate(Routes.GOOGLE_LOGIN) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    },
                     onChatList = {
                         android.widget.Toast.makeText(appContext, "Chat with artisans — Coming Soon!", android.widget.Toast.LENGTH_SHORT).show()
                     }
@@ -350,8 +373,8 @@ fun DhaagaApp(viewModel: AppViewModel) {
                 onMyOrders = { navController.navigate(Routes.MY_ORDERS) },
                 onLogout = {
                     viewModel.logout()
-                    navController.navigate(Routes.LANGUAGE_SELECT) {
-                        popUpTo(Routes.HOME) { inclusive = true }
+                    navController.navigate(Routes.GOOGLE_LOGIN) {
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -396,15 +419,11 @@ fun DhaagaApp(viewModel: AppViewModel) {
         }
 
         composable(Routes.CART) {
-            val cart by viewModel.cart.collectAsState()
-            val user by viewModel.currentUser.collectAsState()
             CartScreen(
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onCheckout = {
-                    viewModel.placeDemoOrder(cart, user) {
-                        navController.navigate(Routes.MY_ORDERS)
-                    }
+                    navController.navigate(Routes.MY_ORDERS)
                 }
             )
         }
