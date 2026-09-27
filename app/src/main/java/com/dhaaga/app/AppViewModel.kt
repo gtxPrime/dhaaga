@@ -6,7 +6,9 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.dhaaga.app.data.mock.MockData
+import com.dhaaga.app.data.mock.HeritageRegistry
 import com.dhaaga.app.data.model.CartItemModel
+import com.dhaaga.app.data.model.CraftHeritageModel
 import com.dhaaga.app.data.model.OrderModel
 import com.dhaaga.app.data.model.ProductModel
 import com.dhaaga.app.data.model.UserModel
@@ -84,6 +86,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _wishlist = MutableStateFlow<Set<String>>(loadSavedWishlist())
     val wishlist: StateFlow<Set<String>> = _wishlist.asStateFlow()
+
+    // Heritage Traditions (SIH 26197)
+    private val _heritageTraditions = MutableStateFlow<List<CraftHeritageModel>>(HeritageRegistry.livingTraditions)
+    val heritageTraditions: StateFlow<List<CraftHeritageModel>> = _heritageTraditions.asStateFlow()
+
+    private val _savedHeritageBookmarks = MutableStateFlow<Set<String>>(loadSavedHeritageBookmarks())
+    val savedHeritageBookmarks: StateFlow<Set<String>> = _savedHeritageBookmarks.asStateFlow()
 
     // Clean cart: restored from local cache so items survive app restarts
     private val _cart = MutableStateFlow<List<CartItemModel>>(loadSavedCart())
@@ -807,6 +816,56 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun isWishlisted(productId: String) = _wishlist.value.contains(productId)
 
+    // ── Heritage Functions (SIH 26197) ──────────────────────────────────────
+    fun toggleHeritageBookmark(craftId: String) {
+        val current = _savedHeritageBookmarks.value.toMutableSet()
+        if (current.contains(craftId)) {
+            current.remove(craftId)
+            Log.d(TAG, "Removed craft from heritage bookmarks: $craftId")
+        } else {
+            current.add(craftId)
+            Log.d(TAG, "Added craft to heritage bookmarks: $craftId")
+        }
+        _savedHeritageBookmarks.value = current
+        saveHeritageBookmarks(current)
+    }
+
+    fun isHeritageBookmarked(craftId: String): Boolean = _savedHeritageBookmarks.value.contains(craftId)
+
+    fun getHeritageCraft(craftId: String): CraftHeritageModel? {
+        return _heritageTraditions.value.find { it.craftId == craftId }
+            ?: HeritageRegistry.getCraftById(craftId)
+    }
+
+    fun incrementHeritageLearner(craftId: String) {
+        val list = _heritageTraditions.value.toMutableList()
+        val index = list.indexOfFirst { it.craftId == craftId }
+        if (index >= 0) {
+            val updated = list[index].copy(learnerCount = list[index].learnerCount + 1)
+            list[index] = updated
+            _heritageTraditions.value = list
+        }
+    }
+
+    fun publishHeritageRecord(record: CraftHeritageModel) {
+        val list = _heritageTraditions.value.toMutableList()
+        val existingIndex = list.indexOfFirst { it.craftId == record.craftId }
+        if (existingIndex >= 0) {
+            list[existingIndex] = record
+        } else {
+            list.add(0, record)
+        }
+        _heritageTraditions.value = list
+        Log.i(TAG, "[Heritage] Published new heritage record: ${record.craftNameEn} (${record.craftId})")
+
+        // Persist to Firestore if online
+        try {
+            firestore?.collection("heritage_records")?.document(record.craftId)?.set(record)
+        } catch (e: Exception) {
+            Log.w(TAG, "[Heritage] Firestore record sync notice: ${e.message}")
+        }
+    }
+
     fun addToCart(product: ProductModel, quantity: Int = 1) {
         val existing = _cart.value.indexOfFirst { it.productId == product.productId }
         if (existing >= 0) {
@@ -1146,6 +1205,26 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun loadSavedWishlist(): Set<String> {
         val json = prefs.getString("saved_wishlist_json", null) ?: return emptySet()
+        return try {
+            val array = JSONArray(json)
+            val set = mutableSetOf<String>()
+            for (i in 0 until array.length()) set.add(array.getString(i))
+            set
+        } catch (e: Exception) { emptySet() }
+    }
+
+    private fun saveHeritageBookmarks(ids: Set<String>) {
+        try {
+            val array = JSONArray()
+            ids.forEach { array.put(it) }
+            prefs.edit().putString("saved_heritage_bookmarks_json", array.toString()).apply()
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed saving heritage bookmarks: ${e.message}")
+        }
+    }
+
+    private fun loadSavedHeritageBookmarks(): Set<String> {
+        val json = prefs.getString("saved_heritage_bookmarks_json", null) ?: return emptySet()
         return try {
             val array = JSONArray(json)
             val set = mutableSetOf<String>()

@@ -47,7 +47,10 @@ data class ProductModel(
     val couponCode: String? = null,                // e.g. "DHAAGA20", "WARLI15"
     val couponExpiryTimestamp: Long? = null,       // Expiry epoch timestamp
     val couponUsageLimit: Int = 0,                 // 0 = unlimited, or 10, 25, 50, etc.
-    val couponUsageCount: Int = 0                  // Times redeemed
+    val couponUsageCount: Int = 0,                 // Times redeemed
+    val craftHeritageId: String = "",              // Linked Craft Heritage ID (e.g. "heritage_warli_01")
+    val provenanceNote: String = "",               // Provenance & authentic technique note
+    val supportBeneficiary: String = ""            // Direct artisan / community beneficiary
 ) {
     @get:Exclude
     val priceRupees: Float get() = priceListed / 100f
