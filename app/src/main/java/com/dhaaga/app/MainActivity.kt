@@ -21,6 +21,10 @@ import com.dhaaga.app.navigation.Routes
 import com.dhaaga.app.ui.buyer.CartScreen
 import com.dhaaga.app.ui.buyer.MyOrdersScreen
 import com.dhaaga.app.ui.buyer.WishlistScreen
+import com.dhaaga.app.ui.heritage.CraftHeritageDetailScreen
+import com.dhaaga.app.ui.heritage.HeritageAtlasScreen
+import com.dhaaga.app.ui.heritage.HeritageStudioScreen
+import com.dhaaga.app.ui.heritage.LearnPracticeScreen
 import com.dhaaga.app.ui.home.HomeScreen
 import com.dhaaga.app.ui.onboarding.GoogleLoginScreen
 import com.dhaaga.app.ui.onboarding.LanguageSelectionScreen
@@ -150,6 +154,7 @@ fun DhaagaApp(viewModel: AppViewModel) {
             composable(Routes.PHONE_OTP) {
                 PhoneOtpScreen(
                     viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
                     onVerified = { phone, uid, existingUser ->
                         userPhone = phone
                         userUid = uid
@@ -317,6 +322,18 @@ fun DhaagaApp(viewModel: AppViewModel) {
                     },
                     onChatList = {
                         android.widget.Toast.makeText(appContext, "Chat with artisans — Coming Soon!", android.widget.Toast.LENGTH_SHORT).show()
+                    },
+                    onCraftClick = { craftId ->
+                        navController.navigate(Routes.heritageDetail(craftId))
+                    },
+                    onHeritageAtlas = {
+                        navController.navigate(Routes.HERITAGE_ATLAS)
+                    },
+                    onLearnPractice = { craftId ->
+                        navController.navigate(Routes.learnPractice(craftId))
+                    },
+                    onHeritageStudio = {
+                        navController.navigate(Routes.HERITAGE_STUDIO)
                     }
                 )
             }
@@ -360,6 +377,9 @@ fun DhaagaApp(viewModel: AppViewModel) {
                             "Bulk enquiry sent to ${product.sellerName}! They'll contact you shortly.",
                             android.widget.Toast.LENGTH_LONG
                         ).show()
+                    },
+                    onHeritageClick = { craftId ->
+                        navController.navigate(Routes.heritageDetail(craftId))
                     }
                 )
             }
@@ -371,6 +391,9 @@ fun DhaagaApp(viewModel: AppViewModel) {
                 onBack = { navController.popBackStack() },
                 onMyListings = { navController.navigate(Routes.MY_LISTINGS) },
                 onMyOrders = { navController.navigate(Routes.MY_ORDERS) },
+                onCraftClick = { craftId ->
+                    navController.navigate(Routes.heritageDetail(craftId))
+                },
                 onLogout = {
                     viewModel.logout()
                     navController.navigate(Routes.GOOGLE_LOGIN) {
@@ -433,6 +456,90 @@ fun DhaagaApp(viewModel: AppViewModel) {
                 viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onOrderClick = { orderId -> }
+            )
+        }
+
+        // ── Heritage & Culture (SIH 26197) ─────────────────────────
+        composable(
+            route = Routes.HERITAGE_DETAIL,
+            arguments = listOf(navArgument("craftId") { type = NavType.StringType }),
+            enterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            exitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            popExitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) }
+        ) { backStack ->
+            val craftId = backStack.arguments?.getString("craftId") ?: ""
+            CraftHeritageDetailScreen(
+                craftId = craftId,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onLearnPractice = { targetCraftId ->
+                    navController.navigate(Routes.learnPractice(targetCraftId))
+                },
+                onSupportCreation = { product ->
+                    viewModel.addToCart(product)
+                },
+                onProductClick = { productId ->
+                    navController.navigate(Routes.productDetail(productId))
+                }
+            )
+        }
+
+        composable(
+            route = Routes.HERITAGE_ATLAS,
+            enterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            exitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            popExitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) }
+        ) {
+            HeritageAtlasScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onCraftClick = { craftId ->
+                    navController.navigate(Routes.heritageDetail(craftId))
+                }
+            )
+        }
+
+        composable(
+            route = Routes.LEARN_PRACTICE,
+            arguments = listOf(
+                navArgument("craftId") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            ),
+            enterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            exitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            popExitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) }
+        ) { backStack ->
+            val craftId = backStack.arguments?.getString("craftId") ?: ""
+            LearnPracticeScreen(
+                initialCraftId = craftId,
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onViewHeritageRecord = { targetCraftId ->
+                    navController.navigate(Routes.heritageDetail(targetCraftId))
+                }
+            )
+        }
+
+        composable(
+            route = Routes.HERITAGE_STUDIO,
+            enterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            exitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(380, easing = FastOutSlowInEasing)) },
+            popExitTransition = { fadeOut(animationSpec = tween(380, easing = FastOutSlowInEasing)) }
+        ) {
+            HeritageStudioScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onPublished = { newCraftId ->
+                    navController.navigate(Routes.heritageDetail(newCraftId)) {
+                        popUpTo(Routes.HERITAGE_STUDIO) { inclusive = true }
+                    }
+                }
             )
         }
     }

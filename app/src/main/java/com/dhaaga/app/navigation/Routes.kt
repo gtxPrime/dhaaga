@@ -33,8 +33,16 @@ object Routes {
     const val CHAT_LIST = "chat_list"
     const val CHAT = "chat/{chatId}"
 
+    // Heritage & Culture (SIH 26197)
+    const val HERITAGE_DETAIL = "heritage_detail/{craftId}"
+    const val HERITAGE_ATLAS = "heritage_atlas"
+    const val LEARN_PRACTICE = "learn_practice?craftId={craftId}"
+    const val HERITAGE_STUDIO = "heritage_studio"
+
     fun productDetail(productId: String, sharedKey: String = "product-image-$productId") =
         "product_detail/$productId?sharedKey=$sharedKey"
+    fun heritageDetail(craftId: String) = "heritage_detail/$craftId"
+    fun learnPractice(craftId: String = "") = "learn_practice?craftId=$craftId"
     fun orderTracking(orderId: String) = "order_tracking/$orderId"
     fun payment(orderId: String) = "payment/$orderId"
     fun orderSuccess(orderId: String) = "order_success/$orderId"
