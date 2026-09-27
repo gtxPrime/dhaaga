@@ -73,16 +73,7 @@ fun LanguageSelectionScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Audio Onboarding Guide
-            com.dhaaga.app.ui.components.AudioGuideCard(
-                englishText = "Welcome to Dhaaga. Please choose your preferred language to continue.",
-                hindiText = "धागा में आपका स्वागत है। आगे बढ़ने के लिए कृपया अपनी पसंदीदा भाषा चुनें।",
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Language grid
             LazyVerticalGrid(

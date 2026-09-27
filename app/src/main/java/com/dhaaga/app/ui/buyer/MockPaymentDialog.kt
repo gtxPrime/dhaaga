@@ -381,23 +381,24 @@ fun MockPaymentDialog(
                                                             modifier = Modifier.fillMaxWidth(),
                                                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                                                         ) {
-                                                            listOf("Google Pay", "PhonePe", "Paytm", "BHIM").forEach { appName ->
-                                                                val isAppSelected = selectedUpiApp == appName
+                                                            listOf("GPay", "PhonePe", "Paytm", "BHIM").forEach { appName ->
+                                                                val isAppSelected = selectedUpiApp == appName || (selectedUpiApp == "Google Pay" && appName == "GPay")
                                                                 Box(
                                                                     modifier = Modifier
                                                                         .weight(1f)
                                                                         .clip(RoundedCornerShape(8.dp))
-                                                                        .background(if (isAppSelected) PaletteForest else Color.White)
-                                                                        .border(1.dp, if (isAppSelected) PaletteForest else DhaagaDivider, RoundedCornerShape(8.dp))
+                                                                        .background(if (isAppSelected) PaletteTerracotta else Color.White)
+                                                                        .border(1.dp, if (isAppSelected) PaletteTerracotta else DhaagaDivider, RoundedCornerShape(8.dp))
                                                                         .clickable { selectedUpiApp = appName }
-                                                                        .padding(vertical = 6.dp),
+                                                                        .padding(vertical = 8.dp),
                                                                     contentAlignment = Alignment.Center
                                                                 ) {
                                                                     Text(
                                                                         text = appName,
-                                                                        fontSize = 10.sp,
+                                                                        fontSize = 11.sp,
                                                                         fontWeight = FontWeight.Bold,
-                                                                        color = if (isAppSelected) Color.White else DhaagaTextDark
+                                                                        color = if (isAppSelected) Color.White else DhaagaTextDark,
+                                                                        maxLines = 1
                                                                     )
                                                                 }
                                                             }

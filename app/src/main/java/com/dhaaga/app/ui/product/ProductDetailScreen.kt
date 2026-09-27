@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -82,6 +83,7 @@ fun ProductDetailScreen(
     onBack: () -> Unit,
     onAddToCart: (ProductModel) -> Unit,
     onBulkEnquiry: (ProductModel) -> Unit,
+    onHeritageClick: (String) -> Unit = {},
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null
 ) {
@@ -372,6 +374,61 @@ fun ProductDetailScreen(
 
                 Spacer(modifier = Modifier.height(18.dp))
 
+                // Heritage Tradition Banner (SIH 26197)
+                if (product.craftHeritageId.isNotBlank()) {
+                    Surface(
+                        onClick = { onHeritageClick(product.craftHeritageId) },
+                        color = PaletteMintCard,
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.dp, PaletteForest.copy(alpha = 0.35f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(PaletteForest),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Living Tradition Behind This Creation",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PaletteDarkGreen
+                                )
+                                Text(
+                                    text = "Explore Sacred Heritage Lore & Listen to Oral History →",
+                                    fontSize = 11.sp,
+                                    color = PaletteForest,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                tint = PaletteForest,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
+                }
+
                 // 2. Product Title & Price Row
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     Row(
@@ -502,73 +559,49 @@ fun ProductDetailScreen(
                     // GI Certified Heritage Banner
                     if (product.hasGITag || product.giVerified || !product.giTag.isNullOrBlank()) {
                         Spacer(modifier = Modifier.height(10.dp))
-                        Card(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { showGiDetailsDialog = true },
-                            shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF2F7EF)),
-                            border = BorderStroke(1.dp, PaletteForest.copy(alpha = 0.35f))
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(PaletteTerracotta.copy(alpha = 0.08f))
+                                .border(1.dp, PaletteTerracotta.copy(alpha = 0.25f), RoundedCornerShape(12.dp))
+                                .clickable { showGiDetailsDialog = true }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(12.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(38.dp)
-                                        .clip(CircleShape)
-                                        .background(PaletteForest),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Verified,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            text = "GI CERTIFIED HERITAGE",
-                                            fontSize = 10.5.sp,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            color = PaletteForest,
-                                            letterSpacing = 0.8.sp
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(4.dp))
-                                                .background(PaletteForest.copy(alpha = 0.15f))
-                                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                                        ) {
-                                            Text(
-                                                text = product.giTag ?: "GI-Certified",
-                                                fontSize = 9.5.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = PaletteForest
-                                            )
-                                        }
-                                    }
-                                    Text(
-                                        text = if (product.giCraftName.isNotBlank()) product.giCraftName else "${product.craftType} (${product.region})",
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = PaletteDarkGreen
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = "Details",
-                                    tint = PaletteForest,
-                                    modifier = Modifier.size(16.dp)
+                            Icon(
+                                imageVector = Icons.Default.Verified,
+                                contentDescription = null,
+                                tint = PaletteTerracotta,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "GI CERTIFIED HERITAGE" + if (!product.giTag.isNullOrBlank()) " • ${product.giTag}" else "",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = PaletteTerracotta,
+                                    letterSpacing = 0.5.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = if (product.giCraftName.isNotBlank()) product.giCraftName else "${product.craftType} (${product.region})",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PaletteDarkGreen,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = "Details",
+                                tint = PaletteTerracotta,
+                                modifier = Modifier.size(16.dp)
+                            )
                         }
                     }
 
@@ -664,48 +697,92 @@ fun ProductDetailScreen(
                             .border(1.dp, PaletteForest.copy(alpha = 0.2f), RoundedCornerShape(18.dp))
                             .padding(16.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(46.dp)
-                                    .clip(CircleShape)
-                                    .background(PaletteForest.copy(alpha = 0.12f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.WorkspacePremium,
-                                    contentDescription = null,
-                                    tint = PaletteForest,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                        Column {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(46.dp)
+                                        .clip(CircleShape)
+                                        .background(PaletteForest.copy(alpha = 0.12f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.WorkspacePremium,
+                                        contentDescription = null,
+                                        tint = PaletteForest,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = product.sellerName,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PaletteDarkGreen
+                                    )
+                                    Text(
+                                        text = "${product.sellerVillage} • ${product.craftType}",
+                                        fontSize = 12.sp,
+                                        color = DhaagaTextMedium
+                                    )
+                                }
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(
+                                        text = "${product.authenticityScore}",
+                                        fontSize = 20.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PaletteForest
+                                    )
+                                    Text(
+                                        text = "SHILPI SCORE",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = DhaagaTextLight
+                                    )
+                                }
                             }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = product.sellerName,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = PaletteDarkGreen
-                                )
-                                Text(
-                                    text = "${product.sellerVillage} • ${product.craftType}",
-                                    fontSize = 12.sp,
-                                    color = DhaagaTextMedium
-                                )
-                            }
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = "${product.authenticityScore}",
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = PaletteForest
-                                )
-                                Text(
-                                    text = "SHILPI SCORE",
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = DhaagaTextLight
-                                )
+
+                            if (product.supportBeneficiary.isNotBlank() || product.provenanceNote.isNotBlank()) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                HorizontalDivider(color = PaletteForest.copy(alpha = 0.15f))
+                                Spacer(modifier = Modifier.height(10.dp))
+
+                                if (product.supportBeneficiary.isNotBlank()) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.VolunteerActivism,
+                                            contentDescription = null,
+                                            tint = PaletteForest,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = product.supportBeneficiary,
+                                            fontSize = 11.5.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = PaletteDarkGreen
+                                        )
+                                    }
+                                }
+
+                                if (product.provenanceNote.isNotBlank()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.LocationOn,
+                                            contentDescription = null,
+                                            tint = PaletteForest,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = product.provenanceNote,
+                                            fontSize = 11.sp,
+                                            color = DhaagaTextMedium
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -717,8 +794,8 @@ fun ProductDetailScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(18.dp))
-                            .background(Color(0xFFEFF4EB)) // Soft Creamy Sage
-                            .border(1.dp, PaletteForest.copy(alpha = 0.2f), RoundedCornerShape(18.dp))
+                            .background(Color(0xFFF8FAFC))
+                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(18.dp))
                             .padding(16.dp)
                     ) {
                         Column {
@@ -731,7 +808,7 @@ fun ProductDetailScreen(
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.MenuBook,
                                     contentDescription = null,
-                                    tint = PaletteForest,
+                                    tint = PaletteTerracotta,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -802,22 +879,34 @@ fun ProductDetailScreen(
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Text(
                                                     text = "Artisan Oral History",
-                                                    fontSize = 12.sp,
+                                                    fontSize = 12.5.sp,
                                                     fontWeight = FontWeight.Bold,
-                                                    color = PaletteDarkGreen
+                                                    color = DhaagaTextDark,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                                 Text(
-                                                    text = "In Marathi & Hindi • 1:15 min",
-                                                    fontSize = 10.sp,
-                                                    color = DhaagaTextLight
+                                                    text = "Marathi & Hindi • 1m 15s",
+                                                    fontSize = 11.sp,
+                                                    color = DhaagaTextLight,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                             }
-                                            Text(
-                                                text = if (isAudioPlaying) "Playing..." else "Tap to Listen",
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = PaletteForest
-                                            )
+                                            Surface(
+                                                shape = RoundedCornerShape(12.dp),
+                                                color = PaletteTerracotta.copy(alpha = 0.12f),
+                                                modifier = Modifier.padding(start = 8.dp)
+                                            ) {
+                                                Text(
+                                                    text = if (isAudioPlaying) "Playing..." else "Listen",
+                                                    fontSize = 11.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = PaletteTerracotta,
+                                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                                    maxLines = 1
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -863,14 +952,16 @@ fun ProductDetailScreen(
                                     Text(
                                         text = key,
                                         fontSize = 12.sp,
-                                        color = DhaagaTextMedium
+                                        color = DhaagaTextMedium,
+                                        modifier = Modifier.weight(0.9f)
                                     )
                                     Text(
                                         text = value,
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
-                                        color = PaletteDarkGreen,
-                                        modifier = Modifier.widthIn(max = 200.dp)
+                                        color = DhaagaTextDark,
+                                        textAlign = TextAlign.End,
+                                        modifier = Modifier.weight(1.1f)
                                     )
                                 }
                                 if (index < 5) {
@@ -914,174 +1005,161 @@ fun ProductDetailScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(PaletteForest.copy(alpha = 0.12f))
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    .background(PaletteTerracotta.copy(alpha = 0.08f))
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        modifier = Modifier.weight(1f),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
                                         Icon(
                                             imageVector = Icons.Default.VerifiedUser,
                                             contentDescription = null,
-                                            tint = PaletteForest,
-                                            modifier = Modifier.size(14.dp)
+                                            tint = PaletteTerracotta,
+                                            modifier = Modifier.size(16.dp)
                                         )
                                         Spacer(modifier = Modifier.width(6.dp))
                                         Text(
                                             text = "₹${(product.priceListed * 0.88 / 100).toInt()} directly reaches ${product.sellerName.split(" ").firstOrNull() ?: "Artisan"}",
-                                            fontSize = 11.sp,
+                                            fontSize = 11.5.sp,
                                             fontWeight = FontWeight.Bold,
-                                            color = PaletteDarkGreen
+                                            color = PaletteDarkGreen,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = "FAIR TRADE",
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = PaletteForest
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        color = PaletteTerracotta,
+                                        maxLines = 1
                                     )
                                 }
                             }
                         }
                     }
                 }
+                Spacer(modifier = Modifier.height(84.dp))
             }
         }
 
-        // 7. Floating Bottom Action Pill (Pure Sage & Forest Green Design System, matching Home Nav Pill)
-        Box(
+        // 7. Docked Bottom Action Bar
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
-            contentAlignment = Alignment.BottomCenter
+                .align(Alignment.BottomCenter),
+            color = Color.White,
+            shadowElevation = 10.dp,
+            border = BorderStroke(1.dp, Color(0xFFE2E8F0))
         ) {
-            Surface(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(58.dp)
-                    .shadow(
-                        elevation = 14.dp,
-                        shape = RoundedCornerShape(29.dp),
-                        spotColor = Color(0x4460734E),
-                        ambientColor = Color(0x1F000000)
-                    ),
-                shape = RoundedCornerShape(29.dp),
-                color = Color(0xFFE2EAD9), // PaletteGreenTint - Soft Sage Green Tint matching Home Nav Pill
-                border = BorderStroke(1.dp, PaletteSage.copy(alpha = 0.4f))
+                    .navigationBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                // Left: Price Column
+                Column(
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    // Left: Price Column
-                    Column(
-                        verticalArrangement = Arrangement.Center
+                    Text(
+                        text = "TOTAL PRICE",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = DhaagaTextLight,
+                        letterSpacing = 0.8.sp
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
-                            text = "TOTAL PRICE",
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PaletteForest,
-                            letterSpacing = 0.8.sp
+                            text = product.priceDisplay,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = PaletteDarkGreen
                         )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = product.priceDisplay,
-                                fontSize = 17.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = PaletteDarkGreen
-                            )
-                            Text(
-                                text = "₹${(product.priceListed * 1.4 / 100).toInt()}",
-                                fontSize = 11.sp,
-                                color = DhaagaTextLight,
-                                textDecoration = TextDecoration.LineThrough
-                            )
-                        }
+                        Text(
+                            text = "₹${(product.priceListed * 1.4 / 100).toInt()}",
+                            fontSize = 11.sp,
+                            color = DhaagaTextLight,
+                            textDecoration = TextDecoration.LineThrough
+                        )
+                    }
+                }
+
+                // Right Actions: Add to Bag + Buy Craft
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Add to Bag Button
+                    OutlinedButton(
+                        onClick = {
+                            if (isInCart) {
+                                Toast.makeText(context, "Item is already in your Bag", Toast.LENGTH_SHORT).show()
+                            } else {
+                                onAddToCart(product)
+                                Toast.makeText(context, "Added to bag", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (isInCart) PaletteMintCard else Color.White,
+                            contentColor = if (isInCart) PaletteTerracotta else PaletteDarkGreen
+                        ),
+                        border = BorderStroke(1.dp, if (isInCart) PaletteTerracotta else Color(0xFFCBD5E1)),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isInCart) Icons.Default.Check else Icons.Outlined.ShoppingBag,
+                            contentDescription = null,
+                            tint = if (isInCart) PaletteTerracotta else PaletteDarkGreen,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = if (isInCart) viewModel.tr("in_stock_label", "In Bag") else viewModel.tr("add_to_bag", "Add to Bag"),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isInCart) PaletteTerracotta else PaletteDarkGreen
+                        )
                     }
 
-                    // Right Actions: Add to Bag + Buy Craft →
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Buy Craft Button (Terracotta CTA)
+                    Button(
+                        onClick = {
+                            if (!isInCart) {
+                                onAddToCart(product)
+                            }
+                            Toast.makeText(context, "Proceeding to checkout...", Toast.LENGTH_SHORT).show()
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = PaletteTerracotta),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
-                        // Add to Bag Button
-                        Surface(
-                            onClick = {
-                                if (isInCart) {
-                                    Toast.makeText(context, "Item is already in your Bag", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    onAddToCart(product)
-                                    Toast.makeText(context, "Added to bag", Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                            shape = RoundedCornerShape(20.dp),
-                            color = if (isInCart) PaletteMintCard else Color.White,
-                            border = BorderStroke(1.dp, PaletteForest.copy(alpha = if (isInCart) 0.5f else 0.25f)),
-                            shadowElevation = if (isInCart) 0.dp else 1.dp
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (isInCart) Icons.Default.Check else Icons.Outlined.ShoppingBag,
-                                    contentDescription = null,
-                                    tint = if (isInCart) PaletteForest else PaletteDarkGreen,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Text(
-                                    text = if (isInCart) viewModel.tr("in_stock_label", "In Bag") else viewModel.tr("add_to_bag", "Add to Bag"),
-                                    fontSize = 11.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isInCart) PaletteForest else PaletteDarkGreen
-                                )
-                            }
-                        }
-
-                        // Buy Craft Button (Forest Sage Green #60734E Primary CTA)
-                        Surface(
-                            onClick = {
-                                if (!isInCart) {
-                                    onAddToCart(product)
-                                }
-                                Toast.makeText(context, "Proceeding to checkout...", Toast.LENGTH_SHORT).show()
-                            },
-                            shape = RoundedCornerShape(20.dp),
-                            color = PaletteForest, // Forest Sage #60734E
-                            shadowElevation = 3.dp
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Text(
-                                    text = viewModel.tr("buy_craft", "Buy Craft"),
-                                    fontSize = 12.5.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            }
-                        }
+                        Text(
+                            text = viewModel.tr("buy_craft", "Buy Now"),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(15.dp)
+                        )
                     }
                 }
             }
@@ -1206,8 +1284,8 @@ fun ProductDetailScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FAF4)),
-                        border = BorderStroke(1.dp, Color(0xFFE2EAD9))
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC)),
+                        border = BorderStroke(1.dp, Color(0xFFE2E8F0))
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
                             Row(

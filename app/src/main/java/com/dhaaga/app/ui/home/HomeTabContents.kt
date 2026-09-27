@@ -62,8 +62,8 @@ fun TabHeaderBlock(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(PaletteForest, PaletteSage)
+                Brush.horizontalGradient(
+                    colors = listOf(PaletteTerracotta, Color(0xFFC85A32))
                 )
             )
             .statusBarsPadding()
@@ -1161,7 +1161,7 @@ fun EditCraftSheet(
                     val isSelected = status == code
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = if (isSelected) PaletteForest else Color(0xFFF1F4EE),
+                        color = if (isSelected) PaletteForest else Color(0xFFF1F5F9),
                         modifier = Modifier.weight(1f).clickable { status = code }
                     ) {
                         Box(modifier = Modifier.padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
@@ -1686,7 +1686,7 @@ fun ProfileTabContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 130.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 160.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             // User ID Card
@@ -1720,48 +1720,54 @@ fun ProfileTabContent(
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
+                    val accountDisplay = user?.email?.takeIf { it.isNotBlank() } ?: viewModel.loggedInPhone.ifBlank { "Google Account" }
+                    val isEmail = accountDisplay.contains("@")
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             user?.name ?: if (isSeller) "Artisan" else "Buyer",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = PaletteDarkGreen
+                            color = DhaagaTextDark,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = Icons.Default.Phone,
+                                imageVector = if (isEmail) Icons.Default.Email else Icons.Default.Phone,
                                 contentDescription = null,
-                                tint = PaletteForest,
+                                tint = PaletteTerracotta,
                                 modifier = Modifier.size(13.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = viewModel.loggedInPhone,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = PaletteDarkGreen
+                                text = accountDisplay,
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = DhaagaTextMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(PaletteForest)
+                                .background(PaletteTerracotta.copy(alpha = 0.12f))
                                 .padding(horizontal = 8.dp, vertical = 2.dp)
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(
                                     imageVector = if (isSeller) Icons.Default.Storefront else Icons.Default.ShoppingBag,
                                     contentDescription = null,
-                                    tint = Color.White,
+                                    tint = PaletteTerracotta,
                                     modifier = Modifier.size(12.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     if (isSeller) "Artisan Seller" else "Verified Buyer",
                                     fontSize = 10.sp,
-                                    color = Color.White,
+                                    color = PaletteTerracotta,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -1771,30 +1777,33 @@ fun ProfileTabContent(
             }
 
             // Settings List
+            val hasEmail = !user?.email.isNullOrBlank()
             ProfileOptionRow(
-                icon = Icons.Outlined.PhoneAndroid,
-                label = "Logged-in Phone Number",
-                value = viewModel.loggedInPhone
+                icon = if (hasEmail) Icons.Outlined.Email else Icons.Outlined.PhoneAndroid,
+                label = if (hasEmail) "Google Account" else "Phone Number",
+                value = user?.email?.takeIf { it.isNotBlank() } ?: viewModel.loggedInPhone.ifBlank { "Signed In" },
+                showChevron = false
             ) {
-                Toast.makeText(context, "Logged in as ${viewModel.loggedInPhone}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Account: ${user?.email ?: viewModel.loggedInPhone}", Toast.LENGTH_SHORT).show()
             }
             ProfileOptionRow(
                 icon = Icons.Outlined.Language,
                 label = viewModel.tr("language", "Language (भाषा)"),
-                value = com.dhaaga.app.utils.AppLanguageManager.getLanguageName(currentLang)
+                value = com.dhaaga.app.utils.AppLanguageManager.getLanguageName(currentLang),
+                showChevron = true
             ) {
                 showLanguageSheet = true
             }
             if (isSeller) {
-                ProfileOptionRow(icon = Icons.Outlined.Inventory2, label = viewModel.tr("my_crafts", "My Crafts / Listings"), value = "Manage") {
+                ProfileOptionRow(icon = Icons.Outlined.Inventory2, label = viewModel.tr("my_crafts", "My Crafts / Listings"), value = "Manage", showChevron = true) {
                     onMyListings()
                 }
-                ProfileOptionRow(icon = Icons.Outlined.AutoFixHigh, label = viewModel.tr("ai_settings_title", "Studio Quality & Speed"), value = "Config") {
+                ProfileOptionRow(icon = Icons.Outlined.AutoFixHigh, label = viewModel.tr("ai_settings_title", "Studio Quality & Speed"), value = "Config", showChevron = true) {
                     showDeveloperKeysInDialog = false
                     showAISettingsDialog = true
                 }
             } else {
-                ProfileOptionRow(icon = Icons.Outlined.Receipt, label = viewModel.tr("order_history", "My Orders"), value = "View All") {
+                ProfileOptionRow(icon = Icons.Outlined.Receipt, label = viewModel.tr("order_history", "My Orders"), value = "View All", showChevron = true) {
                     onMyOrders()
                 }
             }
@@ -1808,16 +1817,16 @@ fun ProfileTabContent(
                     else -> "India"
                 }
             }
-            ProfileOptionRow(icon = Icons.Outlined.LocationOn, label = viewModel.tr("saved_addresses", "Saved Addresses"), value = locationLabel) {
+            ProfileOptionRow(icon = Icons.Outlined.LocationOn, label = viewModel.tr("saved_addresses", "Saved Addresses"), value = locationLabel, showChevron = true) {
                 Toast.makeText(context, "Location: $locationLabel", Toast.LENGTH_SHORT).show()
             }
-            ProfileOptionRow(icon = Icons.Outlined.AccountBalance, label = viewModel.tr("bank_upi", "Bank & UPI Payouts"), value = "Active") {
+            ProfileOptionRow(icon = Icons.Outlined.AccountBalance, label = viewModel.tr("bank_upi", "Bank & UPI Payouts"), value = "Active", showChevron = true) {
                 Toast.makeText(context, "UPI & Bank payouts active and verified", Toast.LENGTH_SHORT).show()
             }
-            ProfileOptionRow(icon = Icons.Outlined.SupportAgent, label = viewModel.tr("artisan_helpline", "Artisan Guild Helpline"), value = "24x7") {
+            ProfileOptionRow(icon = Icons.Outlined.SupportAgent, label = viewModel.tr("artisan_helpline", "Artisan Guild Helpline"), value = "24x7", showChevron = true) {
                 Toast.makeText(context, "Helpline: 1800-DHAAGA (Toll Free)", Toast.LENGTH_SHORT).show()
             }
-            ProfileOptionRow(icon = Icons.Outlined.VerifiedUser, label = viewModel.tr("gi_guarantee", "GI & Fair Trade Guarantee"), value = "100%") {
+            ProfileOptionRow(icon = Icons.Outlined.VerifiedUser, label = viewModel.tr("gi_guarantee", "GI & Fair Trade Guarantee"), value = "100%", showChevron = true) {
                 Toast.makeText(context, "All GI-certified crafts are verified before listing", Toast.LENGTH_SHORT).show()
             }
 
@@ -1896,10 +1905,10 @@ fun ProfileTabContent(
                         val isSelected = currentLang == lang.code
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = if (isSelected) PaletteGreenTint else Color(0xFFF7F9F6),
+                            color = if (isSelected) PaletteTerracotta.copy(alpha = 0.12f) else Color.White,
                             border = BorderStroke(
                                 width = if (isSelected) 1.5.dp else 1.dp,
-                                color = if (isSelected) PaletteForest else PaletteSage.copy(alpha = 0.25f)
+                                color = if (isSelected) PaletteTerracotta else Color(0xFFE2E8F0)
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1955,6 +1964,7 @@ private fun ProfileOptionRow(
     icon: ImageVector,
     label: String,
     value: String,
+    showChevron: Boolean = true,
     onClick: () -> Unit
 ) {
     Card(
@@ -1968,19 +1978,48 @@ private fun ProfileOptionRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(horizontal = 14.dp, vertical = 13.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(imageVector = icon, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(text = label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = PaletteDarkGreen)
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = value, fontSize = 12.sp, color = PaletteSage)
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = PaletteSage, modifier = Modifier.size(16.dp))
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = PaletteTerracotta,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = label,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = DhaagaTextDark,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1.1f, fill = false)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Row(
+                modifier = Modifier.weight(0.9f),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = value,
+                    fontSize = 12.sp,
+                    color = DhaagaTextMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.End
+                )
+                if (showChevron) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = DhaagaTextLight.copy(alpha = 0.5f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
         }
     }

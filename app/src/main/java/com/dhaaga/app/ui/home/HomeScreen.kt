@@ -48,6 +48,7 @@ import coil.compose.AsyncImage
 import com.dhaaga.app.ui.components.CardAsyncImage
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.R
+import com.dhaaga.app.data.mock.HeritageRegistry
 import com.dhaaga.app.data.model.ProductModel
 import com.dhaaga.app.data.model.UserModel
 import com.dhaaga.app.ui.components.NotionAvatar
@@ -61,7 +62,8 @@ data class HomeBannerItem(
     val title: String,
     val subtitle: String,
     val badge: String,
-    val imageUrl: String
+    val imageUrl: Any,
+    val craftHeritageId: String = ""
 )
 
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
@@ -79,6 +81,10 @@ fun HomeScreen(
     onProfile: () -> Unit = {},
     onLogout: () -> Unit = {},
     onChatList: () -> Unit = {},
+    onCraftClick: (String) -> Unit = {},
+    onHeritageAtlas: () -> Unit = {},
+    onLearnPractice: (String) -> Unit = {},
+    onHeritageStudio: () -> Unit = {},
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null
 ) {
@@ -135,29 +141,48 @@ fun HomeScreen(
         }
     }
 
-    // Featured Banners for Auto-Loop Slider (Uploaded to Live Server)
+    // Curated Living Heritage Exhibitions of Bharat (SIH 26197)
     val bannerItems = remember(currentLang) {
         listOf(
             HomeBannerItem(
                 id = 1,
-                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner1_title", currentLang, "Artisan Handloom Week"),
-                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner1_sub", currentLang, "Preserving Centuries of Heritage Crafts"),
-                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner1_badge", currentLang, "HANDLOOM SPECIAL"),
-                imageUrl = "https://dhaaga.thecoolestportfolio.site/uploads/dhaaga_20260826_190707_bf398ccf1376.jpg"
+                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner_warli_title", currentLang, "Warli Ritual Cosmogony"),
+                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner_warli_sub", currentLang, "2,500-Year Sacred Geometric Lineage • Palghar, Maharashtra"),
+                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner_warli_badge", currentLang, "LIVING HERITAGE EXHIBITION"),
+                imageUrl = R.drawable.banner_warli_art,
+                craftHeritageId = "heritage_warli_01"
             ),
             HomeBannerItem(
                 id = 2,
-                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner2_title", currentLang, "Authentic Madhubani Art"),
-                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner2_sub", currentLang, "Handcrafted by Master Folk Artists"),
-                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner2_badge", currentLang, "GI CERTIFIED CRAFTS"),
-                imageUrl = "https://dhaaga.thecoolestportfolio.site/uploads/dhaaga_20260826_194856_3422de9243b3.jpg"
+                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner_madhubani_title", currentLang, "Mithila Kohbar & Folk Epics"),
+                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner_madhubani_sub", currentLang, "Natural Pigments & Double-Line Rekha • Madhubani, Bihar"),
+                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner_madhubani_badge", currentLang, "GI REGISTERED TRADITION"),
+                imageUrl = R.drawable.banner_madhubani_art,
+                craftHeritageId = "heritage_madhubani_02"
             ),
             HomeBannerItem(
                 id = 3,
-                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner3_title", currentLang, "Terracotta & Metalwork"),
-                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner3_sub", currentLang, "Direct Workshop Pricing from Rural Artisans"),
-                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner3_badge", currentLang, "DIRECT ARTISAN SALE"),
-                imageUrl = "https://dhaaga.thecoolestportfolio.site/uploads/dhaaga_20260826_190717_1baa44af0567.jpg"
+                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner_pashmina_title", currentLang, "Kashmir Pashmina Handloom"),
+                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner_pashmina_sub", currentLang, "12-Micron Changthangi Himalayan Fleece • Srinagar, Kashmir"),
+                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner_pashmina_badge", currentLang, "CENTURY-OLD CRAFT GUILD"),
+                imageUrl = R.drawable.banner_pashmina_loom,
+                craftHeritageId = "heritage_pashmina_04"
+            ),
+            HomeBannerItem(
+                id = 4,
+                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner_dhokra_title", currentLang, "Bastar Lost-Wax Bell Metal"),
+                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner_dhokra_sub", currentLang, "4,000-Year Ancient Mohenjo-Daro Lineage • Bastar, Chhattisgarh"),
+                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner_dhokra_badge", currentLang, "ANCIENT TRIBAL BRONZE"),
+                imageUrl = R.drawable.banner_dhokra_metal,
+                craftHeritageId = "heritage_dhokra_05"
+            ),
+            HomeBannerItem(
+                id = 5,
+                title = com.dhaaga.app.utils.AppLanguageManager.translate("banner_bluepottery_title", currentLang, "Jaipur Turquoise Blue Pottery"),
+                subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("banner_bluepottery_sub", currentLang, "Clayless Quartz & Cobalt Glaze Firing • Kot Jewar, Rajasthan"),
+                badge = com.dhaaga.app.utils.AppLanguageManager.translate("banner_bluepottery_badge", currentLang, "ROYAL RAJPUT GUILD"),
+                imageUrl = R.drawable.banner_blue_pottery,
+                craftHeritageId = "heritage_blue_pottery_03"
             )
         )
     }
@@ -211,7 +236,11 @@ fun HomeScreen(
                         } else {
                             showLocationPermissionDialog = true
                         }
-                    }
+                    },
+                    onCraftClick = onCraftClick,
+                    onHeritageAtlas = onHeritageAtlas,
+                    onLearnPractice = onLearnPractice,
+                    onHeritageStudio = onHeritageStudio
                 )
                 1 -> if (isSeller) {
                     MyListingsTabContent(
@@ -442,7 +471,11 @@ private fun HomeFeedTab(
     currentLang: String = "en",
     onAvatarClick: () -> Unit = {},
     onAvatarLongClick: () -> Unit = {},
-    onLocationClick: () -> Unit = {}
+    onLocationClick: () -> Unit = {},
+    onCraftClick: (String) -> Unit = {},
+    onHeritageAtlas: () -> Unit = {},
+    onLearnPractice: (String) -> Unit = {},
+    onHeritageStudio: () -> Unit = {}
 ) {
     val isSearching = searchQuery.isNotBlank() || selectedCategory != "All"
     val userLocation by viewModel.userLocation.collectAsState()
@@ -640,23 +673,76 @@ private fun HomeFeedTab(
                     }
                 }
             } else {
-                // Interactive Auto-Loop Image Banner Slider
+                // ── SIH 26197: Living Traditions & Oral Histories Story Reel ─────────
+                item {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    LivingTraditionsStoryReel(
+                        currentLang = currentLang,
+                        onCraftClick = onCraftClick
+                    )
+                }
+
+                // ── SIH 26197: Bharat Heritage Exploration Portals ───────────────────
+                item {
+                    Spacer(modifier = Modifier.height(14.dp))
+                    HeritagePortalsRow(
+                        onHeritageAtlas = onHeritageAtlas,
+                        onLearnPractice = { onLearnPractice("") },
+                        onHeritageStudio = onHeritageStudio,
+                        isSeller = isSeller
+                    )
+                }
+
+                // Interactive Auto-Loop Image Banner Slider with deep link to living heritage
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
                     HeroBannerSlider(
                         banners = bannerItems,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        onBannerClick = { banner ->
+                            if (banner.craftHeritageId.isNotBlank()) {
+                                onCraftClick(banner.craftHeritageId)
+                            }
+                        }
                     )
                 }
 
-                // Section 1: Trending This Week
+                // ── SIH 26197: Living Craft Traditions of Bharat Carousel ─────────────
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
+                    LivingTraditionsCarouselRow(
+                        currentLang = currentLang,
+                        onCraftClick = onCraftClick
+                    )
+                }
+
+                // ── SIH 26197: Interactive Sacred Motifs & Iconography Explorer ────────
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    SacredMotifsExplorerRow(
+                        currentLang = currentLang,
+                        onLearnPractice = onLearnPractice
+                    )
+                }
+
+                // ── SIH 26197: Featured Living Tradition Spotlight ───────────────────
+                item {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    FeaturedLivingTraditionSpotlight(
+                        currentLang = currentLang,
+                        onExplore = { onCraftClick("heritage_warli_01") }
+                    )
+                }
+
+                // ── Section 1: Direct Artisan Workshops & Master Lineages ─────────────
+                item {
+                    Spacer(modifier = Modifier.height(22.dp))
                     SectionHeaderRow(
-                        title = com.dhaaga.app.utils.AppLanguageManager.translate("trending_this_week", currentLang, "TRENDING THIS WEEK"),
-                        icon = Icons.Default.Whatshot,
-                        iconColor = DhaagaPrimary,
-                        onSeeAll = { onCategorySelected("Handloom") }
+                        title = com.dhaaga.app.utils.AppLanguageManager.translate("artisan_workshops_heading", currentLang, "DIRECT ARTISAN WORKSHOPS (शिल्पकार घराने)"),
+                        subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("artisan_workshops_sub", currentLang, "Direct patronage supporting generational master artisan families"),
+                        icon = Icons.Default.WorkspacePremium,
+                        iconColor = PaletteForest,
+                        onSeeAll = { onCategorySelected("All") }
                     )
                 }
 
@@ -686,14 +772,14 @@ private fun HomeFeedTab(
                     }
                 }
 
-                // Section 2: All Products
+                // ── Section 2: Sustainable Patronage Creations ───────────────────────
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     SectionHeaderRow(
-                        title = com.dhaaga.app.utils.AppLanguageManager.translate("all_products", currentLang, "ALL PRODUCTS"),
-                        subtitle = "${products.size} ${com.dhaaga.app.utils.AppLanguageManager.translate("items_suffix", currentLang, "Items")}",
-                        icon = Icons.Default.GridView,
-                        iconColor = DhaagaPrimary,
+                        title = com.dhaaga.app.utils.AppLanguageManager.translate("patronage_creations_heading", currentLang, "SUSTAINABLE PATRONAGE CREATIONS (धरोहर संरक्षण कृतियाँ)"),
+                        subtitle = com.dhaaga.app.utils.AppLanguageManager.translate("patronage_creations_sub", currentLang, "100% direct artisan proceeds • Verified GI provenance • Zero middleman cut"),
+                        icon = Icons.Default.VolunteerActivism,
+                        iconColor = PaletteForest,
                         onSeeAll = {}
                     )
                 }
@@ -780,7 +866,7 @@ private fun HeaderBlock(
             .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF60734E), Color(0xFF738861))
+                    colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B))
                 )
             )
     ) {
@@ -976,7 +1062,7 @@ private fun HeaderBlock(
                 ) {
                     if (searchQuery.isEmpty()) {
                         Text(
-                            text = com.dhaaga.app.utils.AppLanguageManager.translate("search_placeholder", currentLang, "Search products, artisans, crafts..."),
+                            text = com.dhaaga.app.utils.AppLanguageManager.translate("search_placeholder_heritage", currentLang, "Search living traditions, master artisans, motifs..."),
                             color = Color(0xFF888888),
                             fontSize = 13.sp,
                             maxLines = 1,
@@ -1015,7 +1101,7 @@ private fun HeaderBlock(
                                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                                 putExtra(
                                     RecognizerIntent.EXTRA_PROMPT,
-                                    if (currentLang != "en") "शिल्प या कला का नाम बोलें..." else "Speak craft name (e.g. Warli, Handloom, Terracotta)..."
+                                    if (currentLang != "en") "शिल्प या परम्परा का नाम बोलें..." else "Speak craft or tradition name (e.g. Warli, Madhubani, Pashmina)..."
                                 )
                                 putExtra(
                                     RecognizerIntent.EXTRA_LANGUAGE,
@@ -1042,8 +1128,8 @@ private fun HeaderBlock(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Row 3: Category / Craft Filter Chips
-            val categories = listOf("All", "Warli Art", "Madhubani", "Handloom", "Terracotta", "Jewellery", "GI Certified")
+            // Row 3: Living Traditions & Craft Filter Chips
+            val categories = listOf("All", "Warli Art", "Madhubani", "Pashmina", "Dhokra", "Blue Pottery", "GI Certified")
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -1051,12 +1137,12 @@ private fun HeaderBlock(
                 items(categories) { cat ->
                     val isSelected = selectedCategory == cat
                     val localizedLabel = when (cat) {
-                        "All" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_all", currentLang, "All")
+                        "All" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_all", currentLang, "All Traditions")
                         "Warli Art" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_warli", currentLang, "Warli Art")
                         "Madhubani" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_madhubani", currentLang, "Madhubani")
-                        "Handloom" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_handloom", currentLang, "Handloom")
-                        "Terracotta" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_terracotta", currentLang, "Terracotta")
-                        "Jewellery" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_jewellery", currentLang, "Jewellery")
+                        "Pashmina" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_pashmina", currentLang, "Pashmina")
+                        "Dhokra" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_dhokra", currentLang, "Bastar Dhokra")
+                        "Blue Pottery" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_blue_pottery", currentLang, "Blue Pottery")
                         "GI Certified" -> com.dhaaga.app.utils.AppLanguageManager.translate("cat_gi", currentLang, "GI Certified")
                         else -> cat
                     }
@@ -1064,7 +1150,7 @@ private fun HeaderBlock(
                         modifier = Modifier
                             .clip(RoundedCornerShape(14.dp))
                             .background(
-                                if (isSelected) Color.White else Color.White.copy(alpha = 0.22f)
+                                if (isSelected) PaletteTerracotta else Color.White.copy(alpha = 0.15f)
                             )
                             .clickable {
                                 onCategorySelected(cat)
@@ -1075,7 +1161,7 @@ private fun HeaderBlock(
                             text = localizedLabel,
                             fontSize = 11.5.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) PaletteForest else Color.White
+                            color = Color.White
                         )
                     }
                 }
@@ -1090,9 +1176,9 @@ private fun HeaderBlock(
 @Composable
 private fun HeroBannerSlider(
     banners: List<HomeBannerItem>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBannerClick: (HomeBannerItem) -> Unit = {}
 ) {
-    val context = LocalContext.current
     val pagerState = rememberPagerState(pageCount = { banners.size })
 
     // Auto-loop / Auto-slide effect every 3.5 seconds
@@ -1123,7 +1209,7 @@ private fun HeroBannerSlider(
                 modifier = Modifier
                     .fillMaxSize()
                     .clickable {
-                        Toast.makeText(context, "Clicked Banner Item ID: ${banner.id}", Toast.LENGTH_SHORT).show()
+                        onBannerClick(banner)
                     }
             ) {
                 // Background Image with themed loader
@@ -1186,6 +1272,36 @@ private fun HeroBannerSlider(
                         fontSize = 12.sp,
                         color = Color.White.copy(alpha = 0.85f)
                     )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.White.copy(alpha = 0.22f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Explore,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Text(
+                            text = "Explore Exhibition & Oral Archive",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(10.dp)
+                        )
+                    }
                 }
             }
         }
@@ -1206,6 +1322,743 @@ private fun HeroBannerSlider(
                         .clip(RoundedCornerShape(4.dp))
                         .background(if (isSelected) PaletteForest else Color.White.copy(alpha = 0.6f))
                 )
+            }
+        }
+    }
+}
+
+// ── SIH 26197: Heritage Showcase Components ─────────────────────────────────
+
+@Composable
+private fun LivingTraditionsStoryReel(
+    currentLang: String,
+    onCraftClick: (String) -> Unit
+) {
+    val traditions = HeritageRegistry.livingTraditions
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(PaletteTerracotta),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.RecordVoiceOver,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+                Text(
+                    text = com.dhaaga.app.utils.AppLanguageManager.translate("oral_histories_heading", currentLang, "ORAL HISTORIES & LIVING MASTERS"),
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp,
+                    color = PaletteDarkGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Listen",
+                fontSize = 11.5.sp,
+                color = PaletteTerracotta,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            items(traditions, key = { it.craftId }) { craft ->
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .width(76.dp)
+                        .clickable { onCraftClick(craft.craftId) }
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        // Outer decorative ring with warm terracotta accent
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .clip(CircleShape)
+                                .border(2.dp, PaletteTerracotta, CircleShape)
+                                .padding(3.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = com.dhaaga.app.ui.components.getCraftFallbackDrawable(craft.craftId)),
+                                contentDescription = craft.masterArtisanName,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .clip(CircleShape)
+                            )
+                        }
+
+                        // Audio mic badge indicator
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .align(Alignment.BottomEnd)
+                                .offset(x = 2.dp, y = 2.dp)
+                                .clip(CircleShape)
+                                .background(PaletteTerracotta)
+                                .border(1.5.dp, Color.White, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Mic,
+                                contentDescription = "Audio story",
+                                tint = Color.White,
+                                modifier = Modifier.size(11.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = craft.masterArtisanName.take(11),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PaletteDarkGreen,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Text(
+                        text = if (currentLang == "hi") craft.craftNameHi.take(9) else craft.craftNameEn.take(10),
+                        fontSize = 10.sp,
+                        color = DhaagaTextMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeritagePortalsRow(
+    onHeritageAtlas: () -> Unit,
+    onLearnPractice: () -> Unit,
+    onHeritageStudio: () -> Unit,
+    isSeller: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // Portal 1: Heritage Atlas
+        Surface(
+            onClick = onHeritageAtlas,
+            color = Color.White,
+            shape = RoundedCornerShape(14.dp),
+            border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+            shadowElevation = 2.dp,
+            modifier = Modifier.weight(1f)
+        ) {
+            Column(
+                modifier = Modifier.padding(10.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(PaletteTerracotta.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Public,
+                        contentDescription = null,
+                        tint = PaletteTerracotta,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Regional Atlas",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PaletteDarkGreen
+                )
+                Text(
+                    text = "GI Clusters",
+                    fontSize = 10.sp,
+                    color = DhaagaTextMedium
+                )
+            }
+        }
+
+        // Portal 2: Learn & Practice Motifs
+        Surface(
+            onClick = onLearnPractice,
+            color = Color.White,
+            shape = RoundedCornerShape(14.dp),
+            border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+            shadowElevation = 2.dp,
+            modifier = Modifier.weight(1f)
+        ) {
+            Column(
+                modifier = Modifier.padding(10.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(PaletteTerracotta.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.School,
+                        contentDescription = null,
+                        tint = PaletteTerracotta,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Learn Motifs",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PaletteDarkGreen
+                )
+                Text(
+                    text = "Practice Hub",
+                    fontSize = 10.sp,
+                    color = DhaagaTextMedium
+                )
+            }
+        }
+
+        // Portal 3: AI Documentation Studio (or Artisan Studio)
+        Surface(
+            onClick = onHeritageStudio,
+            color = Color.White,
+            shape = RoundedCornerShape(14.dp),
+            border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+            shadowElevation = 2.dp,
+            modifier = Modifier.weight(1f)
+        ) {
+            Column(
+                modifier = Modifier.padding(10.dp),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(PaletteTerracotta.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = PaletteTerracotta,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = if (isSeller) "Document" else "Artisan AI",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PaletteDarkGreen
+                )
+                Text(
+                    text = "Heritage Studio",
+                    fontSize = 10.sp,
+                    color = DhaagaTextMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FeaturedLivingTraditionSpotlight(
+    currentLang: String,
+    onExplore: () -> Unit
+) {
+    Surface(
+        onClick = onExplore,
+        color = Color.White,
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+        shadowElevation = 3.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(76.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.banner_warli_art),
+                    contentDescription = "Warli Tribal Tradition",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Surface(
+                    color = PaletteTerracotta,
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = "LIVING TRADITION SPOTLIGHT",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.8.sp,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Warli Tribal Folk Painting",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PaletteDarkGreen
+                )
+                Text(
+                    text = "2,500-Year Sacred Geometric Tradition • Palghar, Maharashtra",
+                    fontSize = 11.sp,
+                    color = DhaagaTextMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Listen to Oral History & Explore",
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = PaletteTerracotta
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = PaletteTerracotta,
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ── SIH 26197: Living Craft Traditions of Bharat Carousel ───────────────────
+@Composable
+private fun LivingTraditionsCarouselRow(
+    currentLang: String,
+    onCraftClick: (String) -> Unit
+) {
+    val traditions = HeritageRegistry.livingTraditions
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(PaletteTerracotta),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountBalance,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+                Text(
+                    text = com.dhaaga.app.utils.AppLanguageManager.translate("living_traditions_heading", currentLang, "LIVING TRADITIONS OF BHARAT"),
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp,
+                    color = PaletteDarkGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "5 Hubs",
+                fontSize = 11.5.sp,
+                color = PaletteTerracotta,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            items(traditions, key = { it.craftId }) { craft ->
+                Surface(
+                    onClick = { onCraftClick(craft.craftId) },
+                    shape = RoundedCornerShape(18.dp),
+                    color = Color.White,
+                    border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    shadowElevation = 3.dp,
+                    modifier = Modifier.width(260.dp)
+                ) {
+                    Column {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(130.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = com.dhaaga.app.ui.components.getCraftFallbackDrawable(craft.craftId)),
+                                contentDescription = craft.craftNameEn,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.verticalGradient(
+                                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.75f))
+                                        )
+                                    )
+                            )
+                            // Top Badges
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    color = PaletteTerracotta,
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "${craft.traditionAgeYears} Yrs Old",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                                Surface(
+                                    color = Color.White.copy(alpha = 0.95f),
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = "GI Registered",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PaletteDarkGreen,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                            // Bottom Title on Image
+                            Column(
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(10.dp)
+                            ) {
+                                Text(
+                                    text = if (currentLang == "hi") craft.craftNameHi else craft.craftNameEn,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = "${craft.district}, ${craft.state}",
+                                    fontSize = 10.sp,
+                                    color = Color.White.copy(alpha = 0.85f)
+                                )
+                            }
+                        }
+
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = if (currentLang == "hi") craft.summaryHi else craft.summaryEn,
+                                fontSize = 11.sp,
+                                color = DhaagaTextMedium,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                lineHeight = 15.sp
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Mic,
+                                        contentDescription = null,
+                                        tint = PaletteTerracotta,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Text(
+                                        text = craft.masterArtisanName,
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = PaletteDarkGreen
+                                    )
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        text = "Oral Archive",
+                                        fontSize = 10.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PaletteTerracotta
+                                    )
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                        contentDescription = null,
+                                        tint = PaletteTerracotta,
+                                        modifier = Modifier.size(11.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ── SIH 26197: Interactive Sacred Motifs & Iconography Explorer ──────────────
+@Composable
+private fun SacredMotifsExplorerRow(
+    currentLang: String,
+    onLearnPractice: (String) -> Unit
+) {
+    val motifs = listOf(
+        Triple(
+            "Tarpa Spiral Dance",
+            "तारपा नृत्य चक्र • Warli",
+            "Unbroken circle of life, cosmic harmony, and community solidarity without hierarchy."
+        ),
+        Triple(
+            "Kohbar Lotus & Bamboo",
+            "कोहबर कमल व बांस • Mithila",
+            "Sacred fertility and longevity; lotus symbolizes female purity, bamboo symbolizes male lineage."
+        ),
+        Triple(
+            "Kalka Paisley (Boteh)",
+            "काल्का बादाम बूटा • Kashmir",
+            "Ancient cypress tree and young shoot motif representing immortality, vitality, and renewal."
+        ),
+        Triple(
+            "Dancing Deer Totem",
+            "वन्य हिरण प्रतीक • Dhokra",
+            "4,000-year tribal animism symbol representing communion with forest spirits."
+        ),
+        Triple(
+            "Arabesque Foliage (Bel-Boote)",
+            "बेल-बूटे लताएं • Jaipur",
+            "Intertwined natural vine florals symbolizing boundless prosperity and grace."
+        )
+    )
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(PaletteTerracotta),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Palette,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+                Text(
+                    text = com.dhaaga.app.utils.AppLanguageManager.translate("sacred_motifs_heading", currentLang, "SACRED FOLK MOTIFS & ICONOGRAPHY"),
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp,
+                    color = PaletteDarkGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Studio >",
+                fontSize = 11.5.sp,
+                color = PaletteTerracotta,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                modifier = Modifier.clickable { onLearnPractice("") }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(motifs) { (titleEn, titleHi, meaning) ->
+                Surface(
+                    onClick = { onLearnPractice(titleEn) },
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, PaletteSage.copy(alpha = 0.35f)),
+                    shadowElevation = 2.dp,
+                    modifier = Modifier.width(220.dp)
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Surface(
+                                color = PaletteMintCard,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Brush,
+                                        contentDescription = null,
+                                        tint = PaletteForest,
+                                        modifier = Modifier.size(11.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Digital Canvas",
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PaletteForest
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = if (currentLang == "hi") titleHi else titleEn,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PaletteDarkGreen,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Text(
+                            text = meaning,
+                            fontSize = 11.sp,
+                            color = DhaagaTextMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            lineHeight = 15.sp
+                        )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = "Practice Drawing",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PaletteForest
+                            )
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                tint = PaletteForest,
+                                modifier = Modifier.size(11.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -1378,53 +2231,81 @@ private fun ProductCardCreative(
                     val displayTitle = if (currentLang != "en" && product.titleHi.isNotBlank()) product.titleHi else product.titleEn
                     Text(
                         text = displayTitle,
-                        fontSize = 13.sp,
+                        fontSize = 12.5.sp,
                         fontWeight = FontWeight.Bold,
                         color = PaletteDarkGreen,
+                        minLines = 2,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        lineHeight = 17.sp
+                        lineHeight = 16.sp
                     )
 
                     Spacer(modifier = Modifier.height(2.dp))
 
                     Text(
                         text = product.sellerVillage,
-                        fontSize = 11.sp,
+                        fontSize = 10.5.sp,
                         color = DhaagaTextLight,
+                        minLines = 1,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                    // Price Row
+                    // Fair Patronage Value Row (SpaceBetween ensures price & badge never collide or wrap)
                     Row(
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
                             text = product.priceDisplay,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PaletteForest
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = PaletteDarkGreen,
+                            maxLines = 1
+                        )
+                        Surface(
+                            color = PaletteTerracotta.copy(alpha = 0.08f),
+                            shape = RoundedCornerShape(4.dp)
+                        ) {
+                            Text(
+                                text = "Fair Value",
+                                fontSize = 8.5.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PaletteTerracotta,
+                                maxLines = 1,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Verified,
+                            contentDescription = null,
+                            tint = PaletteTerracotta,
+                            modifier = Modifier.size(10.dp)
                         )
                         Text(
-                            text = "₹${(product.priceListed * 1.3 / 100).toInt()}",
-                            fontSize = 11.sp,
-                            color = Color(0xFF999999),
-                            textDecoration = TextDecoration.LineThrough
-                        )
-                        Text(
-                            text = "23% off",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PaletteForest
+                            text = "100% Direct to Artisan",
+                            fontSize = 9.sp,
+                            color = DhaagaTextMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 var isButtonBouncing by remember { mutableStateOf(false) }
                 val buttonScale by animateFloatAsState(
@@ -1434,7 +2315,7 @@ private fun ProductCardCreative(
                     label = "btnScale"
                 )
 
-                // Add to Cart Button
+                // Sustainable Patronage Action Button
                 Button(
                     onClick = {
                         if (isInCart) {
@@ -1446,32 +2327,32 @@ private fun ProductCardCreative(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(36.dp)
+                        .height(34.dp)
                         .graphicsLayer(scaleX = buttonScale, scaleY = buttonScale),
-                    shape = RoundedCornerShape(18.dp),
+                    shape = RoundedCornerShape(17.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isInCart) PaletteForest else Color(0xFFEFF4EB)
+                        containerColor = if (isInCart) PaletteTerracotta else Color(0xFFF1F5F9)
                     ),
-                    contentPadding = PaddingValues(horizontal = 8.dp)
+                    border = if (isInCart) null else BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                    contentPadding = PaddingValues(horizontal = 6.dp)
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Icon(
-                            imageVector = if (isInCart) com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Check else com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping,
+                            imageVector = if (isInCart) com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Check else Icons.Default.VolunteerActivism,
                             contentDescription = null,
-                            tint = if (isInCart) Color.White else PaletteForest,
-                            modifier = Modifier.size(13.dp)
+                            tint = if (isInCart) Color.White else PaletteTerracotta,
+                            modifier = Modifier.size(12.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        val btnLabel = if (isInCart) {
-                            "${com.dhaaga.app.utils.AppLanguageManager.translate("in_stock_label", currentLang, "In Bag")} • ${com.dhaaga.app.utils.AppLanguageManager.translate("view_bag", currentLang, "View")}"
-                        } else {
-                            com.dhaaga.app.utils.AppLanguageManager.translate("add_to_bag", currentLang, "Add to Bag")
-                        }
                         Text(
-                            text = btnLabel,
+                            text = if (isInCart) "In Bag" else "Patronize",
                             fontSize = 11.5.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isInCart) Color.White else PaletteForest
+                            color = if (isInCart) Color.White else PaletteDarkGreen,
+                            maxLines = 1
                         )
                     }
                 }
@@ -1481,7 +2362,7 @@ private fun ProductCardCreative(
 }
 
 /**
- * Section Header Row
+ * Section Header Row with stacked title and subtitle
  */
 @Composable
 private fun SectionHeaderRow(
@@ -1495,31 +2376,51 @@ private fun SectionHeaderRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(18.dp))
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = title,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = PaletteDarkGreen,
-            letterSpacing = 0.5.sp
-        )
-        if (subtitle.isNotEmpty()) {
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = subtitle,
-                fontSize = 12.sp,
-                color = DhaagaTextLight
-            )
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .background(iconColor.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(15.dp))
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = PaletteDarkGreen,
+                    letterSpacing = 0.4.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (subtitle.isNotEmpty()) {
+                    Text(
+                        text = subtitle,
+                        fontSize = 10.5.sp,
+                        color = DhaagaTextMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "See all >",
-            fontSize = 12.sp,
-            color = PaletteForest,
+            text = "Explore >",
+            fontSize = 11.5.sp,
+            color = PaletteTerracotta,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
             modifier = Modifier.clickable { onSeeAll() }
         )
     }
@@ -1591,19 +2492,20 @@ fun LoreExactFloatingBottomNav(
     ) {
         val navIconSize = 24.dp
 
-        // Exact Lore App Floating Pill Container (#E2EAD9)
+        // Sleek Floating Pill Container (Pristine White with subtle border)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
                 .shadow(
-                    elevation = 14.dp,
+                    elevation = 16.dp,
                     shape = RoundedCornerShape(28.dp),
-                    spotColor = Color(0x4460734E),
-                    ambientColor = Color(0x1F000000)
+                    spotColor = Color(0x33000000),
+                    ambientColor = Color(0x1A000000)
                 )
                 .clip(RoundedCornerShape(28.dp))
-                .background(Color(0xFFE2EAD9)) // Rich Soft Sage Green Tint
+                .background(Color.White)
+                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(28.dp))
                 .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -1620,7 +2522,7 @@ fun LoreExactFloatingBottomNav(
                     label = "tab0Scale"
                 )
                 val tab0Tint by animateColorAsState(
-                    targetValue = if (isHomeSelected) PaletteForest else Color(0xFF6E8260),
+                    targetValue = if (isHomeSelected) PaletteTerracotta else Color(0xFF64748B),
                     animationSpec = tween(220),
                     label = "tab0Tint"
                 )
@@ -1630,7 +2532,7 @@ fun LoreExactFloatingBottomNav(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(if (isHomeSelected) PaletteForest.copy(alpha = 0.12f) else Color.Transparent)
+                        .background(if (isHomeSelected) PaletteTerracotta.copy(alpha = 0.12f) else Color.Transparent)
                 ) {
                     Icon(
                         imageVector = if (isHomeSelected) Icons.Filled.Home else Icons.Outlined.Home,
@@ -1650,7 +2552,7 @@ fun LoreExactFloatingBottomNav(
                     label = "tab1Scale"
                 )
                 val tab1Tint by animateColorAsState(
-                    targetValue = if (isTab1Selected) PaletteForest else Color(0xFF6E8260),
+                    targetValue = if (isTab1Selected) PaletteTerracotta else Color(0xFF64748B),
                     animationSpec = tween(220),
                     label = "tab1Tint"
                 )
@@ -1660,7 +2562,7 @@ fun LoreExactFloatingBottomNav(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(if (isTab1Selected) PaletteForest.copy(alpha = 0.12f) else Color.Transparent)
+                        .background(if (isTab1Selected) PaletteTerracotta.copy(alpha = 0.12f) else Color.Transparent)
                 ) {
                     Box {
                         Icon(
@@ -1710,7 +2612,7 @@ fun LoreExactFloatingBottomNav(
                     label = "tab3Scale"
                 )
                 val tab3Tint by animateColorAsState(
-                    targetValue = if (isTab3Selected) PaletteForest else Color(0xFF6E8260),
+                    targetValue = if (isTab3Selected) PaletteTerracotta else Color(0xFF64748B),
                     animationSpec = tween(220),
                     label = "tab3Tint"
                 )
@@ -1720,7 +2622,7 @@ fun LoreExactFloatingBottomNav(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(if (isTab3Selected) PaletteForest.copy(alpha = 0.12f) else Color.Transparent)
+                        .background(if (isTab3Selected) PaletteTerracotta.copy(alpha = 0.12f) else Color.Transparent)
                 ) {
                     Icon(
                         imageVector = if (isSeller) {
@@ -1744,7 +2646,7 @@ fun LoreExactFloatingBottomNav(
                     label = "tab4Scale"
                 )
                 val tab4Tint by animateColorAsState(
-                    targetValue = if (isTab4Selected) PaletteForest else Color(0xFF6E8260),
+                    targetValue = if (isTab4Selected) PaletteTerracotta else Color(0xFF64748B),
                     animationSpec = tween(220),
                     label = "tab4Tint"
                 )
@@ -1754,7 +2656,7 @@ fun LoreExactFloatingBottomNav(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(if (isTab4Selected) PaletteForest.copy(alpha = 0.12f) else Color.Transparent)
+                        .background(if (isTab4Selected) PaletteTerracotta.copy(alpha = 0.12f) else Color.Transparent)
                 ) {
                     Icon(
                         imageVector = if (isTab4Selected) Icons.Filled.Person else Icons.Outlined.Person,
@@ -1780,11 +2682,11 @@ fun LoreExactFloatingBottomNav(
                         alpha = ringAlpha.value
                     )
                     .clip(CircleShape)
-                    .background(PaletteForest.copy(alpha = 0.6f))
+                    .background(PaletteTerracotta.copy(alpha = 0.6f))
             )
         }
 
-        // Center Floating Action Button (Elevated Forest Sage FAB with Bounce & Rotation)
+        // Center Floating Action Button (Elevated Cultural Terracotta FAB)
         val isTab2Selected = selectedTab == 2
         val baseFabScale by animateFloatAsState(
             targetValue = if (isTab2Selected) 1.08f else 1.0f,
@@ -1811,11 +2713,11 @@ fun LoreExactFloatingBottomNav(
                     .shadow(
                         elevation = if (isTab2Selected || fabAnimScale.value > 1.05f) 18.dp else 12.dp,
                         shape = CircleShape,
-                        spotColor = PaletteForest,
-                        ambientColor = PaletteSage
+                        spotColor = PaletteTerracotta,
+                        ambientColor = Color(0x33000000)
                     )
                     .clip(CircleShape)
-                    .background(PaletteForest)
+                    .background(PaletteTerracotta)
                     .clickable { onTabSelected(2) },
                 contentAlignment = Alignment.Center
             ) {

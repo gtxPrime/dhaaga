@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dhaaga.app.AppViewModel
 import com.dhaaga.app.ui.theme.*
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -36,13 +37,17 @@ fun ProfileScreen(
     onBack: () -> Unit,
     onLogout: () -> Unit,
     onMyListings: () -> Unit = {},
-    onMyOrders: () -> Unit = {}
+    onMyOrders: () -> Unit = {},
+    onCraftClick: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val user by viewModel.currentUser.collectAsState()
     val isSeller = user?.isSeller == true
     val currentLang by viewModel.selectedLanguage.collectAsState()
     var showLanguageSheet by remember { mutableStateOf(false) }
+    var showPassportSheet by remember { mutableStateOf(false) }
+    val savedBookmarks by viewModel.savedHeritageBookmarks.collectAsState()
+    val allTraditions by viewModel.heritageTraditions.collectAsState()
     var showAISettingsDialog by remember { mutableStateOf(false) }
     var showDeveloperKeysInDialog by remember { mutableStateOf(false) }
 
@@ -119,6 +124,7 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(6.dp))
 
+                    val displayEmail = user?.email?.takeIf { it.isNotBlank() } ?: "Google Account"
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
@@ -126,11 +132,11 @@ fun ProfileScreen(
                             .background(PaletteForest.copy(alpha = 0.08f))
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
-                        Icon(Icons.Default.Phone, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Default.Email, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(14.dp))
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = viewModel.loggedInPhone,
-                            fontSize = 13.5.sp,
+                            text = displayEmail,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = PaletteDarkGreen
                         )
@@ -138,28 +144,61 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Role badge
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(DhaagaPrimary.copy(alpha = 0.1f))
-                            .border(1.dp, DhaagaPrimary.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-                            .padding(horizontal = 14.dp, vertical = 6.dp)
+                    // Role & Lineage badge
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = if (user?.isSeller == true) Icons.Default.Storefront else Icons.Default.ShoppingBag,
-                                contentDescription = null,
-                                tint = DhaagaPrimary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (user?.isSeller == true) viewModel.tr("artisan_seller", "Artisan Seller") else viewModel.tr("craft_buyer", "Craft Buyer"),
-                                fontSize = 13.sp,
-                                color = DhaagaPrimary,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(DhaagaPrimary.copy(alpha = 0.1f))
+                                .border(1.dp, DhaagaPrimary.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = if (user?.isSeller == true) Icons.Default.Storefront else Icons.Default.Explore,
+                                    contentDescription = null,
+                                    tint = DhaagaPrimary,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = if (user?.isSeller == true) "Master Craftsman (शिल्पकार)" else "Culture Explorer (अन्वेषक)",
+                                    fontSize = 12.5.sp,
+                                    color = DhaagaPrimary,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+
+                        user?.heritageRecognition?.let { recognition ->
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(Color(0xFFFFF8E7))
+                                    .border(1.dp, Color(0xFFF9A825).copy(alpha = 0.4f), RoundedCornerShape(20.dp))
+                                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(
+                                        Icons.Default.WorkspacePremium,
+                                        contentDescription = null,
+                                        tint = Color(0xFFF57F17),
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = recognition,
+                                        fontSize = 11.sp,
+                                        color = Color(0xFFE65100),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -224,14 +263,16 @@ fun ProfileScreen(
                     )
                 } else {
                     ProfileMenuSection(
-                        title = viewModel.tr("buyer_label", "Buyer"),
+                        title = "Heritage & Culture",
                         items = listOf(
+                            ProfileMenuItem("passport", Icons.Default.BookmarkBorder, "Cultural Passport", "${savedBookmarks.size} Saved Living Traditions"),
                             ProfileMenuItem("addresses", Icons.Default.LocationOn, viewModel.tr("delivery_addresses", "Delivery Addresses"), viewModel.tr("manage_addresses", "Manage addresses")),
                             ProfileMenuItem("payment", Icons.Default.Payment, viewModel.tr("payment_methods", "Payment Methods"), viewModel.tr("payment_sub", "UPI, Cards, Wallets")),
                             ProfileMenuItem("orders", com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping, viewModel.tr("order_history", "Order History"), viewModel.tr("past_orders", "Past orders"))
                         ),
                         onItemClick = { id ->
                             when (id) {
+                                "passport" -> { showPassportSheet = true }
                                 "orders" -> onMyOrders()
                                 "addresses" -> Toast.makeText(context, "Address management coming soon", Toast.LENGTH_SHORT).show()
                                 "payment" -> Toast.makeText(context, "UPI & Cards integration coming soon", Toast.LENGTH_SHORT).show()
@@ -343,8 +384,8 @@ fun ProfileScreen(
                         val isSelected = currentLang == lang.code
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = if (isSelected) PaletteGreenTint else Color(0xFFF7F9F6),
-                            border = BorderStroke(if (isSelected) 1.5.dp else 1.dp, if (isSelected) PaletteForest else PaletteSage.copy(alpha = 0.25f)),
+                            color = if (isSelected) PaletteTerracotta.copy(alpha = 0.12f) else Color.White,
+                            border = BorderStroke(if (isSelected) 1.5.dp else 1.dp, if (isSelected) PaletteTerracotta else Color(0xFFE2E8F0)),
                             modifier = Modifier.fillMaxWidth().clickable {
                                 viewModel.setLanguage(lang.code)
                                 showLanguageSheet = false
@@ -353,10 +394,10 @@ fun ProfileScreen(
                         ) {
                             Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(lang.nativeName, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = if (isSelected) PaletteForest else PaletteDarkGreen)
+                                    Text(lang.nativeName, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = if (isSelected) PaletteTerracotta else PaletteDarkGreen)
                                     Text(lang.englishName, fontSize = 11.sp, color = DhaagaTextLight)
                                 }
-                                if (isSelected) Icon(Icons.Default.CheckCircle, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(18.dp))
+                                if (isSelected) Icon(Icons.Default.CheckCircle, contentDescription = null, tint = PaletteTerracotta, modifier = Modifier.size(18.dp))
                             }
                         }
                     }
@@ -374,6 +415,129 @@ fun ProfileScreen(
                 showDeveloperKeysInDialog = false
             }
         )
+    }
+
+    if (showPassportSheet) {
+        val bookmarkedCrafts = remember(savedBookmarks, allTraditions) {
+            allTraditions.filter { it.craftId in savedBookmarks }
+        }
+
+        ModalBottomSheet(
+            onDismissRequest = { showPassportSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = DhaagaSurface,
+            dragHandle = {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 10.dp, bottom = 4.dp)
+                        .width(40.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(DhaagaDivider)
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(DhaagaPrimary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.Bookmark, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(20.dp))
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Cultural Passport (विरासत पासपोर्ट)", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                        Text("${bookmarkedCrafts.size} Saved Living Traditions of Bharat", fontSize = 12.sp, color = DhaagaTextMedium)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(color = DhaagaDivider.copy(alpha = 0.4f))
+                Spacer(modifier = Modifier.height(14.dp))
+
+                if (bookmarkedCrafts.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 40.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.BookmarkBorder, contentDescription = null, tint = DhaagaTextLight, modifier = Modifier.size(48.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text("No Traditions Saved Yet", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                "Bookmark crafts from the Heritage Atlas or Tradition profiles to build your personal cultural portfolio.",
+                                fontSize = 13.sp,
+                                color = DhaagaTextMedium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        }
+                    }
+                } else {
+                    androidx.compose.foundation.lazy.LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.heightIn(max = 420.dp)
+                    ) {
+                        items(bookmarkedCrafts.size) { idx ->
+                            val craft = bookmarkedCrafts[idx]
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        showPassportSheet = false
+                                        onCraftClick(craft.craftId)
+                                    },
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(containerColor = DhaagaBackground),
+                                border = BorderStroke(1.dp, DhaagaDivider.copy(alpha = 0.5f))
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    AsyncImage(
+                                        model = craft.bannerImageUrl,
+                                        contentDescription = craft.craftNameEn,
+                                        modifier = Modifier
+                                            .size(60.dp)
+                                            .clip(RoundedCornerShape(10.dp)),
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(craft.craftNameEn, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = DhaagaTextDark)
+                                        Text("${craft.state} • ${craft.giTagNumber ?: "Living Folk Tradition"}", fontSize = 12.sp, color = DhaagaTextMedium)
+                                        if (craft.craftNameHi.isNotBlank()) {
+                                            Text(craft.craftNameHi, fontSize = 11.5.sp, color = DhaagaPrimary, fontWeight = FontWeight.Medium)
+                                        }
+                                    }
+                                    IconButton(
+                                        onClick = { viewModel.toggleHeritageBookmark(craft.craftId) }
+                                    ) {
+                                        Icon(Icons.Default.Bookmark, contentDescription = "Remove bookmark", tint = DhaagaPrimary, modifier = Modifier.size(20.dp))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -435,8 +599,8 @@ private fun ProfileMenuSection(
                 Icon(item.icon, contentDescription = null, tint = DhaagaPrimary, modifier = Modifier.size(22.dp))
                 Spacer(modifier = Modifier.width(14.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(item.label, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = DhaagaTextDark)
-                    if (item.subtitle.isNotBlank()) Text(item.subtitle, fontSize = 12.sp, color = DhaagaTextLight)
+                    Text(item.label, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = DhaagaTextDark, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    if (item.subtitle.isNotBlank()) Text(item.subtitle, fontSize = 12.sp, color = DhaagaTextLight, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
                 Icon(Icons.Default.ChevronRight, contentDescription = null, tint = DhaagaTextLight.copy(alpha = 0.5f), modifier = Modifier.size(18.dp))
             }

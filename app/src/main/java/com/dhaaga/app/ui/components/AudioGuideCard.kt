@@ -97,19 +97,22 @@ fun AudioGuideCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Speaker icon & Status indicator
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
                             .size(36.dp)
                             .scale(pulseScale)
                             .clip(CircleShape)
-                            .background(if (isMuted) Color(0xFFEEEEEE) else PaletteForest.copy(alpha = 0.15f)),
+                            .background(if (isMuted) Color(0xFFEEEEEE) else PaletteTerracotta.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = if (isMuted) Icons.Default.VolumeOff else if (isSpeaking) Icons.Default.VolumeUp else Icons.Default.RecordVoiceOver,
                             contentDescription = if (isMuted) "Audio Off" else "Voice Guide",
-                            tint = if (isMuted) Color.Gray else PaletteForest,
+                            tint = if (isMuted) Color.Gray else PaletteTerracotta,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -126,11 +129,13 @@ fun AudioGuideCard(
                         Text(
                             text = if (isMuted) "ऑडियो बंद है (Muted)" else if (isSpeaking) "सुनिए • Speaking..." else "टैप करें सुनने के लिए",
                             fontSize = 11.sp,
-                            color = if (isMuted) Color.Gray else PaletteForest,
+                            color = if (isMuted) Color.Gray else PaletteTerracotta,
                             fontWeight = FontWeight.Medium
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.width(8.dp))
 
                 // Audio ON / OFF Toggle Button
                 Surface(
@@ -143,17 +148,17 @@ fun AudioGuideCard(
                         }
                     },
                     shape = RoundedCornerShape(12.dp),
-                    color = if (isMuted) Color(0xFFFFEBEE) else PaletteGreenTint,
-                    border = BorderStroke(1.dp, if (isMuted) Color(0xFFEF9A9A) else PaletteForest.copy(alpha = 0.3f))
+                    color = if (isMuted) Color(0xFFFFEBEE) else Color(0xFFF1F5F9),
+                    border = BorderStroke(1.dp, if (isMuted) Color(0xFFEF9A9A) else Color(0xFFCBD5E1))
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = if (isMuted) Icons.Default.VolumeOff else Icons.Default.VolumeUp,
                             contentDescription = null,
-                            tint = if (isMuted) Color(0xFFD32F2F) else PaletteForest,
+                            tint = if (isMuted) Color(0xFFD32F2F) else PaletteTerracotta,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -161,7 +166,8 @@ fun AudioGuideCard(
                             text = if (isMuted) "Audio OFF" else "Audio ON",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isMuted) Color(0xFFD32F2F) else PaletteDarkGreen
+                            color = if (isMuted) Color(0xFFD32F2F) else PaletteDarkGreen,
+                            maxLines = 1
                         )
                     }
                 }
@@ -214,15 +220,15 @@ private fun LanguageChip(
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        color = if (isSelected) PaletteForest else Color.White,
-        border = BorderStroke(1.dp, if (isSelected) PaletteForest else PaletteSage.copy(alpha = 0.4f))
+        color = if (isSelected) PaletteTerracotta else Color.White,
+        border = BorderStroke(1.dp, if (isSelected) PaletteTerracotta else Color(0xFFE2E8F0))
     ) {
         Text(
             text = label,
-            fontSize = 11.sp,
+            fontSize = 11.5.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             color = if (isSelected) Color.White else PaletteDarkGreen,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
     }
 }

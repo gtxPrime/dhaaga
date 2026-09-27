@@ -369,8 +369,8 @@ fun AddProductScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(Color(0xFFF7FAF4))
-                                .border(1.dp, PaletteSage.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                                .background(Color(0xFFF8FAFC))
+                                .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(16.dp))
                                 .padding(vertical = 24.dp, horizontal = 16.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -677,8 +677,8 @@ fun AddProductScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(16.dp))
-                            .background(if (hasGITag) PaletteForest.copy(alpha = 0.08f) else Color(0xFFF7FAF4))
-                            .border(1.dp, if (hasGITag) PaletteForest.copy(alpha = 0.35f) else Color(0xFFE2EAD9), RoundedCornerShape(16.dp))
+                            .background(if (hasGITag) PaletteTerracotta.copy(alpha = 0.08f) else Color(0xFFF8FAFC))
+                            .border(1.dp, if (hasGITag) PaletteTerracotta.copy(alpha = 0.35f) else Color(0xFFE2E8F0), RoundedCornerShape(16.dp))
                             .padding(14.dp)
                     ) {
                         Row(
@@ -939,8 +939,8 @@ fun AddProductScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFF7FAF4))
-                            .border(1.dp, PaletteSage.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
+                            .background(Color(0xFFF8FAFC))
+                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(14.dp))
                             .padding(horizontal = 14.dp, vertical = 12.dp)
                     ) {
                         Column {
@@ -1095,8 +1095,8 @@ fun AddProductScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFF7FAF4))
-                            .border(1.dp, Color(0xFFE2EAD9), RoundedCornerShape(12.dp))
+                            .background(Color(0xFFF8FAFC))
+                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
                             .clickable { showDiscountsAccordion = !showDiscountsAccordion }
                             .padding(horizontal = 14.dp, vertical = 12.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1473,8 +1473,8 @@ fun GITagPickerDialog(
                                     onDismiss()
                                 },
                             shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF7FAF4)),
-                            border = BorderStroke(1.dp, Color(0xFFE2EAD9))
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC)),
+                            border = BorderStroke(1.dp, Color(0xFFE2E8F0))
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
                                 Row(

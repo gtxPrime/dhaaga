@@ -82,16 +82,7 @@ fun RoleSelectionScreen(
                 color = DhaagaTextMedium
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Audio Guide with Hindi / English toggle and Audio ON/OFF switch
-            com.dhaaga.app.ui.components.AudioGuideCard(
-                englishText = "Welcome to Dhaaga! Please choose your role to continue. If you make and sell handmade crafts, select 'I am an Artisan'. If you want to explore and purchase authentic crafts, select 'I am a Buyer'. Then tap Continue.",
-                hindiText = "नमस्ते! धागा में आपका स्वागत है। कृपया अपनी भूमिका चुनें। यदि आप हस्तशिल्प बनाते और बेचते हैं, तो 'कारीगर' चुनें। यदि आप प्रामाणिक कला खरीदना चाहते हैं, तो 'खरीदार' चुनें। इसके बाद नीचे 'आगे बढ़ें' पर टैप करें।",
-                initialLanguage = viewModel?.selectedLanguage?.value ?: "hi"
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             // Uniform Role Cards
             Row(
@@ -100,9 +91,9 @@ fun RoleSelectionScreen(
             ) {
                 RoleCard(
                     icon = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.Store,
-                    title = "I'm an Artisan",
-                    subtitle = "I make & sell crafts",
-                    hindiText = "मैं कारीगर हूँ",
+                    title = "I'm a Craftsman",
+                    subtitle = "I preserve & sell crafts",
+                    hindiText = "मैं शिल्पकार हूँ",
                     role = "seller",
                     isSelected = selectedRole == "seller",
                     modifier = Modifier.weight(1f),
@@ -110,9 +101,9 @@ fun RoleSelectionScreen(
                 )
                 RoleCard(
                     icon = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.BagShopping,
-                    title = "I'm a Buyer",
-                    subtitle = "I buy handmade crafts",
-                    hindiText = "मैं खरीदार हूँ",
+                    title = "I'm an Explorer",
+                    subtitle = "I learn & support crafts",
+                    hindiText = "मैं अन्वेषक हूँ",
                     role = "buyer",
                     isSelected = selectedRole == "buyer",
                     modifier = Modifier.weight(1f),
@@ -126,12 +117,12 @@ fun RoleSelectionScreen(
             if (selectedRole == "seller") {
                 InfoCard(
                     icon = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.WandMagicSparkles,
-                    text = "AI-powered product listing, GI Tag detection, voice cataloger, and seller dashboard"
+                    text = "Document living traditions with photo & voice, AI heritage structuring, GI Tag validation, and direct patron support"
                 )
             } else if (selectedRole == "buyer") {
                 InfoCard(
                     icon = com.dhaaga.app.ui.components.FontAwesomeIcons.Solid.MagnifyingGlass,
-                    text = "Browse authentic GI-certified crafts, voice search, bulk enquiry, and order tracking"
+                    text = "Explore regional heritage atlas, listen to oral histories, decode & practice sacred motifs, and purchase authentic creations"
                 )
             }
 

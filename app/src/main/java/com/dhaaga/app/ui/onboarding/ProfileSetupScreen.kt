@@ -119,15 +119,6 @@ fun ProfileSetupScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Audio Onboarding Guide
-            com.dhaaga.app.ui.components.AudioGuideCard(
-                englishText = if (isSeller) "Please enter your name, village, and state to create your artisan profile." else "Please enter your name and city to complete your buyer profile.",
-                hindiText = if (isSeller) "कृपया अपनी कारीगर प्रोफ़ाइल बनाने के लिए अपना नाम, गाँव और राज्य दर्ज करें।" else "कृपया अपनी प्रोफ़ाइल पूरी करने के लिए अपना नाम और शहर दर्ज करें।",
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
             // Fields with Title Case capitalization
             DhaagaTextField(
                 value = name,

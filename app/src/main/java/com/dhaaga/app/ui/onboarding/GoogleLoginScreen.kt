@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -251,16 +252,7 @@ fun GoogleLoginScreen(
                 lineHeight = 20.sp
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Audio Guide Card
-            AudioGuideCard(
-                englishText = "Welcome to Dhaaga! Please sign in with your Google account. If you are an existing user, you will be taken directly to the app. If you are new, you can choose whether you are an Artisan or a Buyer.",
-                hindiText = "धागा में आपका स्वागत है! कृपया अपने गूगल खाते से लॉगिन करें। यदि आप पहले से पंजीकृत हैं, तो सीधे ऐप खुल जाएगा। यदि आप नए हैं, तो आप कारीगर या खरीदार चुन सकेंगे।",
-                initialLanguage = viewModel.selectedLanguage.value
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Error Message (if any)
             AnimatedVisibility(
@@ -361,7 +353,7 @@ fun GoogleLoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Trust badge
             Row(

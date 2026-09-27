@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -199,7 +200,8 @@ private fun LocationFeatureRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFF7FAF4))
+            .background(Color(0xFFF8FAFC))
+            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp))
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -207,10 +209,10 @@ private fun LocationFeatureRow(
             modifier = Modifier
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(PaletteForest.copy(alpha = 0.1f)),
+                .background(PaletteTerracotta.copy(alpha = 0.12f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(icon, contentDescription = null, tint = PaletteForest, modifier = Modifier.size(16.dp))
+            Icon(icon, contentDescription = null, tint = PaletteTerracotta, modifier = Modifier.size(16.dp))
         }
         Spacer(modifier = Modifier.width(10.dp))
         Column(modifier = Modifier.weight(1f)) {
