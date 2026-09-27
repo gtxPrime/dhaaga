@@ -1,59 +1,43 @@
 # Dhaaga (धागा • ShilpSetu) - Release Changelog
 
-## Version 0.2.0 (Patch Build / Milestone 2)
+## Version 0.3.0 (Milestone 3 — High-Fidelity Cultural UI & Polish Edition)
 
-> **Connecting Hands to Markets: From Village Craft to Global Cart**
+> **Connecting Hands to Markets: Authentic Living Heritage from Indian Artisan Hubs**
 
 ---
 
 ### Key Highlights & Major Additions
 
-#### 1. GI Tag Authentication & Verification Engine
-* **Government Registry Cross-Referencing:** Integrated `GITagRegistry.kt` covering official Indian Geographical Indications across textiles, handicrafts, handlooms, and terracotta.
-* **Multimodal AI Verification:** Leveraged Gemini AI Vision and text models (`GeminiAIService.kt`) to automatically cross-reference craft titles, descriptions, materials, and regional imagery against official GI registry parameters.
-* **Artisan GI Registry UI:** Added dedicated GI tag badge indicators, authenticity confidence scores, and an in-app searchable catalog of registered GI craft clusters.
+#### 1. Complete UI Typography & Text-Wrapping Overhaul
+* **No Awkward Line Wrapping:** Audited and resolved text wrapping across all screens. Enforced single-line boundaries with ellipsis on phone numbers, delivery addresses, and subtitle badges.
+* **Profile Tab & Real Google Identity:** Replaced generic phone label with real **Google Account** details (`email`, profile photo, and Notion avatar). Refactored `ProfileOptionRow` with responsive weighted containers (`1.1f` on label, `0.9f` with `textAlign = TextAlign.End` on value).
+* **Navigation Clearance:** Increased bottom scroll padding to `160.dp` across tab contents, ensuring buttons (such as "Log Out of Dhaaga") remain completely unobstructed above the floating bottom navigation bar.
+* **Living Heritage Oral Archive:** Fixed language tab squeezing in `CraftHeritageDetailScreen.kt` where tabs were compressed into vertical character strips. Aligned "हिंदी" and "English" tabs horizontally with clean margins.
+* **Hero Badges Alignment:** Replaced corner-pinned badges with a unified `SpaceBetween` row (`${craft.traditionAgeYears}+ Yrs Heritage` and `Process Video`), preventing badge collisions across diverse screen aspect ratios.
 
-#### 2. Interactive Mock Payment Gateway & Cloud Order System
-* **Full-Flow Payment Simulation:** Introduced `MockPaymentDialog.kt` supporting simulated UPI apps (Google Pay, PhonePe, Paytm), Net Banking, Credit/Debit cards, and Cash on Delivery with realistic processing delays and instant haptic confirmation.
-* **Dynamic Cloud Synchronization:** Orders are seamlessly written to and synchronized from Cloud Firestore (`orders` collection) in real time for both buyers and artisans.
-* **Automated Stock Decrement & Cancellation Reversal:** Placing an order decrements product stock dynamically across marketplace feeds; cancelling an order automatically returns inventory to the artisan's active listing.
+#### 2. Premium Cultural Terracotta & Charcoal Palette
+* **Warm Artisan Theme:** Transitioned from dull green backgrounds to warm terracotta (`#C85A32`, `PaletteTerracotta`), deep charcoal, and clean slate surfaces.
+* **Refined Tab Headers:** Upgraded `TabHeaderBlock` from a faded gradient to a warm horizontal terracotta brand gradient (`PaletteTerracotta` to `#C85A32`).
+* **Lore Exact Floating Navigation Bar:** Centered elevated terracotta FAB with animated spring pop-effects, glow rings on cart additions, and crisp unclipped badge pill.
+* **Payment Sheet UI:** Styled UPI selection pills (GPay, PhonePe, Paytm, BHIM) with single-line labels, clean borders, and terracotta active indicators.
 
-#### 3. Native GPS Geolocation Engine
-* **High-Accuracy Workshop Location:** Implemented `LocationHelper.kt` utilizing native Android `LocationManager` and dual asynchronous/legacy background `Geocoder` to resolve user district, city, state, postal code, latitude, and longitude.
-* **Live Marketplace Clustering:** Displays live artisan workshop and buyer delivery locations on the Home Screen header with animated real-time status indicators.
-* **Regional Discovery Autofill:** Enabled one-tap GPS autofill in `AddProductScreen.kt` to authenticate artisan craft origin directly against official GI clusters.
+#### 3. High-Resolution Craft Visual Assets & Offline Fallback Engine
+* **Bundled High-Fidelity Craft Banners:** Generated and integrated bespoke local drawable assets:
+  * `banner_warli_art.jpg` (Palghar, Maharashtra — 2,500-Year Sacred Geometric Lineage)
+  * `banner_madhubani_art.jpg` (Mithila, Bihar — Kohbar & Natural Mineral Dye Frieze)
+  * `banner_pashmina_loom.jpg` (Srinagar, Kashmir — Changthangi Cashmere Loom)
+  * `banner_dhokra_metal.jpg` (Bastar, Chhattisgarh — 4,000-Year Lost-Wax Bell Metal)
+  * `banner_blue_pottery.jpg` (Kot Jewar, Rajasthan — Clayless Quartz & Cobalt Glaze)
+* **Resilient Image Interceptor:** Added model interceptor in `CardAsyncImage.kt` mapping stock photo URLs directly to bundled high-res craft drawables for instant, reliable offline rendering.
 
-#### 4. Hardened Runtime Permissions & Security
-* **Location Permission Rationale:** Built `LocationPermissionDialog.kt` presenting a clear, transparent explanation of benefits (GI cluster matching, regional discovery, and shipping autofill) before requesting fine/coarse location permissions.
-* **Android 13+ Notification Handling:** Added runtime `POST_NOTIFICATIONS` permission launcher in `MainActivity.kt` ensuring order confirmations and dispatch tracking notifications deliver smoothly on API 33+.
-* **Graceful Failure Isolation:** All permission requests (Camera, Audio/Mic, Location, Notifications) include non-intrusive fallbacks and defensive exception handling to guarantee zero crashes if denied.
+#### 4. Balanced 2x4 Product Catalog Grid
+* **Uniform Card Dimensions:** Enforced strict `minLines = 2, maxLines = 2` on titles, `minLines = 1, maxLines = 1` on artisan regions, and fixed 34.dp action button heights across `ProductCardCreative`.
+* **Balanced Inventory:** Added Handcrafted Ceramic Peacock Vase (`prod008`) to `MockData.kt` ensuring an even 8-item product grid with zero orphan cards.
 
-#### 5. Clean UI & Complete Emoji Purge
-* **Enterprise Material Icons:** Replaced all informal emojis across UI screens, dialogs, button labels, toasts, and headers with official Jetpack Compose Material vector icons (`Icons.Default.*` and `Icons.AutoMirrored.*`).
-* **AutoMirrored Directional Compliance:** Upgraded directional icons (`ArrowBack`, `Logout`, `List`, `MenuBook`, `Chat`) to `Icons.AutoMirrored` packages to support right-to-left (RTL) localized layouts cleanly.
-* **Structured System Logging:** Converted all Logcat emoji prefixes to clean bracketed architectural tags: `[Location]`, `[Cache]`, `[User]`, `[Registry]`, `[Auth]`, `[Cloud]`, `[Firestore]`, `[Session]`, `[Cart]`, `[Language]`, `[Inventory]`, `[Orders]`, and `[Upload]`.
-
-#### 6. Master Technical Architectural Report
-* Generated comprehensive documentation: `Dhaaga_Master_Technical_Report.html` and `Dhaaga_Master_Technical_Report.pdf`.
-* Contains deep-dive architectural blueprints, Firestore schema matrices, security rules analysis, AI pipeline breakdown, and a 6-person engineering task delegation roadmap.
-
----
-
-### Commits Included in this Release
-
-* `ec8225a` - `docs: add comprehensive architectural report and team delegation analysis`
-* `445f10f` - `refactor(ui): purge emojis across UI and logs in favor of AutoMirrored Material icons`
-* `c770185` - `feat(location): add native GPS geolocation engine and runtime permission handling`
-* `3d6d59e` - `feat(ai): integrate GI Tag verification registry and multimodal AI cataloging`
-* `b8fc796` - `feat(orders): implement mock payment gateway and dynamic cloud order tracking`
-
----
-
-### Authentication & Cloud Data Integrity
-
-* **100% Dynamic Firebase Authentication:** Completely purged all hardcoded demo credentials, mock users, and test OTP bypasses.
-* **Live Phone Verification:** Uses real Firebase Phone Auth SMS verification codes (`PhoneAuthProvider`) with dynamic Cloud Firestore profile lookup and registration.
-* **Google Play Services:** Full Google Sign-In with real UID account persistence and automatic returning-user profile sync.
+#### 5. Docked Bottom Action Bar & Specification Alignments
+* **Docked Product Detail Bar:** Converted the floating bottom bar in `ProductDetailScreen.kt` to a docked `Surface` with elevation and bottom navigation bar insets.
+* **Oral History Audio Pill:** Updated audio player subtitle to `Marathi & Hindi • 1m 15s` with a compact `Listen` / `Playing...` pill.
+* **Specifications Table:** Right-aligned all craft specifications (`textAlign = TextAlign.End`) for luxury e-commerce clarity.
 
 ---
 
@@ -62,11 +46,24 @@
 * **Release Package:** `app/build/outputs/apk/release/app-release.apk`
 * **Version Name:** `0.2.0`
 * **Version Code:** `2`
-* **File Size:** `21,838,870 bytes` (~20.8 MB)
-* **Signing Scheme:** Android APK Signature Scheme v2 (Verified: `true`)
+* **File Size:** `27,445,462 bytes` (~27.4 MB)
+* **Signing Config:** Release Keystore (`alphaKey.jks`, alias `key0`)
 * **Minimum SDK:** Android 7.0 (API 24)
 * **Target SDK:** Android 15 (API 37)
 
 ```bash
-adb install -r app-release.apk
+adb install -r app/build/outputs/apk/release/app-release.apk
 ```
+
+---
+
+## Version 0.2.0 (Milestone 2)
+
+> **Connecting Hands to Markets: From Village Craft to Global Cart**
+
+### Key Highlights
+* **GI Tag Authentication & Verification Engine:** Government registry cross-referencing with multimodal AI validation.
+* **Interactive Mock Payment Gateway:** UPI, Cards, NetBanking, and COD simulation with real-time Cloud Firestore updates.
+* **Native GPS Geolocation Engine:** Native Android `LocationManager` and Geocoder resolving artisan clusters and delivery destinations.
+* **Enterprise Material Icons:** Complete emoji purge in favor of `Icons.AutoMirrored` and Material vector sets.
+* **Architectural Blueprint Documentation:** Generated master SIH 2026 technical report and engineering delegation matrix.
