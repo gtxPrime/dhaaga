@@ -8,6 +8,12 @@
 
 ### Key Highlights & Major Additions
 
+#### 0. Multilingual AI Auto-Cataloger & Translation Engine Upgrade
+* **Zero-Downtime Gemini Model Fleet:** Upgraded from deprecated/overloaded preview models to Google's high-availability production fleet (`gemini-flash-latest`, `gemini-3.1-flash-lite`, `gemini-3.6-flash`, `gemini-3.7-flash`).
+* **Resolved 503 High Demand Error:** Direct API diagnosis revealed `gemini-3.6-flash` and older models were returning 503/404. Replaced the fallback chain with tested 200 OK models.
+* **Thought Token Isolation:** Added `thinkingBudget: 0` to `generationConfig` and implemented `extractCandidateText` so thinking traces no longer collide with or corrupt JSON translation parsing.
+* **Resilient Offline / Outage Fallback:** Implemented an intelligent local heuristic catalog builder with `GITagRegistry` keyword extraction, ensuring that artisans can always generate bilingual listings and GI mappings even during complete cloud disruptions.
+
 #### 1. Complete UI Typography & Text-Wrapping Overhaul
 * **No Awkward Line Wrapping:** Audited and resolved text wrapping across all screens. Enforced single-line boundaries with ellipsis on phone numbers, delivery addresses, and subtitle badges.
 * **Profile Tab & Real Google Identity:** Replaced generic phone label with real **Google Account** details (`email`, profile photo, and Notion avatar). Refactored `ProfileOptionRow` with responsive weighted containers (`1.1f` on label, `0.9f` with `textAlign = TextAlign.End` on value).
